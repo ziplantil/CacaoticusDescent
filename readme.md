@@ -1,3 +1,21 @@
+# Cacaoticus Descent
+_Cacaoticus Descent_ is a version of _[Chocolate Descent](https://github.com/InsanityBringer/ChocolateDescent)_ that adds
+localization/translation support to the game.
+
+In order to run Cacaoticus Descent, you need to have a language
+.HOG. See the _data_ folder.
+
+To select a language, create a file called `LANGUAGE.CFG` in
+the game directory and enter the language .HOG name
+(without the file extension).
+
+## TODO
+* Descent 2 (currently only D1 supported)
+* Test larger fonts (such as in multiplayer etc.)
+* Add RTL support
+
+The original _Chocolate Descent_ description follows.
+
 ## Chocolate Descent 
 
 A barebones software-rendered focused port of the Descent game.

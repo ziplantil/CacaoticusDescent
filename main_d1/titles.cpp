@@ -49,11 +49,12 @@ COPYRIGHT 1993-1998 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #include "titles.h"
 #include "vfx.h"
 #include "2d/i_gr.h"
+#include "locale/utf8.h"
 
 uint8_t New_pal[768];
 int	New_pal_254_bash;
 
-char* Briefing_text;
+unsigned char* Briefing_text;
 
 #define	MAX_BRIEFING_COLORS	2
 
@@ -436,17 +437,13 @@ void init_briefing_bitmap(void)
 //	-----------------------------------------------------------------------------
 //	Returns char width.
 //	If show_robot_flag set, then show a frame of the spinning robot.
-int show_char_delay(char the_char, int delay, int robot_num, int cursor_flag)
+int show_char_delay(const char *message, int delay, int robot_num, int cursor_flag)
 {
 	int	w, h, aw;
-	char	message[2];
 	fix	start_time;
 	int	i;
 
 	start_time = timer_get_fixed_seconds();
-
-	message[0] = the_char;
-	message[1] = 0;
 
 	gr_get_string_size(message, &w, &h, &aw);
 
@@ -517,7 +514,7 @@ int load_briefing_screen(int screen_num)
 #define	KEY_DELAY_DEFAULT	((F1_0*28)/1000)
 
 //	-----------------------------------------------------------------------------
-int get_message_num(char** message)
+int get_message_num(unsigned char** message)
 {
 	int	num = 0;
 
@@ -540,7 +537,7 @@ void title_save_game()
 {
 	grs_canvas* save_canv;
 	grs_canvas* save_canv_data;
-	grs_font* save_font;
+	grs_fontstyle* save_font;
 	uint8_t palette[768];
 
 	if (Next_level_num == 0) return;
@@ -566,7 +563,7 @@ void title_save_game()
 
 
 //	-----------------------------------------------------------------------------
-void get_message_name(char** message, char* result)
+void get_message_name(unsigned char** message, char* result)
 {
 	while (**message == ' ')
 		(*message)++;
@@ -601,10 +598,11 @@ void flash_cursor(int cursor_flag)
 
 //	-----------------------------------------------------------------------------
 //	Return true if message got aborted by user (pressed ESC), else return false.
-int show_briefing_message(int screen_num, char* message)
+int show_briefing_message(int screen_num, unsigned char* message)
 {
 	int	prev_ch = -1;
-	int	ch, done = 0;
+	uint32_t	ch;
+	int done = 0;
 	briefing_screen* bsp = &Briefing_screens[screen_num];
 	int	delay_count = KEY_DELAY_DEFAULT;
 	int	key_check;
@@ -613,6 +611,7 @@ int show_briefing_message(int screen_num, char* message)
 	int	tab_stop = 0;
 	int	flashing_cursor = 0;
 	int	new_page = 0;
+	char utfbuf[5];
 
 	Bitmap_name[0] = 0;
 
@@ -625,10 +624,10 @@ int show_briefing_message(int screen_num, char* message)
 
 	while (!done) 
 	{
-		ch = *message++;
+		ch = utf8_read_buf(&message, utfbuf);
 		if (ch == '$') 
 		{
-			ch = *message++;
+			ch = utf8_read_buf(&message, utfbuf);
 			if (ch == 'C') 
 			{
 				Current_color = get_message_num(&message) - 1;
@@ -801,7 +800,7 @@ int show_briefing_message(int screen_num, char* message)
 		else
 		{
 			prev_ch = ch;
-			Briefing_text_x += show_char_delay(ch, delay_count, robot_num, flashing_cursor);
+			Briefing_text_x += show_char_delay(utfbuf, delay_count, robot_num, flashing_cursor);
 		}
 
 		//	Check for Esc -> abort.
@@ -881,9 +880,9 @@ int show_briefing_message(int screen_num, char* message)
 
 //	-----------------------------------------------------------------------------
 //	Return a pointer to the start of text for screen #screen_num.
-char* get_briefing_message(int screen_num)
+unsigned char* get_briefing_message(int screen_num)
 {
-	char* tptr = Briefing_text;
+	unsigned char* tptr = Briefing_text;
 	int	cur_screen = 0;
 	int	ch;
 
@@ -903,7 +902,7 @@ char* get_briefing_message(int screen_num)
 
 // -----------------------------------------------------------------------------
 //	Load Descent briefing text.
-void load_screen_text(const char* filename, char** buf)
+void load_screen_text(const char* filename, unsigned char** buf)
 {
 	CFILE* tfile;
 	CFILE* ifile;
@@ -923,14 +922,14 @@ void load_screen_text(const char* filename, char** buf)
 		have_binary = 1;
 
 		len = cfilelength(ifile);
-		MALLOC(*buf,char, len);//Unable to get this to compile...is it a case issue? -KRB
+		MALLOC(*buf, unsigned char, len);//Unable to get this to compile...is it a case issue? -KRB
 		//*buf = (char*)malloc(len * sizeof(char));//My hack -KRB
 		cfread(*buf, 1, len, ifile);
 		cfclose(ifile);
 	}
 	else {
 		len = cfilelength(tfile);
-		MALLOC(*buf, char, len);//-KRB
+		MALLOC(*buf, unsigned char, len);//-KRB
 		//*buf = (char*)malloc(len * sizeof(char));//-KRB
 		cfread(*buf, 1, len, tfile);
 		cfclose(tfile);
@@ -939,7 +938,7 @@ void load_screen_text(const char* filename, char** buf)
 	if (have_binary) {
 		char* ptr;
 
-		for (i = 0, ptr = *buf; i < len; i++, ptr++) {
+		for (i = 0, ptr = (char*)*buf; i < len; i++, ptr++) {
 			if (*ptr != '\n') {
 				encode_rotate_left(ptr);
 				*ptr = *ptr ^ BITMAP_TBL_XOR;
@@ -954,7 +953,7 @@ void load_screen_text(const char* filename, char** buf)
 //	Return true if message got aborted, else return false.
 int show_briefing_text(int screen_num)
 {
-	char* message_ptr;
+	unsigned char* message_ptr;
 
 	// briefing_screen	*bsp = &Briefing_screens[screen_num];
 
@@ -1069,8 +1068,8 @@ void do_registered_end_game(void)
 		int len = 40;
 
 		//MALLOC(Briefing_text, char, len);//Unable to compile -KRB
-		Briefing_text = (char*)malloc(len * sizeof(char));//my hack -KRB
-		sprintf(Briefing_text, "Test");
+		Briefing_text = (unsigned char*)malloc(len * sizeof(unsigned char));//my hack -KRB
+		sprintf((char*)Briefing_text, "Test");
 	}
 
 	load_screen_text(Ending_text_filename, &Briefing_text);

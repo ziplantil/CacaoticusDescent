@@ -63,5 +63,8 @@ void CF_GetString(char* buffer, int count, CFILE* fp);
 // Passing NULL disables this.
 int cfile_use_alternate_hogfile(const char* name);
 
+// same as above, but for language HOGs
+int cfile_use_langfile(const char* name);
+
 void cfile_read_vector(vms_vector *vec, CFILE* fp);
 void cfile_read_angvec(vms_angvec *vec, CFILE* fp);

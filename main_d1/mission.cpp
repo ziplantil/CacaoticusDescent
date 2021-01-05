@@ -25,6 +25,8 @@ COPYRIGHT 1993-1998 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #include "titles.h"
 #include "platform/mono.h"
 #include "misc/error.h"
+#include "text.h"
+#include "locale/transl.h"
 
 mle Mission_list[MAX_MISSIONS];
 
@@ -173,7 +175,7 @@ int build_mission_list(int anarchy_mode)
 
 #ifndef DEST_SAT
 	strcpy(Mission_list[0].filename, "");		//no filename for builtin
-	strcpy(Mission_list[0].mission_name, "Descent: First Strike");
+	strcpy(Mission_list[0].mission_name, transl_get_string("Descent1Mission"));
 	count = 1;
 #endif
 
@@ -204,12 +206,16 @@ int build_mission_list(int anarchy_mode)
 	return count;
 }
 
-//values for built-in mission
-
-#define BIM_LAST_LEVEL			27
-#define BIM_LAST_SECRET_LEVEL	-3
-#define BIM_BRIEFING_FILE		"briefing.tex"
-#define BIM_ENDING_FILE			"endreg.tex"
+void free_old_translated_level_names()
+{
+	int i;
+	for (i = 0; i < (sizeof(_TRANSLATED_LEVEL_NAMES) / sizeof(_TRANSLATED_LEVEL_NAMES[0])); ++i)
+		if (_TRANSLATED_LEVEL_NAMES[i])
+		{
+			free((void*)_TRANSLATED_LEVEL_NAMES[i]);
+			_TRANSLATED_LEVEL_NAMES[i] = NULL;
+		}
+}
 
 //loads the specfied mission from the mission list.  build_mission_list()
 //must have been called.  If build_mission_list() returns 0, this function
@@ -219,6 +225,8 @@ int load_mission(int mission_num)
 	Current_mission_num = mission_num;
 
 	mprintf((0, "Loading mission %d\n", mission_num));
+
+	free_old_translated_level_names();
 
 	if (mission_num == 0) //built-in mission
 	{
@@ -240,6 +248,31 @@ int load_mission(int mission_num)
 		strcpy(Briefing_text_filename, BIM_BRIEFING_FILE);
 		strcpy(Ending_text_filename, BIM_ENDING_FILE);
 		cfile_use_alternate_hogfile(NULL);		//disable alternate
+
+		{
+			CFILE* lng = cfopen("D1LEVELS.LNG", "rb");
+			if (lng)
+			{
+				char inputline[LEVEL_NAME_LEN];
+				int i = 0, l;
+				while (cfgets(inputline, sizeof(inputline) - 1, lng) && i < (sizeof(_TRANSLATED_LEVEL_NAMES) / sizeof(_TRANSLATED_LEVEL_NAMES[0])))
+				{
+					char* p = strchr(inputline, '\n');
+					if (p) *p = '\0';
+					if (*inputline && *inputline != '#')
+					{
+						l = p - inputline + 1;
+						char* pp = (char*)malloc(l);
+						if (pp)
+						{
+							strcpy(pp, inputline);
+							_TRANSLATED_LEVEL_NAMES[++i] = pp;
+						}
+					}
+				}
+				cfclose(lng);
+			}
+		}
 	}
 	else
 	{		 //NOTE LINK TO ABOVE IF!!!!!

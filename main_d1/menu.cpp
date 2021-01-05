@@ -100,7 +100,7 @@ extern void init_cockpit(); //[ISB] I really should stuff these somewhere formal
 //ADD_ITEM("Start netgame...", MENU_START_NETGAME, -1 );
 //ADD_ITEM("Send net message...", MENU_SEND_NET_MESSAGE, -1 );
 
-#define ADD_ITEM(t,value,key)  do { m[num_options].type=NM_TYPE_MENU; m[num_options].text=t; menu_choice[num_options]=value;num_options++; } while (0)
+#define ADD_ITEM(t,value,key)  do { m[num_options].type=NM_TYPE_MENU; nm_copy_text(&m[num_options], t); menu_choice[num_options]=value;num_options++; } while (0)
 
 extern int last_joy_time;		//last time the joystick was used
 #ifndef NDEBUG
@@ -123,7 +123,7 @@ void autodemo_menu_check(int nitems, newmenu_item* items, int* last_key, int cit
 	citem = citem;
 
 	//draw copyright message
-	if (Menu_draw_copyright) 
+	if (Menu_draw_copyright)
 	{
 		Menu_draw_copyright = 0;
 		gr_set_current_canvas(NULL);
@@ -133,16 +133,16 @@ void autodemo_menu_check(int nitems, newmenu_item* items, int* last_key, int cit
 	}
 
 	// Don't allow them to hit ESC in the main menu.
-	if (*last_key == KEY_ESC)* last_key = 0;
+	if (*last_key == KEY_ESC)*last_key = 0;
 
-	if (do_auto_demo) 
+	if (do_auto_demo)
 	{
 		curtime = timer_get_approx_seconds();
 		//if ( ((keyd_time_when_last_pressed+i2f(20)) < curtime) && ((last_joy_time+i2f(20)) < curtime) && (!speedtest_on)  ) {
 		if (((keyd_time_when_last_pressed + i2f(45)) < curtime) && (!speedtest_on)) {
 			keyd_time_when_last_pressed = curtime;			// Reset timer so that disk won't thrash if no demos.
 			newdemo_start_playback(NULL);		// Randomly pick a file
-			if (Newdemo_state == ND_STATE_PLAYBACK) 
+			if (Newdemo_state == ND_STATE_PLAYBACK)
 			{
 				Function_mode = FMODE_GAME;
 				*last_key = -2;
@@ -198,18 +198,18 @@ void create_main_menu(newmenu_item* m, int* menu_choice, int* callers_num_option
 	ADD_ITEM(TXT_QUIT, MENU_QUIT, KEY_Q);
 
 #ifndef RELEASE
-	if (!(Game_mode & GM_MULTI)) 
+	if (!(Game_mode & GM_MULTI))
 	{
 		//m[num_options].type=NM_TYPE_TEXT;
 		//m[num_options++].text=" Debug options:";
 
-		ADD_ITEM((char*)"  Load level...", MENU_LOAD_LEVEL, KEY_N);
+		ADD_ITEM("  Load level...", MENU_LOAD_LEVEL, KEY_N);
 #ifdef EDITOR
-		ADD_ITEM((char*)"  Editor", MENU_EDITOR, KEY_E);
+		ADD_ITEM("  Editor", MENU_EDITOR, KEY_E);
 #endif
 	}
 
-	ADD_ITEM((char*)"  Play song", MENU_PLAY_SONG, -1);
+	ADD_ITEM("  Play song", MENU_PLAY_SONG, -1);
 #endif
 
 	* callers_num_options = num_options;
@@ -222,13 +222,13 @@ int DoMenu()
 	newmenu_item m[25];
 	int num_options = 0;
 
-	if (Players[Player_num].callsign[0] == 0) 
+	if (Players[Player_num].callsign[0] == 0)
 	{
 		RegisterPlayer();
 		return 0;
 	}
 
-	if ((Game_mode & GM_SERIAL) || (Game_mode & GM_MODEM)) 
+	if ((Game_mode & GM_SERIAL) || (Game_mode & GM_MODEM))
 	{
 		do_option(MENU_START_SERIAL);
 		return 0;
@@ -236,7 +236,7 @@ int DoMenu()
 
 	create_main_menu(m, menu_choice, &num_options);
 
-	do 
+	do
 	{
 		keyd_time_when_last_pressed = timer_get_fixed_seconds();		// .. 20 seconds from now!
 		if (main_menu_choice < 0)	main_menu_choice = 0;
@@ -259,7 +259,7 @@ extern void show_order_form(void);	// John didn't want this in inferno.h so I ju
 //returns flag, true means quit menu
 void do_option(int select)
 {
-	switch (select) 
+	switch (select)
 	{
 	case MENU_NEW_GAME:
 		do_new_game_menu();
@@ -269,7 +269,7 @@ void do_option(int select)
 	case MENU_DEMO_PLAY:
 	{
 		char demo_file[16];
-		if (newmenu_get_filename(TXT_SELECT_DEMO, "*.dem", demo_file, 1)) 
+		if (newmenu_get_filename(TXT_SELECT_DEMO, "*.dem", demo_file, 1))
 		{
 			newdemo_start_playback(demo_file);
 		}
@@ -314,12 +314,12 @@ void do_option(int select)
 
 #ifndef RELEASE
 
-	case MENU_PLAY_SONG: 
+	case MENU_PLAY_SONG:
 	{
 		int i;
 		char* m[MAX_SONGS];
 
-		for (i = 0; i < MAX_SONGS; i++) 
+		for (i = 0; i < MAX_SONGS; i++)
 		{
 			m[i] = Songs[i].filename;
 		}
@@ -329,20 +329,20 @@ void do_option(int select)
 			songs_play_song(i, 0);
 		}
 	}
-						 break;
-	case MENU_LOAD_LEVEL: 
+	break;
+	case MENU_LOAD_LEVEL:
 	{
 		newmenu_item m;
 		char text[11] = ""; //[ISB] null terminators are your friend
 		int new_level_num;
 
-		m.type = NM_TYPE_INPUT; m.text_len = 10; m.text = text;
+		m.type = NM_TYPE_INPUT; m.text_len = 10; nm_copy_text(&m, text);
 
 		newmenu_do(NULL, "Enter level to load", 1, &m, NULL);
 
 		new_level_num = atoi(m.text);
 
-		if (new_level_num != 0 && new_level_num >= Last_secret_level && new_level_num <= Last_level) 
+		if (new_level_num != 0 && new_level_num >= Last_secret_level && new_level_num <= Last_level)
 		{
 			gr_palette_fade_out(gr_palette, 32, 0);
 			StartNewGame(new_level_num);
@@ -394,15 +394,15 @@ int do_difficulty_menu()
 	int s;
 	newmenu_item m[5];
 
-	m[0].type = NM_TYPE_MENU; m[0].text = MENU_DIFFICULTY_TEXT(0);
-	m[1].type = NM_TYPE_MENU; m[1].text = MENU_DIFFICULTY_TEXT(1);
-	m[2].type = NM_TYPE_MENU; m[2].text = MENU_DIFFICULTY_TEXT(2);
-	m[3].type = NM_TYPE_MENU; m[3].text = MENU_DIFFICULTY_TEXT(3);
-	m[4].type = NM_TYPE_MENU; m[4].text = MENU_DIFFICULTY_TEXT(4);
+	m[0].type = NM_TYPE_MENU; nm_copy_text(&m[0], MENU_DIFFICULTY_TEXT(0));
+	m[1].type = NM_TYPE_MENU; nm_copy_text(&m[1], MENU_DIFFICULTY_TEXT(1));
+	m[2].type = NM_TYPE_MENU; nm_copy_text(&m[2], MENU_DIFFICULTY_TEXT(2));
+	m[3].type = NM_TYPE_MENU; nm_copy_text(&m[3], MENU_DIFFICULTY_TEXT(3));
+	m[4].type = NM_TYPE_MENU; nm_copy_text(&m[4], MENU_DIFFICULTY_TEXT(4));
 
 	s = newmenu_do1(NULL, TXT_DIFFICULTY_LEVEL, NDL, m, NULL, Difficulty_level);
 
-	if (s > -1) 
+	if (s > -1)
 	{
 		if (s != Difficulty_level)
 		{
@@ -438,7 +438,7 @@ void set_detail_level_parameters(int detail_level)
 {
 	Assert((detail_level >= 0) && (detail_level < NUM_DETAIL_LEVELS));
 
-	if (detail_level < NUM_DETAIL_LEVELS - 1) 
+	if (detail_level < NUM_DETAIL_LEVELS - 1)
 	{
 		Render_depth = Render_depths[detail_level];
 		Max_perspective_depth = Max_perspective_depths[detail_level];
@@ -468,19 +468,19 @@ void do_detail_level_menu(void)
 	int s;
 	newmenu_item m[7];
 
-	m[0].type = NM_TYPE_MENU; m[0].text = MENU_DETAIL_TEXT(0);
-	m[1].type = NM_TYPE_MENU; m[1].text = MENU_DETAIL_TEXT(1);
-	m[2].type = NM_TYPE_MENU; m[2].text = MENU_DETAIL_TEXT(2);
-	m[3].type = NM_TYPE_MENU; m[3].text = MENU_DETAIL_TEXT(3);
-	m[4].type = NM_TYPE_MENU; m[4].text = MENU_DETAIL_TEXT(4);
-	m[5].type = NM_TYPE_TEXT; m[5].text = (char*)"";
-	m[6].type = NM_TYPE_MENU; m[6].text = MENU_DETAIL_TEXT(5);
+	m[0].type = NM_TYPE_MENU; nm_copy_text(&m[0], MENU_DETAIL_TEXT(0));
+	m[1].type = NM_TYPE_MENU; nm_copy_text(&m[1], MENU_DETAIL_TEXT(1));
+	m[2].type = NM_TYPE_MENU; nm_copy_text(&m[2], MENU_DETAIL_TEXT(2));
+	m[3].type = NM_TYPE_MENU; nm_copy_text(&m[3], MENU_DETAIL_TEXT(3));
+	m[4].type = NM_TYPE_MENU; nm_copy_text(&m[4], MENU_DETAIL_TEXT(4));
+	m[5].type = NM_TYPE_TEXT; nm_copy_text(&m[5], "");
+	m[6].type = NM_TYPE_MENU; nm_copy_text(&m[6], MENU_DETAIL_TEXT(5));
 
 	s = newmenu_do1(NULL, TXT_DETAIL_LEVEL, NDL + 2, m, NULL, Detail_level);
 
 	if (s > -1)
 	{
-		switch (s) 
+		switch (s)
 		{
 		case 0:
 		case 1:
@@ -538,46 +538,46 @@ void do_detail_level_menu_custom(void)
 	int	s = 0;
 	newmenu_item m[7];
 
-	do 
+	do
 	{
 		m[0].type = NM_TYPE_SLIDER;
-		m[0].text = TXT_OBJ_COMPLEXITY;
+		nm_copy_text(&m[0], TXT_OBJ_COMPLEXITY);
 		m[0].value = Object_complexity;
 		m[0].min_value = 0;
 		m[0].max_value = NDL - 1;
 
 		m[1].type = NM_TYPE_SLIDER;
-		m[1].text = TXT_OBJ_DETAIL;
+		nm_copy_text(&m[1], TXT_OBJ_DETAIL);
 		m[1].value = Object_detail;
 		m[1].min_value = 0;
 		m[1].max_value = NDL - 1;
 
 		m[2].type = NM_TYPE_SLIDER;
-		m[2].text = TXT_WALL_DETAIL;
+		nm_copy_text(&m[2], TXT_WALL_DETAIL);
 		m[2].value = Wall_detail;
 		m[2].min_value = 0;
 		m[2].max_value = NDL - 1;
 
 		m[3].type = NM_TYPE_SLIDER;
-		m[3].text = TXT_WALL_RENDER_DEPTH;
+		nm_copy_text(&m[3], TXT_WALL_RENDER_DEPTH);
 		m[3].value = Wall_render_depth;
 		m[3].min_value = 0;
 		m[3].max_value = NDL - 1;
 
 		m[4].type = NM_TYPE_SLIDER;
-		m[4].text = TXT_DEBRIS_AMOUNT;
+		nm_copy_text(&m[4], TXT_DEBRIS_AMOUNT);
 		m[4].value = Debris_amount;
 		m[4].min_value = 0;
 		m[4].max_value = NDL - 1;
 
 		m[5].type = NM_TYPE_SLIDER;
-		m[5].text = TXT_SOUND_CHANNELS;
+		nm_copy_text(&m[5], TXT_SOUND_CHANNELS);
 		m[5].value = SoundChannels;
 		m[5].min_value = 0;
 		m[5].max_value = NDL - 1;
 
 		m[6].type = NM_TYPE_TEXT;
-		m[6].text = TXT_LO_HI;
+		nm_copy_text(&m[6], TXT_LO_HI);
 
 		s = newmenu_do1(NULL, TXT_DETAIL_CUSTOM, 7, m, do_detail_level_menu_custom_menuset, s);
 	} while (s > -1);
@@ -598,23 +598,23 @@ void do_new_game_menu()
 		char* m[MAX_MISSIONS];
 
 		default_mission = 0;
-		for (i = 0; i < n_missions; i++) 
+		for (i = 0; i < n_missions; i++)
 		{
 			m[i] = Mission_list[i].mission_name;
 			if (!_strfcmp(m[i], config_last_mission))
 				default_mission = i;
 		}
 
-		new_mission_num = newmenu_listbox1("New Game\n\nSelect mission", n_missions, m, 1, default_mission, NULL);
+		new_mission_num = newmenu_listbox1(transl_get_string("NewGameMission"), n_missions, m, 1, default_mission, NULL);
 
 		if (new_mission_num == -1)
 			return;		//abort!
 
 		strcpy(config_last_mission, m[new_mission_num]);
 
-		if (!load_mission(new_mission_num)) 
+		if (!load_mission(new_mission_num))
 		{
-			nm_messagebox(NULL, 1, TXT_OK, "Error in Mission file");
+			nm_messagebox(NULL, 1, TXT_OK, transl_get_string("NewGameError"));
 			return;
 		}
 	}
@@ -627,20 +627,18 @@ void do_new_game_menu()
 	if (player_highest_level > Last_level)
 		player_highest_level = Last_level;
 
-	if (player_highest_level > 1) 
+	if (player_highest_level > 1)
 	{
 		newmenu_item m[2];
 		char info_text[80];
-		char num_text[10];
 		int choice;
 
 	try_again:
-		sprintf(info_text, "%s %d", TXT_START_ANY_LEVEL, player_highest_level);
+		sprintf(info_text, transl_fmt_string_i("TXT_START_ANY_LEVEL", player_highest_level));
 
-		m[0].type = NM_TYPE_TEXT; m[0].text = info_text;
-		m[1].type = NM_TYPE_INPUT; m[1].text_len = 10; m[1].text = num_text;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], info_text);
+		m[1].type = NM_TYPE_INPUT; m[1].text_len = 10; nm_copy_text(&m[1], "1");
 
-		strcpy(num_text, "1");
 
 		choice = newmenu_do(NULL, TXT_SELECT_START_LEV, 2, &m[0], NULL);
 
@@ -651,7 +649,7 @@ void do_new_game_menu()
 
 		if (!(new_level_num > 0 && new_level_num <= player_highest_level))
 		{
-			m[0].text = TXT_ENTER_TO_CONT;
+			nm_copy_text(&m[0], TXT_ENTER_TO_CONT);
 			nm_messagebox(NULL, 1, TXT_OK, TXT_INVALID_LEVEL);
 			goto try_again;
 		}
@@ -686,34 +684,34 @@ void do_load_game_menu()
 
 	get_game_list(saved_text);
 
-	for (i = 0; i < N_SAVE_SLOTS; i++) 
+	for (i = 0; i < N_SAVE_SLOTS; i++)
 	{
 
 		if (saved_text[i][0]) {
 			m[i].type = NM_TYPE_MENU;
-			m[i].text = saved_text[i];
+			nm_copy_text(&m[i], saved_text[i]);
 		}
 		else {
 			m[i].type = NM_TYPE_TEXT;
-			m[i].text = TXT_EMPTY;
+			nm_copy_text(&m[i], TXT_EMPTY);
 		}
 	}
 
 	choice = newmenu_do(NULL, TXT_LOAD_GAME, N_SAVE_SLOTS, m, NULL);
 
-	if (choice != -1) 
+	if (choice != -1)
 	{
 		int ret;
 
 		if ((ret = load_player_game(choice)) == EZERO)
 			ResumeSavedGame(Players[Player_num].level);
-		else 
+		else
 		{
 			newmenu_item m1[3];
 
-			m1[0].type = NM_TYPE_TEXT;  m1[0].text = strerror(ret);
-			m1[1].type = NM_TYPE_TEXT;  m1[1].text = (char*)"";
-			m1[2].type = NM_TYPE_TEXT;  m1[2].text = TXT_ENTER_TO_CONT;
+			m1[0].type = NM_TYPE_TEXT;  nm_copy_text(&m1[0], strerror(ret));
+			m1[1].type = NM_TYPE_TEXT;  nm_copy_text(&m1[1], "");
+			m1[2].type = NM_TYPE_TEXT;  nm_copy_text(&m1[2], TXT_ENTER_TO_CONT);
 
 			newmenu_do(NULL, TXT_ERR_LOADING_GAME, 3, m1, NULL);
 
@@ -730,14 +728,14 @@ void do_save_game_menu()
 
 	get_game_list(saved_text_ptrs);
 
-	for (i = 0; i < N_SAVE_SLOTS; i++) 
+	for (i = 0; i < N_SAVE_SLOTS; i++)
 	{
 
 		strcpy(menu_text[i], saved_text_ptrs[i]);
 
 		m[i].type = NM_TYPE_INPUT_MENU;
 		m[i].text_len = GAME_NAME_LEN;
-		m[i].text = menu_text[i];
+		nm_copy_text(&m[i], menu_text[i]);
 
 		if (!menu_text[i][0])
 			strcpy(menu_text[i], TXT_EMPTY);
@@ -746,7 +744,7 @@ void do_save_game_menu()
 
 	choice = newmenu_do(NULL, TXT_SAVE_GAME_SLOTS, N_SAVE_SLOTS, m, NULL);
 
-	if (choice != -1) 
+	if (choice != -1)
 	{
 		int ret;
 
@@ -763,19 +761,19 @@ void joydef_menuset(int nitems, newmenu_item* items, int* last_key, int citem)
 	nitems = nitems;
 	*last_key = *last_key;
 
-	if (citem == 4) 
+	if (citem == 4)
 	{
 		gr_palette_set_gamma(items[4].value);
 	}
 
-	if (Config_digi_volume != items[0].value) 
+	if (Config_digi_volume != items[0].value)
 	{
 		Config_digi_volume = items[0].value;
 		digi_set_digi_volume((Config_digi_volume * 32768) / 8);
 		digi_play_sample_once(SOUND_DROP_BOMB, F1_0);
 	}
 
-	if (Config_midi_volume != items[1].value) 
+	if (Config_midi_volume != items[1].value)
 	{
 		Config_midi_volume = items[1].value;
 		digi_set_midi_volume((Config_midi_volume * 128) / 8);
@@ -794,25 +792,25 @@ void do_options_menu()
 	newmenu_item m[13];
 	int i = 0;
 
-	do 
+	do
 	{
-		m[0].type = NM_TYPE_SLIDER; m[0].text = TXT_FX_VOLUME; m[0].value = Config_digi_volume; m[0].min_value = 0; m[0].max_value = 8;
-		m[1].type = NM_TYPE_SLIDER; m[1].text = TXT_MUSIC_VOLUME; m[1].value = Config_midi_volume; m[1].min_value = 0; m[1].max_value = 8;
-		m[2].type = NM_TYPE_CHECK; m[2].text = TXT_REVERSE_STEREO; m[2].value = Config_channels_reversed;
-		m[3].type = NM_TYPE_TEXT; m[3].text = (char*)"";
-		m[4].type = NM_TYPE_SLIDER; m[4].text = TXT_BRIGHTNESS; m[4].value = gr_palette_get_gamma(); m[4].min_value = 0; m[4].max_value = 8;
-		m[5].type = NM_TYPE_TEXT; m[5].text = (char*)"";
-		m[6].type = NM_TYPE_MENU; m[6].text = TXT_CONTROLS_;
-		m[7].type = NM_TYPE_MENU; m[7].text = TXT_DETAIL_LEVELS;
-		m[8].type = NM_TYPE_MENU; m[8].text = TXT_CAL_JOYSTICK;
-		m[9].type = NM_TYPE_TEXT; m[9].text = (char*)"";
-		m[10].type = NM_TYPE_SLIDER; m[10].text = TXT_JOYS_SENSITIVITY; m[10].value = Config_joystick_sensitivity; m[10].min_value = 0; m[10].max_value = 8;
-		m[11].type = NM_TYPE_TEXT; m[11].text = (char*)"";
-		m[12].type = NM_TYPE_CHECK; m[12].text = (char*)"Ship auto-leveling"; m[12].value = Auto_leveling_on;
+		m[0].type = NM_TYPE_SLIDER; nm_copy_text(&m[0], TXT_FX_VOLUME); m[0].value = Config_digi_volume; m[0].min_value = 0; m[0].max_value = 8;
+		m[1].type = NM_TYPE_SLIDER; nm_copy_text(&m[1], TXT_MUSIC_VOLUME); m[1].value = Config_midi_volume; m[1].min_value = 0; m[1].max_value = 8;
+		m[2].type = NM_TYPE_CHECK; nm_copy_text(&m[2], TXT_REVERSE_STEREO); m[2].value = Config_channels_reversed;
+		m[3].type = NM_TYPE_TEXT; nm_copy_text(&m[3], "");
+		m[4].type = NM_TYPE_SLIDER; nm_copy_text(&m[4], TXT_BRIGHTNESS); m[4].value = gr_palette_get_gamma(); m[4].min_value = 0; m[4].max_value = 8;
+		m[5].type = NM_TYPE_TEXT; nm_copy_text(&m[5], "");
+		m[6].type = NM_TYPE_MENU; nm_copy_text(&m[6], TXT_CONTROLS_);
+		m[7].type = NM_TYPE_MENU; nm_copy_text(&m[7], TXT_DETAIL_LEVELS);
+		m[8].type = NM_TYPE_MENU; nm_copy_text(&m[8], TXT_CAL_JOYSTICK);
+		m[9].type = NM_TYPE_TEXT; nm_copy_text(&m[9], "");
+		m[10].type = NM_TYPE_SLIDER; nm_copy_text(&m[10], TXT_JOYS_SENSITIVITY); m[10].value = Config_joystick_sensitivity; m[10].min_value = 0; m[10].max_value = 8;
+		m[11].type = NM_TYPE_TEXT; nm_copy_text(&m[11], "");
+		m[12].type = NM_TYPE_CHECK; nm_copy_text(&m[12], transl_get_string("ShipAutoLevel")); m[12].value = Auto_leveling_on;
 
 		i = newmenu_do1(NULL, TXT_OPTIONS, 13, m, joydef_menuset, i);
 
-		switch (i) 
+		switch (i)
 		{
 		case 6: joydefs_config(); 			break;
 		case 7: do_detail_level_menu();	break;
@@ -839,7 +837,7 @@ void do_multi_player_menu()
 	int choice = 0, num_options = 0;
 	int old_game_mode;
 
-	do 
+	do
 	{
 		old_game_mode = Game_mode;
 		num_options = 0;

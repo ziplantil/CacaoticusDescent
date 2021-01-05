@@ -974,6 +974,7 @@ fix find_connected_distance(vms_vector* p0, int seg0, vms_vector* p1, int seg1, 
 			if (WALL_IS_DOORWAY(segp, snum) & wid_flag) 
 			{
 				int	this_seg = segp->children[snum];
+				Assert(this_seg < MAX_SEGMENTS);
 
 				if (!visited[this_seg])
 				{

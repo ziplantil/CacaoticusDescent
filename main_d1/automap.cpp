@@ -260,7 +260,7 @@ void draw_automap()
 #define LEAVE_TIME 0x4000
 
 //print to canvas & double height
-grs_canvas * print_to_canvas(char* s, grs_font * font, int fc, int bc)
+grs_canvas * print_to_canvas(const char* s, grs_fontstyle * font, int fc, int bc)
 {
 	int y;
 	uint8_t* data;
@@ -294,7 +294,7 @@ grs_canvas * print_to_canvas(char* s, grs_font * font, int fc, int bc)
 }
 
 //print to buffer, double heights, and blit bitmap to screen
-void modex_printf(int x, int y, char* s, int fontnum)
+void modex_printf(int x, int y, const char* s, int fontnum)
 {
 	grs_canvas* temp_canv;
 
@@ -310,7 +310,8 @@ void create_name_canv()
 	char	name_level[128];
 
 	if (Current_level_num > 0)
-		sprintf(name_level, "%s %i: ", TXT_LEVEL, Current_level_num);
+		//sprintf(name_level, "%s %i: ", TXT_LEVEL, Current_level_num);
+		sprintf(name_level, transl_fmt_string_ti("AutoMapLevelFormat", "TXT_LEVEL", Current_level_num));
 	else
 		name_level[0] = 0;
 
@@ -402,10 +403,23 @@ void do_automap(int key_code)
 	{
 		gr_set_current_canvas(&Pages[i]);
 		gr_bitmap(0, 0, &Automap_background);
-		modex_printf(40, 22, TXT_AUTOMAP, GFONT_BIG_1);
-		modex_printf(70, 353, TXT_TURN_SHIP, GFONT_SMALL);
-		modex_printf(70, 369, TXT_SLIDE_UPDOWN, GFONT_SMALL);
-		modex_printf(70, 385, TXT_VIEWING_DISTANCE, GFONT_SMALL);
+		modex_printf(40, 22, transl_get_string("Automap"), GFONT_BIG_1);
+		if (Gamefonts[GFONT_SMALL]->ft_h <= 5)
+		{
+			modex_printf(70, 353, TXT_TURN_SHIP, GFONT_SMALL);
+			modex_printf(70, 369, TXT_SLIDE_UPDOWN, GFONT_SMALL);
+			modex_printf(70, 385, TXT_VIEWING_DISTANCE, GFONT_SMALL);
+		}
+		else
+		{
+			int fth = Gamefonts[GFONT_SMALL]->ft_h * 2 + 2;
+			int fac = 0;
+			const char* vd = TXT_VIEWING_DISTANCE;
+			if (vd && *vd)
+				modex_printf(70, 397 - fth * ++fac, vd, GFONT_SMALL);
+			modex_printf(70, 397 - fth * ++fac, TXT_SLIDE_UPDOWN, GFONT_SMALL);
+			modex_printf(70, 397 - fth * ++fac, TXT_TURN_SHIP, GFONT_SMALL);
+		}
 	}
 	if (Automap_background.bm_data)
 		free(Automap_background.bm_data);

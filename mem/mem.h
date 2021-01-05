@@ -20,9 +20,11 @@ extern int show_mem_info;
 void* mem_display_blocks(void);
 extern void* mem_malloc(unsigned int size, const char* var, const char* file, int line, int fill_zero);
 extern void mem_free(void* buffer);
+extern void* mem_realloc(void* ptr, unsigned int new_size, const char* var, const char* filename, int line, int fill_zero);
 
 #define malloc(size)    mem_malloc((size),"Unknown", __FILE__,__LINE__, 0 )
 #define calloc(n,size)  mem_malloc((n*size),"Unknown", __FILE__,__LINE__, 1 )
+#define realloc(ptr,size)    mem_realloc((ptr),(size),"Unknown", __FILE__,__LINE__, 0 )
 #define free(ptr)       do{ mem_free(ptr); ptr=NULL; } while(0)
 
 #define MALLOC( var, type, count )   (var=(type *)mem_malloc((count)*sizeof(type),#var, __FILE__,__LINE__,0 ))

@@ -1519,10 +1519,11 @@ int get_level_name()
 
 	newmenu_item m[2];
 
-	m[0].type = NM_TYPE_TEXT; m[0].text = "Please enter a name for this mine:";
-	m[1].type = NM_TYPE_INPUT; m[1].text = Current_level_name; m[1].text_len = LEVEL_NAME_LEN;
+	m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], "Please enter a name for this mine:");
+	m[1].type = NM_TYPE_INPUT; nm_copy_text(&m[1], Current_level_name); m[1].text_len = LEVEL_NAME_LEN;
 
 	newmenu_do(NULL, "Enter mine name", 2, m, NULL);
+	strcpy(Current_level_name, m[1].text);
 
 	return 0;
 }

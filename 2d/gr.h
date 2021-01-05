@@ -41,6 +41,8 @@ typedef struct _grs_point
 #define CC_LSPACING_S 	"\x2"		//next char specifies line spacing
 #define CC_UNDERLINE_S	"\x3"		//next char is underlined
 
+#define FAST_FONT_TABLE 1
+
 typedef struct _grs_font 
 {
 	short		ft_w, ft_h;		// Width and height in pixels
@@ -53,8 +55,59 @@ typedef struct _grs_font
 	uint8_t** ft_chars;		// Ptrs to data for each char (required for prop font)
 	short* ft_widths;		// Array of widths (required for prop font)
 	uint8_t* ft_kerndata;	// Array of kerning triplet data
+	short ft_yoffset; // Y offset to be added when rendering characters for this font. should be positive
+#if FAST_FONT_TABLE
+	uint32_t ft_uoffset;
+#endif
 	uint8_t* ft_datablock; //this format sucks aaaaaaaaaaaaaaaaaaaaaa
 } grs_font;
+
+#if !FAST_FONT_TABLE
+// represents node in font style binary tree (possibly root)
+typedef struct _grs_fontstyle_node
+{
+	struct _grs_fontstyle_node* left;   // if the character is lower that in this font
+	struct _grs_fontstyle_node* right;  // if the character is higher that in this font
+	struct _grs_fontstyle_node* parent; // parent in tree
+	grs_font* font;   // current font in style
+	uint32_t minchar; // minimum char represented in this font
+	uint32_t maxchar; // maximum char represented in this font
+	signed char balance;      // AVL balance. either -1, 0, 1 (might be -2 or 2 during insert)
+} grs_fontstyle_node;
+#endif
+
+#define UNICODE_CODEPOINT_COUNT 0x110000
+#define FAST_FONT_TABLE_SHIFT 12
+#define FAST_FONT_TABLE_SIZE (UNICODE_CODEPOINT_COUNT >> FAST_FONT_TABLE_SHIFT)
+#define FAST_FONT_TABLE_SUBTABLE_SIZE (1 << (FAST_FONT_TABLE_SHIFT)) 
+#define FAST_FONT_TABLE_MASK ((FAST_FONT_TABLE_SUBTABLE_SIZE) - 1)
+
+typedef struct _grs_kernex
+{
+	uint32_t c1, c2;
+	short spacing;
+} grs_kernex;
+
+// represents font style
+typedef struct _grs_fontstyle
+{
+	short ft_w, ft_h, ft_mh; // width, height, maximum height; by default width and height is maximum of all fonts in style
+	short flags; // font flags that apply only to the default font (used for color font flag check), actual maximum height (for render)
+	grs_font* deffont;   // "default" font (the one that comes with the game)
+#if FAST_FONT_TABLE
+	// full table of all fonts, split into some sections to avoid using too much memory
+	grs_font** fonts[FAST_FONT_TABLE_SIZE];
+#else
+	uint32_t minchar; // minimum char represented in the cached font
+	uint32_t maxchar; // maximum char represented in the cached font
+	grs_font* font;   // cached font
+	grs_fontstyle_node* root; // root of tree
+#endif
+	short yoffset;
+	int kerncnt;
+	int kernsize;
+	grs_kernex* kerns;
+} grs_fontstyle;
 
 #define BM_LINEAR   0
 #define BM_MODEX    1
@@ -95,7 +148,7 @@ typedef struct _grs_canvas
 	grs_bitmap  cv_bitmap;      // the bitmap for this canvas
 	short       cv_color;       // current color
 	short       cv_drawmode;    // fill,XOR,etc.
-	grs_font* cv_font;        // the currently selected font
+	grs_fontstyle* cv_font;        // the currently selected font style
 	short       cv_font_fg_color;   // current font foreground color (-1==Invisible)
 	short       cv_font_bg_color;   // current font background color (-1==Invisible)
 } grs_canvas;
@@ -322,11 +375,18 @@ void gr_remap_font(grs_font* font, char* fontname);
 void gr_close_font(grs_font* font);
 void gr_remap_color_fonts();
 
+grs_fontstyle* gr_init_fontstyle(const char* name);
+void gr_register_font(grs_fontstyle* style, grs_font* font, uint32_t offset);
+void gr_register_kern(grs_fontstyle* style, uint32_t c1, uint32_t c2, short spacing);
+// MUST BE CALLED after kerns registered
+void gr_prepare_kerns(grs_fontstyle* style);
+void gr_close_fontstyle(grs_fontstyle* style);
+
 // Writes a string using current font. Returns the next column after last char.
 void gr_set_fontcolor(int fg, int bg);
-void gr_set_curfont(grs_font* newfont);
+void gr_set_curfont(grs_fontstyle* newfont);
 int gr_string(int x, int y, const char* s);
-int gr_ustring(int x, int y, const char* s);
+//int gr_ustring(int x, int y, const char* s);
 int gr_printf(int x, int y, const char* format, ...);
 int gr_uprintf(int x, int y, const char* format, ...);
 void gr_get_string_size(const char* s, int* string_width, int* string_height, int* average_width);
@@ -356,6 +416,8 @@ extern void gr_set_current_canvas(grs_canvas* canv);
 #define FT_COLOR			1
 #define FT_PROPORTIONAL	2
 #define FT_KERNED			4
+//extra fonts for more characters
+#define FT_EXTRA_FONT          16
 
 // Special effects
 //extern void gr_snow_out(int num_dots); //[ISB] not in PC?
@@ -415,5 +477,5 @@ int gr_set_mode(int mode);
 //[ISB] I MADE BAD DECISIONS AGAIN
 #define VGA_current_mode grd_curscreen->sc_mode
 
-//shortcut to look at current font
+//shortcut to look at current font style
 #define grd_curfont grd_curcanv->cv_font

@@ -738,7 +738,7 @@ void john_cheat_func_4(int key)
 					HUD_init_message(TXT_ROBOT_PAINTING_OFF);
 				}
 				else {
-					HUD_init_message(TXT_ROBOT_PAINTING_ON, Ugly_robot_texture);
+					HUD_init_message(transl_fmt_string_i("TXT_ROBOT_PAINTING_ON", Ugly_robot_texture));
 					Ugly_robot_cheat = 0xBADA55;
 				}
 				mprintf((0, "Paint value = %i\n", Ugly_robot_texture));

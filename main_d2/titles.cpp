@@ -58,6 +58,7 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #include "state.h"
 #include "movie.h"
 #include "menu.h"
+#include "locale/utf8.h"
 
 #if defined(POLY_ACC)
 #include "poly_acc.h"

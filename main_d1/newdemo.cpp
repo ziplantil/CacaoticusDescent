@@ -170,13 +170,13 @@ int8_t playback_style;
 FILE* infile;
 FILE* outfile;
 
-int newdemo_get_percent_done() 
+int newdemo_get_percent_done()
 {
-	if (Newdemo_state == ND_STATE_PLAYBACK) 
+	if (Newdemo_state == ND_STATE_PLAYBACK)
 	{
 		return (ftell(infile) * 100) / Newdemo_size;
 	}
-	if (Newdemo_state == ND_STATE_RECORDING) 
+	if (Newdemo_state == ND_STATE_RECORDING)
 	{
 		return ftell(outfile);
 	}
@@ -185,7 +185,7 @@ int newdemo_get_percent_done()
 
 #define VEL_PRECISION 12
 
-void my_extract_shortpos(object * objp, shortpos * spp)
+void my_extract_shortpos(object* objp, shortpos* spp)
 {
 	int	segnum;
 	int8_t* sp;
@@ -424,12 +424,12 @@ void nd_read_object(object* obj)
 
 	nd_read_byte(&(obj->id));
 	nd_read_byte(&(obj->flags));
-	nd_read_short((short*) & (obj->signature));
+	nd_read_short((short*)&(obj->signature));
 	nd_read_shortpos(obj);
 
 	obj->attached_obj = -1;
 
-	switch (obj->type) 
+	switch (obj->type)
 	{
 
 	case OBJ_HOSTAGE:
@@ -480,16 +480,16 @@ void nd_read_object(object* obj)
 	nd_read_vector(&(obj->last_pos));
 	if ((obj->type == OBJ_WEAPON) && (obj->render_type == RT_WEAPON_VCLIP))
 		nd_read_fix(&(obj->lifeleft));
-	else 
+	else
 	{
-		nd_read_byte((uint8_t*) & (obj->lifeleft));
+		nd_read_byte((uint8_t*)&(obj->lifeleft));
 		obj->lifeleft = (fix)((int)obj->lifeleft << 12);
 	}
 
 #ifndef SHAREWARE
-	if (obj->type == OBJ_ROBOT) 
+	if (obj->type == OBJ_ROBOT)
 	{
-		if (Robot_info[obj->id].boss_flag) 
+		if (Robot_info[obj->id].boss_flag)
 		{
 			int8_t cloaked;
 
@@ -499,7 +499,7 @@ void nd_read_object(object* obj)
 	}
 #endif
 
-	switch (obj->movement_type) 
+	switch (obj->movement_type)
 	{
 
 	case MT_PHYSICS:
@@ -518,7 +518,7 @@ void nd_read_object(object* obj)
 		Int3();
 	}
 
-	switch (obj->control_type) 
+	switch (obj->control_type)
 	{
 
 	case CT_EXPLOSION:
@@ -1271,7 +1271,7 @@ int newdemo_read_demo_start(int rnd_demo)
 		newmenu_item m[1];
 
 		sprintf(text, "%s %s", TXT_CANT_PLAYBACK, TXT_DEMO_CORRUPT);
-		m[0].type = NM_TYPE_TEXT; m[0].text = text;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], text);
 		newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 		return 1;
 	}
@@ -1280,7 +1280,7 @@ int newdemo_read_demo_start(int rnd_demo)
 		if (!rnd_demo) {
 			newmenu_item m[1];
 			sprintf(text, "%s %s", TXT_CANT_PLAYBACK, TXT_DEMO_OLD);
-			m[0].type = NM_TYPE_TEXT; m[0].text = text;
+			m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], text);
 			newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 		}
 		return 1;
@@ -1290,13 +1290,13 @@ int newdemo_read_demo_start(int rnd_demo)
 		newmenu_item m[3];
 
 		sprintf(text, "%s %s", TXT_CANT_PLAYBACK, TXT_RECORDED);
-		m[0].type = NM_TYPE_TEXT; m[0].text = text;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], text);
 #ifdef SHAREWARE
-		m[1].type = NM_TYPE_TEXT; m[1].text = TXT_WITH_REGISTERED;
+		m[1].type = NM_TYPE_TEXT; nm_copy_text(&m[1], TXT_WITH_REGISTERED);
 #else
-		m[1].type = NM_TYPE_TEXT; m[1].text = TXT_WITH_SHAREWARE;
+		m[1].type = NM_TYPE_TEXT; nm_copy_text(&m[1], TXT_WITH_SHAREWARE);
 #endif
-		m[2].type = NM_TYPE_TEXT; m[2].text = TXT_OF_DESCENT;
+		m[2].type = NM_TYPE_TEXT; nm_copy_text(&m[2], TXT_OF_DESCENT);
 
 		newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 		return 1;
@@ -1312,7 +1312,7 @@ int newdemo_read_demo_start(int rnd_demo)
 	}
 #endif
 
-//#ifdef NETWORK
+	//#ifdef NETWORK
 	int i; int8_t laser_level;
 	char current_mission[9];
 #ifdef NETWORK
@@ -1328,17 +1328,17 @@ int newdemo_read_demo_start(int rnd_demo)
 	}
 #else
 #ifdef NETWORK
-	if (Newdemo_game_mode & GM_TEAM) 
+	if (Newdemo_game_mode & GM_TEAM)
 	{
 		nd_read_byte(&(Netgame.team_vector));
 		nd_read_string(Netgame.team_name[0]);
 		nd_read_string(Netgame.team_name[1]);
 	}
-	if (Newdemo_game_mode & GM_MULTI) 
+	if (Newdemo_game_mode & GM_MULTI)
 	{
 
 		multi_new_game();
-		nd_read_byte((int8_t*)& N_players);
+		nd_read_byte((int8_t*)&N_players);
 		for (i = 0; i < N_players; i++) {
 			Players[i].cloak_time = 0;
 			Players[i].invulnerable_time = 0;
@@ -1349,8 +1349,8 @@ int newdemo_read_demo_start(int rnd_demo)
 				nd_read_int(&(Players[i].score));
 			}
 			else {
-				nd_read_short((short*) & (Players[i].net_killed_total));
-				nd_read_short((short*) & (Players[i].net_kills_total));
+				nd_read_short((short*)&(Players[i].net_killed_total));
+				nd_read_short((short*)&(Players[i].net_kills_total));
 			}
 		}
 		Game_mode = Newdemo_game_mode;
@@ -1363,10 +1363,10 @@ int newdemo_read_demo_start(int rnd_demo)
 		nd_read_int(&(Players[Player_num].score));		// Note link to above if!
 
 	for (i = 0; i < MAX_PRIMARY_WEAPONS; i++)
-		nd_read_short((short*) & (Players[Player_num].primary_ammo[i]));
+		nd_read_short((short*)&(Players[Player_num].primary_ammo[i]));
 
 	for (i = 0; i < MAX_SECONDARY_WEAPONS; i++)
-		nd_read_short((short*) & (Players[Player_num].secondary_ammo[i]));
+		nd_read_short((short*)&(Players[Player_num].secondary_ammo[i]));
 
 	nd_read_byte(&laser_level);
 	if (laser_level != Players[Player_num].laser_level)
@@ -1382,24 +1382,24 @@ int newdemo_read_demo_start(int rnd_demo)
 	if (!strcmp(current_mission, ""))
 		strcpy(current_mission, "DESTSAT");
 #endif
-	if (!load_mission_by_name(current_mission)) 
+	if (!load_mission_by_name(current_mission))
 	{
 		newmenu_item m[1];
 
 		sprintf(text, TXT_NOMISSION4DEMO, current_mission);
-		m[0].type = NM_TYPE_TEXT; m[0].text = text;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], text);
 		newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 		return 1;
 	}
 
-//#endif
+	//#endif
 
 	nd_recorded_total = 0;
 	nd_playback_total = 0;
 	nd_read_byte(&energy);
 	nd_read_byte(&shield);
 
-	nd_read_int((int*) & (Players[Player_num].flags));
+	nd_read_int((int*)&(Players[Player_num].flags));
 	if (Players[Player_num].flags & PLAYER_FLAGS_CLOAKED) {
 		Players[Player_num].cloak_time = GameTime - (CLOAK_TIME_MAX / 2);
 		Newdemo_players_cloaked |= (1 << Player_num);
@@ -1407,8 +1407,8 @@ int newdemo_read_demo_start(int rnd_demo)
 	if (Players[Player_num].flags & PLAYER_FLAGS_INVULNERABLE)
 		Players[Player_num].invulnerable_time = GameTime - (INVULNERABLE_TIME_MAX / 2);
 
-	nd_read_byte((int8_t*)& Primary_weapon);
-	nd_read_byte((int8_t*)& Secondary_weapon);
+	nd_read_byte((int8_t*)&Primary_weapon);
+	nd_read_byte((int8_t*)&Secondary_weapon);
 
 	// Next bit of code to fix problem that I introduced between 1.0 and 1.1
 	// check the next byte -- it _will_ be a load_new_level event.  If it is
@@ -1496,7 +1496,7 @@ int newdemo_read_frame_information()
 			done = 1;
 			nd_read_short(&last_frame_length);
 			nd_read_int(&NewdemoFrameCount);
-			nd_read_int((int*)& nd_recorded_time);
+			nd_read_int((int*)&nd_recorded_time);
 			if (Newdemo_vcr_state == ND_STATE_PLAYBACK)
 				nd_recorded_total += nd_recorded_time;
 			NewdemoFrameCount--;
@@ -1630,7 +1630,7 @@ int newdemo_read_frame_information()
 
 		case ND_EVENT_MORPH_FRAME: {
 #if 0
-			morph_data * md;
+			morph_data* md;
 
 			md = &morph_objects[0];
 			if (newdemo_read(md->morph_vecs, sizeof(md->morph_vecs), 1) != 1) { done = -1; break; }
@@ -1742,7 +1742,7 @@ int newdemo_read_frame_information()
 		case ND_EVENT_PLAYER_FLAGS: {
 			uint32_t oflags;
 
-			nd_read_int((int*) & (Players[Player_num].flags));
+			nd_read_int((int*)&(Players[Player_num].flags));
 			if (nd_bad_read) { done = -1; break; }
 
 			oflags = Players[Player_num].flags >> 16;
@@ -2168,7 +2168,7 @@ int newdemo_read_frame_information()
 			if ((loaded_level < Last_secret_level) || (loaded_level > Last_level - 1)) {
 				newmenu_item m[1];
 
-				m[0].type = NM_TYPE_TEXT; m[0].text = TXT_NO_DESTSAT_LVL;
+				m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_NO_DESTSAT_LVL);
 				newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 				return -1;
 			}
@@ -2176,9 +2176,9 @@ int newdemo_read_frame_information()
 			if ((loaded_level < Last_secret_level) || (loaded_level > Last_level)) {
 				newmenu_item m[3];
 
-				m[0].type = NM_TYPE_TEXT; m[0].text = TXT_CANT_PLAYBACK;
-				m[1].type = NM_TYPE_TEXT; m[1].text = TXT_LEVEL_CANT_LOAD;
-				m[2].type = NM_TYPE_TEXT; m[2].text = TXT_DEMO_OLD_CORRUPT;
+				m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_CANT_PLAYBACK);
+				m[1].type = NM_TYPE_TEXT; nm_copy_text(&m[1], TXT_LEVEL_CANT_LOAD);
+				m[2].type = NM_TYPE_TEXT; nm_copy_text(&m[2], TXT_DEMO_OLD_CORRUPT);
 				newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 				return -1;
 			}
@@ -2224,8 +2224,8 @@ int newdemo_read_frame_information()
 	if (nd_bad_read) {
 		newmenu_item m[2];
 
-		m[0].type = NM_TYPE_TEXT; m[0].text = TXT_DEMO_ERR_READING;
-		m[1].type = NM_TYPE_TEXT; m[1].text = TXT_DEMO_OLD_CORRUPT;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_DEMO_ERR_READING);
+		m[1].type = NM_TYPE_TEXT; nm_copy_text(&m[1], TXT_DEMO_OLD_CORRUPT);
 		newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 	}
 
@@ -2260,9 +2260,9 @@ void newdemo_goto_end()
 	if ((level < LAST_SECRET_LEVEL) || (level > LAST_LEVEL)) {
 		newmenu_item m[3];
 
-		m[0].type = NM_TYPE_TEXT; m[0].text = TXT_CANT_PLAYBACK;
-		m[1].type = NM_TYPE_TEXT; m[1].text = TXT_LEVEL_CANT_LOAD;
-		m[2].type = NM_TYPE_TEXT; m[2].text = TXT_DEMO_OLD_CORRUPT;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_CANT_PLAYBACK);
+		m[1].type = NM_TYPE_TEXT; nm_copy_text(&m[1], TXT_LEVEL_CANT_LOAD);
+		m[2].type = NM_TYPE_TEXT; nm_copy_text(&m[2], TXT_DEMO_OLD_CORRUPT);
 		newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 		newdemo_stop_playback();
 		return;
@@ -2304,9 +2304,9 @@ void newdemo_goto_end()
 	if ((level < Last_secret_level) || (level > Last_level)) {
 		newmenu_item m[3];
 
-		m[0].type = NM_TYPE_TEXT; m[0].text = TXT_CANT_PLAYBACK;
-		m[1].type = NM_TYPE_TEXT; m[1].text = TXT_LEVEL_CANT_LOAD;
-		m[2].type = NM_TYPE_TEXT; m[2].text = TXT_DEMO_OLD_CORRUPT;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_CANT_PLAYBACK);
+		m[1].type = NM_TYPE_TEXT; nm_copy_text(&m[1], TXT_LEVEL_CANT_LOAD);
+		m[2].type = NM_TYPE_TEXT; nm_copy_text(&m[2], TXT_DEMO_OLD_CORRUPT);
 		newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 		newdemo_stop_playback();
 		return;
@@ -2333,19 +2333,19 @@ void newdemo_goto_end()
 	nd_read_byte(&shield);
 	Players[Player_num].energy = i2f(energy);
 	Players[Player_num].shields = i2f(shield);
-	nd_read_int((int*) & (Players[Player_num].flags));
+	nd_read_int((int*)&(Players[Player_num].flags));
 	if (Players[Player_num].flags & PLAYER_FLAGS_CLOAKED) {
 		Players[Player_num].cloak_time = GameTime - (CLOAK_TIME_MAX / 2);
 		Newdemo_players_cloaked |= (1 << Player_num);
 	}
 	if (Players[Player_num].flags & PLAYER_FLAGS_INVULNERABLE)
 		Players[Player_num].invulnerable_time = GameTime - (INVULNERABLE_TIME_MAX / 2);
-	nd_read_byte((int8_t*)& Primary_weapon);
-	nd_read_byte((int8_t*)& Secondary_weapon);
+	nd_read_byte((int8_t*)&Primary_weapon);
+	nd_read_byte((int8_t*)&Secondary_weapon);
 	for (i = 0; i < MAX_PRIMARY_WEAPONS; i++)
-		nd_read_short((short*) & (Players[Player_num].primary_ammo[i]));
+		nd_read_short((short*)&(Players[Player_num].primary_ammo[i]));
 	for (i = 0; i < MAX_SECONDARY_WEAPONS; i++)
-		nd_read_short((short*) & (Players[Player_num].secondary_ammo[i]));
+		nd_read_short((short*)&(Players[Player_num].secondary_ammo[i]));
 	nd_read_byte(&laser_level);
 	if (laser_level != Players[Player_num].laser_level) {
 		Players[Player_num].laser_level = laser_level;
@@ -2353,7 +2353,7 @@ void newdemo_goto_end()
 	}
 
 	if (Newdemo_game_mode & GM_MULTI) {
-		nd_read_byte((int8_t*)& N_players);
+		nd_read_byte((int8_t*)&N_players);
 		for (i = 0; i < N_players; i++) {
 			nd_read_string(Players[i].callsign);
 			nd_read_byte(&(Players[i].connected));
@@ -2361,8 +2361,8 @@ void newdemo_goto_end()
 				nd_read_int(&(Players[i].score));
 			}
 			else {
-				nd_read_short((short*) & (Players[i].net_killed_total));
-				nd_read_short((short*) & (Players[i].net_kills_total));
+				nd_read_short((short*)&(Players[i].net_killed_total));
+				nd_read_short((short*)&(Players[i].net_kills_total));
 			}
 		}
 	}
@@ -2866,18 +2866,21 @@ try_again:
 
 	Newmenu_allowed_chars = demoname_allowed_chars;
 	if (!Newdemo_no_space) {
-		m[0].type = NM_TYPE_INPUT; m[0].text_len = 8; m[0].text = filename;
+		m[0].type = NM_TYPE_INPUT; m[0].text_len = 8; nm_copy_text(&m[0], filename);
 		exit = newmenu_do(NULL, TXT_SAVE_DEMO_AS, 1, &(m[0]), NULL);
+		strcpy(filename, m[0].text);
 	}
 	else if (Newdemo_no_space == 1) {
-		m[0].type = NM_TYPE_TEXT; m[0].text = TXT_DEMO_SAVE_BAD;
-		m[1].type = NM_TYPE_INPUT; m[1].text_len = 8; m[1].text = filename;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_DEMO_SAVE_BAD);
+		m[1].type = NM_TYPE_INPUT; m[1].text_len = 8; nm_copy_text(&m[1], filename);
 		exit = newmenu_do(NULL, NULL, 2, m, NULL);
+		strcpy(filename, m[1].text);
 	}
 	else if (Newdemo_no_space == 2) {
-		m[0].type = NM_TYPE_TEXT; m[0].text = TXT_DEMO_SAVE_NOSPACE;
-		m[1].type = NM_TYPE_INPUT; m[1].text_len = 8; m[1].text = filename;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_DEMO_SAVE_NOSPACE);
+		m[1].type = NM_TYPE_INPUT; m[1].text_len = 8; nm_copy_text(&m[1], filename);
 		exit = newmenu_do(NULL, NULL, 2, m, NULL);
+		strcpy(filename, m[1].text);
 	}
 	Newmenu_allowed_chars = NULL;
 
@@ -2939,7 +2942,7 @@ void newdemo_start_playback(const char* filename)
 	FILEFINDSTRUCT find;
 	int rnd_demo = 0;
 
-	if (filename == NULL) 
+	if (filename == NULL)
 	{
 		// Randomly pick a filename 
 		int NumFiles = 0, RandFileNum;
@@ -2947,17 +2950,17 @@ void newdemo_start_playback(const char* filename)
 
 		NumFiles = newdemo_count_demos();
 
-		if (NumFiles == 0) 
+		if (NumFiles == 0)
 		{
 			return;		// No files found!
 		}
 		RandFileNum = P_Rand() % NumFiles;
 		NumFiles = 0;
-		if (!FileFindFirst("*.DEM", &find)) 
+		if (!FileFindFirst("*.DEM", &find))
 		{
-			do 
+			do
 			{
-				if (NumFiles == RandFileNum) 
+				if (NumFiles == RandFileNum)
 				{
 					filename = &find.name[0];
 					break;
@@ -2995,7 +2998,7 @@ void newdemo_start_playback(const char* filename)
 #endif
 	strncpy(nd_save_callsign, Players[Player_num].callsign, CALLSIGN_LEN);
 	Viewer = ConsoleObject = &Objects[0];	// play properly as if console player
-	if (newdemo_read_demo_start(rnd_demo)) 
+	if (newdemo_read_demo_start(rnd_demo))
 	{
 		fclose(infile);
 		return;
@@ -3049,7 +3052,7 @@ void newdemo_strip_frames(char* outname, int bytes_to_strip)
 	if (outfile == NULL) {
 		newmenu_item m[1];
 
-		m[0].type = NM_TYPE_TEXT; m[0].text = (char*)"Can't open output file";
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], (char*)"Can't open output file");
 		newmenu_do(NULL, NULL, 1, m, NULL);
 		newdemo_stop_playback();
 		return;
@@ -3058,7 +3061,7 @@ void newdemo_strip_frames(char* outname, int bytes_to_strip)
 	if (buf == NULL) {
 		newmenu_item m[1];
 
-		m[0].type = NM_TYPE_TEXT; m[0].text = (char*)"Can't malloc output buffer";
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], (char*)"Can't malloc output buffer");
 		newmenu_do(NULL, NULL, 1, m, NULL);
 		fclose(outfile);
 		newdemo_stop_playback();

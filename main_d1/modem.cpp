@@ -1055,7 +1055,7 @@ com_connect()
 	return(0);
 }
 
-#define ADD_ITEM(t,value,key)  do { m[num_options].type=NM_TYPE_MENU; menu_choice[num_options]=value; m[num_options].text=t; num_options++; } while (0)
+#define ADD_ITEM(t,value,key)  do { m[num_options].type=NM_TYPE_MENU; menu_choice[num_options]=value; nm_copy_text(&m[num_options],t); num_options++; } while (0)
 
 #define MENU_MODEM_CALL				0
 #define MENU_MODEM_ANSWER			1
@@ -1068,7 +1068,7 @@ com_connect()
 codex(code_12s, code_12e)
 
 void
-com_menu_poll(int nitems, newmenu_item * menus, int* key, int citem)
+com_menu_poll(int nitems, newmenu_item* menus, int* key, int citem)
 {
 	// Watch the serial stream if we are connected and take appropriate actions
 
@@ -1088,9 +1088,9 @@ com_menu_poll(int nitems, newmenu_item * menus, int* key, int citem)
 	com_process_input();
 
 	if ((old_game_mode != Game_mode) || other_menu_choice || (com_process_mode != COM_PROCESS_MENU))
-		* key = -2;
+		*key = -2;
 	if (multi_leave_menu)
-		* key = -2;
+		*key = -2;
 }
 
 void
@@ -1109,8 +1109,8 @@ com_ready_to_start(void)
 	int choice;
 
 	m[0].type = m[1].type = NM_TYPE_MENU;
-	m[0].text = TXT_YES;
-	m[1].text = TXT_NO;
+	nm_copy_text(&m[0], TXT_YES);
+	nm_copy_text(&m[1], TXT_NO);
 
 	choice = newmenu_do1(NULL, TXT_READY_DESCENT, 2, m, com_menu_poll, 0);
 	if (choice == 0)
@@ -1209,7 +1209,7 @@ newmenu:
 			com_disable();
 			return;
 		}
-		m[0].text = TXT_YES; m[1].text = TXT_NO;
+		nm_copy_text(&m[0], TXT_YES); nm_copy_text(&m[1], TXT_NO);
 		m[0].type = m[1].type = NM_TYPE_MENU;
 
 		choice = newmenu_do1(NULL, TXT_EXIT_WILL_CLOSE, 2, m, com_menu_poll, 0);
@@ -1323,16 +1323,19 @@ newmenu:
 	sprintf(irq, "%d", new_irq);
 
 	loc = 0;
-	mm[loc].type = NM_TYPE_TEXT; mm[loc].text = TXT_COM_BASE; loc++;
-	mm[loc].type = NM_TYPE_INPUT; mm[loc].text = base; mm[loc].text_len = 9; loc++;
-	mm[loc].type = NM_TYPE_TEXT; mm[loc].text = TXT_COM_IRQ; loc++;
-	mm[loc].type = NM_TYPE_INPUT; mm[loc].text = irq, mm[loc].text_len = 2; loc++;
+	int base_loc, irq_loc;
+	nm_copy_text(&mm[loc].type = NM_TYPE_TEXT; mm[loc], TXT_COM_BASE); loc++;
+	base_loc = loc;  nm_copy_text(&mm[loc].type = NM_TYPE_INPUT; mm[loc], base); mm[loc].text_len = 9; loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_TEXT; mm[loc], TXT_COM_IRQ); loc++;
+	irq_loc = loc;  nm_copy_text(&mm[loc].type = NM_TYPE_INPUT; mm[loc], irq, mm[loc].text_len = 2); loc++;
 	menu_reset = loc;
-	mm[loc].type = NM_TYPE_MENU; mm[loc].text = TXT_RESET_DEFAULTS; loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_MENU; mm[loc], TXT_RESET_DEFAULTS); loc++;
 	menu_save = loc;
-	mm[loc].type = NM_TYPE_MENU; mm[loc].text = TXT_ACCEPT; loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_MENU; mm[loc], TXT_ACCEPT); loc++;
 
 	mmn = newmenu_do1(NULL, title, loc, mm, NULL, menu_save);
+	strcpy(base, mm[base_loc].text);
+	strcpy(irq, mm[irq_loc].text);
 
 	if (mmn == -1)
 		return; // All changes lost
@@ -1414,23 +1417,24 @@ void com_param_setup(void)
 
 setupmenu:
 	loc = 0;
-	mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_port_num == COM1); mm[loc].text = "COM1"; mm[loc].group = 0; loc++;
-	mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_port_num == COM2); mm[loc].text = "COM2"; mm[loc].group = 0; loc++;
-	mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_port_num == COM3); mm[loc].text = "COM3"; mm[loc].group = 0; loc++;
-	mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_port_num == COM4); mm[loc].text = "COM4"; mm[loc].group = 0; loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_port_num == COM1); mm[loc], "COM1"); mm[loc].group = 0; loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_port_num == COM2); mm[loc], "COM2"); mm[loc].group = 0; loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_port_num == COM3); mm[loc], "COM3"); mm[loc].group = 0; loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_port_num == COM4); mm[loc], "COM4"); mm[loc].group = 0; loc++;
 	menu_custom = loc;
-	mm[loc].type = NM_TYPE_CHECK; mm[loc].value = (com_port_num == com_custom_port); mm[loc].text = TXT_COM_CUSTOM_SETTINGS; loc++;
-	mm[loc].type = NM_TYPE_TEXT; mm[loc].text = TXT_BAUD_RATE; loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_CHECK; mm[loc].value = (com_port_num == com_custom_port); mm[loc], TXT_COM_CUSTOM_SETTINGS); loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_TEXT; mm[loc], TXT_BAUD_RATE); loc++;
 	menu_baud = loc;
-	mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_speed == 9600); mm[loc].text = "9600"; mm[loc].group = 1; loc++;
-	mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_speed == 19200); mm[loc].text = "19200"; mm[loc].group = 1; loc++;
-	mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_speed == 38400); mm[loc].text = "38400"; mm[loc].group = 1; loc++;
-	mm[loc].type = NM_TYPE_TEXT; mm[loc].text = TXT_MODEM_INIT_STRING; loc++;
-	mm[loc].type = NM_TYPE_INPUT; mm[loc].text_len = INIT_STRING_LEN; mm[loc].text = init_string; loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_speed == 9600); mm[loc], "9600"); mm[loc].group = 1; loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_speed == 19200); mm[loc], "19200"); mm[loc].group = 1; loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_RADIO; mm[loc].value = (com_speed == 38400); mm[loc], "38400"); mm[loc].group = 1; loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_TEXT; mm[loc], TXT_MODEM_INIT_STRING); loc++;
+	int init_string_loc = loc; nm_copy_text(&mm[loc].type = NM_TYPE_INPUT; mm[loc].text_len = INIT_STRING_LEN; mm[loc], init_string); loc++;
 	menu_save = loc;
-	mm[loc].type = NM_TYPE_MENU; mm[loc].text = TXT_ACCEPT_SAVE; loc++;
+	nm_copy_text(&mm[loc].type = NM_TYPE_MENU; mm[loc], TXT_ACCEPT_SAVE); loc++;
 
 	mmn = newmenu_do1(NULL, TXT_SERIAL_SETTINGS, loc, mm, com_param_setup_poll, menu_save);
+	strcpy(init_string, mm[init_string_loc].text);
 
 	if (mmn > -1) {
 		changed = 1;
@@ -1502,7 +1506,7 @@ void modem_game_param_poll(int nitems, newmenu_item* menus, int* key, int citem)
 	key = key;
 	citem = citem;
 	if (last_cinvul != menus[opt_cinvul].value) {
-		sprintf(menus[opt_cinvul].text, "%s: %d %s", TXT_REACTOR_LIFE, menus[opt_cinvul].value * 5, TXT_MINUTES_ABBREV);
+		sprintf(menus[opt_cinvul].text, transl_fmt_string_i("TXT_REACTOR_LIFE", menus[opt_cinvul].value * 5));
 		last_cinvul = menus[opt_cinvul].value;
 		menus[opt_cinvul].redraw = 1;
 	}
@@ -1548,35 +1552,36 @@ int com_start_game_menu(void)
 
 newmenu:
 	opt = 0;
-	m[opt].type = NM_TYPE_TEXT; m[opt].text = level_text; opt++;
-	m[opt].type = NM_TYPE_INPUT; m[opt].text_len = 4; m[opt].text = level; opt++;
+	nm_copy_text(&m[opt].type = NM_TYPE_TEXT; m[opt], level_text); opt++;
+	int level_opt = opt;  nm_copy_text(&m[opt].type = NM_TYPE_INPUT; m[opt].text_len = 4; m[opt], level); opt++;
 #ifdef ROCKWELL_CODE
 	mode_opt = 0;
 #else
-	m[opt].type = NM_TYPE_TEXT; m[opt].text = TXT_MODE;
+	nm_copy_text(&m[opt].type = NM_TYPE_TEXT; m[opt], TXT_MODE);
 	mode_opt = opt;
-	m[opt].type = NM_TYPE_RADIO; m[opt].text = TXT_ANARCHY; m[opt].value = !(Game_mode & GM_MULTI_ROBOTS); m[opt].group = 0; opt++;
-	m[opt].type = NM_TYPE_RADIO; m[opt].text = TXT_ANARCHY_W_ROBOTS; m[opt].value = (!(Game_mode & GM_MULTI_COOP) && (Game_mode & GM_MULTI_ROBOTS)); m[opt].group = 0; opt++;
-	m[opt].type = NM_TYPE_RADIO; m[opt].text = TXT_COOPERATIVE; m[opt].value = (Game_mode & GM_MULTI_COOP); m[opt].group = 0; opt++;
+	nm_copy_text(&m[opt].type = NM_TYPE_RADIO; m[opt], TXT_ANARCHY); m[opt].value = !(Game_mode & GM_MULTI_ROBOTS); m[opt].group = 0; opt++;
+	nm_copy_text(&m[opt].type = NM_TYPE_RADIO; m[opt], TXT_ANARCHY_W_ROBOTS); m[opt].value = (!(Game_mode & GM_MULTI_COOP) && (Game_mode & GM_MULTI_ROBOTS)); m[opt].group = 0; opt++;
+	nm_copy_text(&m[opt].type = NM_TYPE_RADIO; m[opt], TXT_COOPERATIVE); m[opt].value = (Game_mode & GM_MULTI_COOP); m[opt].group = 0; opt++;
 #endif
 	diff_opt = opt;
-	m[opt].type = NM_TYPE_SLIDER; m[opt].text = TXT_DIFFICULTY; m[opt].value = Player_default_difficulty; m[opt].min_value = 0; m[opt].max_value = (NDL - 1); opt++;
+	nm_copy_text(&m[opt].type = NM_TYPE_SLIDER; m[opt], TXT_DIFFICULTY); m[opt].value = Player_default_difficulty; m[opt].min_value = 0; m[opt].max_value = (NDL - 1); opt++;
 
 #ifndef SHAREWARE
 	options_opt = opt;
-	//	m[opt].type = NM_TYPE_CHECK; m[opt].text = TXT_SHOW_IDS; m[opt].value=0; opt++;
-	m[opt].type = NM_TYPE_CHECK; m[opt].text = TXT_SHOW_ON_MAP; m[opt].value = 0; opt++;
+	//	nm_copy_text(&m[opt].type = NM_TYPE_CHECK; m[opt], TXT_SHOW_IDS); m[opt].value=0; opt++;
+	nm_copy_text(&m[opt].type = NM_TYPE_CHECK; m[opt], TXT_SHOW_ON_MAP); m[opt].value = 0; opt++;
 
 	opt_cinvul = opt;
-	sprintf(srinvul, "%s: %d %s", TXT_REACTOR_LIFE, 5 * control_invul_time, TXT_MINUTES_ABBREV);
+	sprintf(srinvul, transl_fmt_string_i("TXT_REACTOR_LIFE", 5 * control_invul_time));
 	last_cinvul = control_invul_time;
-	m[opt].type = NM_TYPE_SLIDER; m[opt].value = control_invul_time; m[opt].text = srinvul; m[opt].min_value = 0; m[opt].max_value = 15; opt++;
+	nm_copy_text(&m[opt].type = NM_TYPE_SLIDER; m[opt].value = control_invul_time; m[opt], srinvul); m[opt].min_value = 0; m[opt].max_value = 15; opt++;
 
 #endif
 
 	Assert(opt <= 13);
 
 	choice = newmenu_do1(NULL, TXT_SERIAL_GAME_SETUP, opt, m, modem_game_param_poll, 1);
+	strcpy(level, mm[level_opt].text);
 	if (choice > -1)
 	{
 #ifdef ROCKWELL_CODE
@@ -1639,7 +1644,7 @@ com_ask_to_start()
 
 	com_send_choice(SELECTION_STARTGAME);
 
-	m[0].type = NM_TYPE_TEXT; m[0].text = TXT_ESC_ABORT;
+	nm_copy_text(&m[0].type = NM_TYPE_TEXT; m[0], TXT_ESC_ABORT);
 menu:
 	choice = newmenu_do(NULL, TXT_WAIT_FOR_OK, 1, m, com_menu_poll);
 
@@ -1756,13 +1761,13 @@ void modem_edit_phonebook(newmenu_item* m)
 	char text[2][100];
 	int default_choice = 0;
 
-	m[NUM_PHONE_NUM].text = TXT_SAVE;
+	nm_copy_text(&m[NUM_PHONE_NUM], TXT_SAVE);
 
-	menu[0].text = TXT_NAME; menu[0].type = NM_TYPE_TEXT;
-	menu[1].type = NM_TYPE_INPUT; menu[1].text = text[0]; menu[1].text_len = LEN_PHONE_NAME;
-	menu[2].text = TXT_PHONE_NUM; menu[2].type = NM_TYPE_TEXT;
-	menu[3].type = NM_TYPE_INPUT; menu[3].text = text[1]; menu[3].text_len = LEN_PHONE_NUM;
-	menu[4].text = TXT_ACCEPT; menu[4].type = NM_TYPE_MENU;
+	nm_copy_text(&menu[0], TXT_NAME); menu[0].type = NM_TYPE_TEXT;
+	nm_copy_text(&menu[1].type = NM_TYPE_INPUT; menu[1], text[0]); menu[1].text_len = LEN_PHONE_NAME;
+	nm_copy_text(&menu[2], TXT_PHONE_NUM); menu[2].type = NM_TYPE_TEXT;
+	nm_copy_text(&menu[3].type = NM_TYPE_INPUT; menu[3], text[1]); menu[3].text_len = LEN_PHONE_NUM;
+	nm_copy_text(&menu[4], TXT_ACCEPT); menu[4].type = NM_TYPE_MENU;
 
 menu:
 	choice = newmenu_do1(NULL, TXT_SEL_NUMBER_EDIT, NUM_PHONE_NUM + 1, m, NULL, default_choice);
@@ -1831,7 +1836,7 @@ int modem_dial_menu(void)
 menu:
 	for (i = 0; i < NUM_PHONE_NUM; i++)
 	{
-		m[i].text = menu_text[i];
+		nm_copy_text(&m[i], menu_text[i]);
 		sprintf(m[i].text, "%d. %s \t", i + 1, phone_name[i]);
 		add_phone_number(m[i].text, phone_num[i]);
 		m[i].type = NM_TYPE_MENU;
@@ -1840,8 +1845,8 @@ menu:
 	strcat(m[i - 1].text, "\n");
 
 	m[NUM_PHONE_NUM].type = NM_TYPE_MENU;
-	m[NUM_PHONE_NUM].text = TXT_MANUAL_ENTRY;
-	m[NUM_PHONE_NUM + 1].text = TXT_EDIT_PHONEBOOK;
+	nm_copy_text(&m[NUM_PHONE_NUM], TXT_MANUAL_ENTRY);
+	nm_copy_text(&m[NUM_PHONE_NUM + 1], TXT_EDIT_PHONEBOOK);
 	m[NUM_PHONE_NUM + 1].type = NM_TYPE_MENU;
 
 	choice = newmenu_do1(NULL, TXT_SEL_NUMBER_DIAL, NUM_PHONE_NUM + 2, m, NULL, 0);
@@ -1859,7 +1864,8 @@ menu:
 	{
 		// Manual entry
 		newmenu_item m2[1];
-		m2[0].type = NM_TYPE_INPUT; m2[0].text = phone_num[NUM_PHONE_NUM]; m2[0].text_len = LEN_PHONE_NUM;
+		m2[0].type = NM_TYPE_INPUT;
+		nm_copy_text(&m2[0], phone_num[NUM_PHONE_NUM]); m2[0].text_len = LEN_PHONE_NUM;
 		choice = newmenu_do(NULL, TXT_ENTER_NUMBER_DIAL, 1, m2, NULL);
 		if (choice == -1)
 			goto menu;
@@ -2055,7 +2061,7 @@ main:
 
 	clear_boxed_message();
 
-	m[0].type = NM_TYPE_TEXT; m[0].text = TXT_ESC_ABORT;
+	nm_copy_text(&m[0].type = NM_TYPE_TEXT; m[0], TXT_ESC_ABORT);
 
 	//repeat:
 	choice = newmenu_do(NULL, TXT_WAITING_FOR_ANS, 1, m, com_wait_for_connect);
@@ -2122,7 +2128,7 @@ void modem_answer(void)
 
 	clear_boxed_message();
 
-	m[0].type = NM_TYPE_TEXT; m[0].text = TXT_ESC_ABORT;
+	nm_copy_text(&m[0].type = NM_TYPE_TEXT; m[0], TXT_ESC_ABORT);
 
 repeat:
 	choice = newmenu_do(NULL, TXT_WAITING_FOR_CALL, 1, m, com_wait_for_ring);
@@ -2335,7 +2341,7 @@ void
 com_send_begin_sync(void)
 {
 	mprintf((0, "Sending my sync.\n"));
-	com_send_data((char*)& my_sync, sizeof(com_sync_pack) - 3, 1);
+	com_send_data((char*)&my_sync, sizeof(com_sync_pack) - 3, 1);
 }
 
 void
@@ -2481,10 +2487,10 @@ com_sync(int id)
 	my_sync.sync_id = id;
 #endif
 
-	m[0].type = NM_TYPE_TEXT; m[0].text = TXT_ESC_ABORT;
+	nm_copy_text(&m[0].type = NM_TYPE_TEXT; m[0], TXT_ESC_ABORT);
 	m[1].type = m[2].type = NM_TYPE_MENU;
-	m[1].text = TXT_YES;
-	m[2].text = TXT_NO;
+	nm_copy_text(&m[1], TXT_YES);
+	nm_copy_text(&m[2], TXT_NO);
 
 repeat:
 	choice = newmenu_do(NULL, TXT_WAIT_OPPONENT, 1, m, com_sync_poll);
@@ -2528,7 +2534,7 @@ com_endlevel(int* secret)
 	com_process_mode = COM_PROCESS_ENDLEVEL;
 
 	if ((multi_goto_secret == 1) || (other_sync.level_num == 1))
-		* secret = 1;
+		*secret = 1;
 	else
 		*secret = 0;
 

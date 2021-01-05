@@ -50,15 +50,15 @@ COPYRIGHT 1993-1998 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #define NORMAL_FONT  	(Gamefonts[GFONT_MEDIUM_1])
 #define TEXT_FONT  		(Gamefonts[GFONT_MEDIUM_3])
 
-#define NORMAL_CHECK_BOX	""
-#define CHECKED_CHECK_BOX	"‚"
-#define NORMAL_RADIO_BOX	""
-#define CHECKED_RADIO_BOX	"€"
+#define NORMAL_CHECK_BOX	"\021"
+#define CHECKED_CHECK_BOX	"\022"
+#define NORMAL_RADIO_BOX	"\017"
+#define CHECKED_RADIO_BOX	"\020"
 #define CURSOR_STRING		"_"
-#define SLIDER_LEFT			"ƒ"		// 131
-#define SLIDER_RIGHT			"„"		// 132
-#define SLIDER_MIDDLE		"…"		// 133
-#define SLIDER_MARKER		"†"		// 134
+#define SLIDER_LEFT			"\023"
+#define SLIDER_RIGHT		"\024"
+#define SLIDER_MIDDLE		"\025"
+#define SLIDER_MARKER		"\026"
 
 int Newmenu_first_time = 1;
 //--unused-- int Newmenu_fade_in = 1;
@@ -171,19 +171,26 @@ void nm_restore_background(int x, int y, int w, int h)
 	gr_bm_bitblt(w, h, x1, y1, x1, y1, &nm_background, &(grd_curcanv->cv_bitmap));
 }
 
+void nm_copy_text(newmenu_item* item, const char* txt)
+{
+	strcpyn(item->text, txt, sizeof(item->text));
+}
+
 // Draw a left justfied string
-void nm_string(bkg* b, int w1, int x, int y, char* s)
+void nm_string(bkg* b, int w1, int x, int y, const char* s)
 {
 	int w, h, aw;
 	char* p, * s1 = NULL;
+	char ss[256];
+	strcpyn(ss, s, sizeof(ss));
 
-	p = strchr(s, '\t');
+	p = strchr(ss, '\t');
 	if (p && (w1 > 0)) {
 		*p = '\0';
 		s1 = p + 1;
 	}
 
-	gr_get_string_size(s, &w, &h, &aw);
+	gr_get_string_size(ss, &w, &h, &aw);
 
 	if (w1 > 0)
 		w = w1;
@@ -192,7 +199,7 @@ void nm_string(bkg* b, int w1, int x, int y, char* s)
 	gr_bm_bitblt(b->background->bm_w - 15, h, 5, y, 5, y, b->background, &(grd_curcanv->cv_bitmap));
 	//gr_bm_bitblt(w, h, x, y, x, y, b->background, &(grd_curcanv->cv_bitmap) );
 
-	gr_string(x, y, s);
+	gr_string(x, y, ss);
 
 	if (p && (w1 > 0)) 
 	{
@@ -246,7 +253,7 @@ void nm_string_slider(bkg* b, int w1, int x, int y, char* s)
 
 
 // Draw a left justfied string with black background.
-void nm_string_black(bkg* b, int w1, int x, int y, char* s)
+void nm_string_black(bkg* b, int w1, int x, int y, const char* s)
 {
 	int w, h, aw;
 	gr_get_string_size(s, &w, &h, &aw);
@@ -311,7 +318,7 @@ void update_cursor(newmenu_item* item)
 
 }
 
-void nm_string_inputbox(bkg* b, int w, int x, int y, char* text, int current)
+void nm_string_inputbox(bkg* b, int w, int x, int y, const char* text, int current)
 {
 	int w1, h1, aw;
 
@@ -333,7 +340,7 @@ void nm_string_inputbox(bkg* b, int w, int x, int y, char* text, int current)
 	}
 }
 
-void draw_item(bkg* b, newmenu_item* item, int is_current)
+void draw_item(bkg* b, newmenu_item* item, int is_current, int scroll_y)
 {
 	if (is_current)
 		grd_curcanv->cv_font = CURRENT_FONT;
@@ -346,7 +353,7 @@ void draw_item(bkg* b, newmenu_item* item, int is_current)
 		grd_curcanv->cv_font = TEXT_FONT;
 		// fall through on purpose
 	case NM_TYPE_MENU:
-		nm_string(b, item->w, item->x, item->y, item->text);
+		nm_string(b, item->w, item->x, item->y + scroll_y, item->text);
 		break;
 	case NM_TYPE_SLIDER: 
 	{
@@ -362,48 +369,54 @@ void draw_item(bkg* b, newmenu_item* item, int is_current)
 
 		item->saved_text[item->value + 1 + strlen(item->text) + 1] = SLIDER_MARKER[0];
 
-		nm_string_slider(b, item->w, item->x, item->y, item->saved_text);
+		nm_string_slider(b, item->w, item->x, item->y + scroll_y, item->saved_text);
 	}
 						 break;
 	case NM_TYPE_INPUT_MENU:
 		if (item->group == 0) 
 		{
-			nm_string(b, item->w, item->x, item->y, item->text);
+			nm_string(b, item->w, item->x, item->y + scroll_y, item->text);
 		}
 		else 
 		{
-			nm_string_inputbox(b, item->w, item->x, item->y, item->text, is_current);
+			nm_string_inputbox(b, item->w, item->x, item->y + scroll_y, item->text, is_current);
 		}
 		break;
 	case NM_TYPE_INPUT:
-		nm_string_inputbox(b, item->w, item->x, item->y, item->text, is_current);
+		nm_string_inputbox(b, item->w, item->x, item->y + scroll_y, item->text, is_current);
 		break;
 	case NM_TYPE_CHECK:
-		nm_string(b, item->w, item->x, item->y, item->text);
+		nm_string(b, item->w, item->x, item->y + scroll_y, item->text);
 		if (item->value)
-			nm_rstring(b, item->right_offset, item->x, item->y, CHECKED_CHECK_BOX);
+			nm_rstring(b, item->right_offset, item->x, item->y + scroll_y, CHECKED_CHECK_BOX);
 		else
-			nm_rstring(b, item->right_offset, item->x, item->y, NORMAL_CHECK_BOX);
+			nm_rstring(b, item->right_offset, item->x, item->y + scroll_y, NORMAL_CHECK_BOX);
 		break;
 	case NM_TYPE_RADIO:
-		nm_string(b, item->w, item->x, item->y, item->text);
+		nm_string(b, item->w, item->x, item->y + scroll_y, item->text);
 		if (item->value)
-			nm_rstring(b, item->right_offset, item->x, item->y, CHECKED_RADIO_BOX);
+			nm_rstring(b, item->right_offset, item->x, item->y + scroll_y, CHECKED_RADIO_BOX);
 		else
-			nm_rstring(b, item->right_offset, item->x, item->y, NORMAL_RADIO_BOX);
+			nm_rstring(b, item->right_offset, item->x, item->y + scroll_y, NORMAL_RADIO_BOX);
 		break;
 	case NM_TYPE_NUMBER: 
 	{
 		char text[10];
 		if (item->value < item->min_value) item->value = item->min_value;
 		if (item->value > item->max_value) item->value = item->max_value;
-		nm_string(b, item->w, item->x, item->y, item->text);
+		nm_string(b, item->w, item->x, item->y + scroll_y, item->text);
 		sprintf(text, "%d", item->value);
-		nm_rstring(b, item->right_offset, item->x, item->y, text);
+		nm_rstring(b, item->right_offset, item->x, item->y + scroll_y, text);
 	}
 		break;
 	}
 
+}
+
+
+void draw_item(bkg* b, newmenu_item* item, int is_current)
+{
+	draw_item(b, item, is_current, 0);
 }
 
 char* Newmenu_allowed_chars = NULL;
@@ -460,15 +473,16 @@ int newmenu_do2(const char* title, const char* subtitle, int nitems, newmenu_ite
 int newmenu_do3(const char* title, const char* subtitle, int nitems, newmenu_item* item, void (*subfunction)(int nitems, newmenu_item* items, int* last_key, int citem), int citem, const char* filename, int width, int height)
 {
 	int old_keyd_repeat, done;
-	int  choice, old_choice, i, j, x, y, w, h, aw, tw, th, twidth, fm, right_offset;
+	int  choice, old_choice, i, j, x, y, w, h, aw, tw, th, twidth, fm, right_offset, scroll_pos, scroll_off, full_redraw, redraw_arrows;
 	int k, nmenus, nothers;
 	grs_canvas* save_canvas;
-	grs_font* save_font;
+	grs_fontstyle* save_font;
 	int string_width, string_height, average_width;
 	int ty;
 	bkg bg;
 	int all_text = 0;		//set true if all text items
 	int time_stopped = 0;
+	full_redraw = redraw_arrows = 0;
 
 	if (nitems < 1)
 		return -1;
@@ -509,9 +523,9 @@ int newmenu_do3(const char* title, const char* subtitle, int nitems, newmenu_ite
 		th += string_height;
 	}
 
-	th += 8;		//put some space between titles & body
-
 	grd_curcanv->cv_font = NORMAL_FONT;
+
+	th += grd_curcanv->cv_font->ft_h;		//put some space between titles & body
 
 	w = aw = 0;
 	h = th;
@@ -741,6 +755,7 @@ int newmenu_do3(const char* title, const char* subtitle, int nitems, newmenu_ite
 	old_keyd_repeat = keyd_repeat;
 	keyd_repeat = 1;
 
+	scroll_pos = scroll_off = 0;
 	if (citem == -1) 
 	{
 		choice = -1;
@@ -1053,16 +1068,60 @@ int newmenu_do3(const char* title, const char* subtitle, int nitems, newmenu_ite
 		}
 
 		gr_set_current_canvas(bg.menu_canvas);
+
 		// Redraw everything...
-		for (i = 0; i < nitems; i++) 
+
+		// is current option off screen?
+		if (choice >= 0)
+		{
+			int osp = scroll_pos;
+			if (scroll_pos > choice)
+			{
+				while (scroll_pos > choice)
+					scroll_off -= item[--scroll_pos].h;
+				full_redraw = 1;
+			}
+			while (item[choice].y + item[choice].h - scroll_off >= bg.menu_canvas->cv_bitmap.bm_h)
+				scroll_off += item[scroll_pos++].h;
+			if (scroll_pos > osp)
+				full_redraw = 1;
+		}
+
+		if (full_redraw)
+		{
+			gr_bm_bitblt(bg.background->bm_w - 15, h - ty, 5, y + ty, 5, y + ty, bg.background, &(grd_curcanv->cv_bitmap));
+			for (i = scroll_pos; i < nitems; i++)
+				item[i].redraw = 1;
+
+			full_redraw = 0;
+		}
+
+		for (i = scroll_pos; i < nitems; i++) 
 		{
 			if (item[i].redraw) 
 			{
-				draw_item(&bg, &item[i], (i == choice && !all_text));
+				draw_item(&bg, &item[i], (i == choice && !all_text), -scroll_off);
 				item[i].redraw = 0;
+				redraw_arrows = 1;
 			}
 			else if (i == choice && (item[i].type == NM_TYPE_INPUT || (item[i].type == NM_TYPE_INPUT_MENU && item[i].group)))
 				update_cursor(&item[i]);
+		}
+
+		if (redraw_arrows)
+		{
+			grs_fontstyle* save_font = grd_curcanv->cv_font;
+			grd_curcanv->cv_font = GAME_FONT;
+
+			gr_set_fontcolor(BM_XRGB(28, 28, 28), -1);
+			if (scroll_pos > 0)
+				gr_string(8, y + ty, "\022"); // up arrow
+			if (nitems && (item[nitems - 1].y + item[nitems - 1].h - scroll_off >= bg.menu_canvas->cv_bitmap.bm_h))
+				gr_string(8, h - 16, "\020"); // down arrow
+
+			grd_curcanv->cv_font = save_font;
+
+			redraw_arrows = 0;
 		}
 
 		if (gr_palette_faded_out) 
@@ -1124,7 +1183,7 @@ int nm_messagebox1(const char* title, void (*subfunction)(int nitems, newmenu_it
 	for (i = 0; i < nchoices; i++) 
 	{
 		s = va_arg(args, char*);
-		nm_message_items[i].type = NM_TYPE_MENU; nm_message_items[i].text = s;
+		nm_message_items[i].type = NM_TYPE_MENU; nm_copy_text(&nm_message_items[i], s);
 	}
 	format = va_arg(args, char*);
 	sprintf(nm_text, "");
@@ -1152,7 +1211,7 @@ int nm_messagebox(const char* title, int nchoices, ...)
 	for (i = 0; i < nchoices; i++) 
 	{
 		s = va_arg(args, char*);
-		nm_message_items[i].type = NM_TYPE_MENU; nm_message_items[i].text = s;
+		nm_message_items[i].type = NM_TYPE_MENU; nm_copy_text(&nm_message_items[i], s);
 	}
 	format = va_arg(args, char*);
 	sprintf(nm_text, "");
@@ -1164,10 +1223,13 @@ int nm_messagebox(const char* title, int nchoices, ...)
 	return newmenu_do(title, nm_text, nchoices, nm_message_items, NULL);
 }
 
+#define FILENAME_SIZE 14
+#define FILENAME_BUFSIZE 30
+
 void newmenu_file_sort(int n, char* list)
 {
 	int i, j, incr;
-	char t[14];
+	char t[FILENAME_BUFSIZE];
 
 	incr = n / 2;
 	while (incr > 0) 
@@ -1177,11 +1239,11 @@ void newmenu_file_sort(int n, char* list)
 			j = i - incr;
 			while (j >= 0) 
 			{
-				if (strncmp(&list[j * 14], &list[(j + incr) * 14], 12) > 0) 
+				if (strncmp(&list[j * FILENAME_BUFSIZE], &list[(j + incr) * FILENAME_BUFSIZE], 12) > 0)
 				{
-					memcpy(t, &list[j * 14], 13);
-					memcpy(&list[j * 14], &list[(j + incr) * 14], 13);
-					memcpy(&list[(j + incr) * 14], t, 13);
+					memcpy(t, &list[j * FILENAME_BUFSIZE], FILENAME_BUFSIZE - 1);
+					memcpy(&list[j * FILENAME_BUFSIZE], &list[(j + incr) * FILENAME_BUFSIZE], FILENAME_BUFSIZE - 1);
+					memcpy(&list[(j + incr) * FILENAME_BUFSIZE], t, FILENAME_BUFSIZE - 1);
 					j -= incr;
 				}
 				else
@@ -1224,7 +1286,7 @@ int newmenu_get_filename(const char* title, const char* filespec, char* filename
 	int exit_value = 0;
 	int w_x, w_y, w_w, w_h;
 
-	filenames = (char*)malloc(MAX_FILES * 14);
+	filenames = (char*)malloc(MAX_FILES * FILENAME_BUFSIZE);
 	if (filenames == NULL) return 0;
 
 	citem = 0;
@@ -1241,7 +1303,7 @@ ReadFileNames:
 
 	if (player_mode) 
 	{
-		strncpy(&filenames[NumFiles * 14], TXT_CREATE_NEW, FILENAME_LEN);
+		strncpy(&filenames[NumFiles * FILENAME_BUFSIZE], TXT_CREATE_NEW, FILENAME_BUFSIZE - 1);
 		NumFiles++;
 	}
 
@@ -1251,11 +1313,11 @@ ReadFileNames:
 		{
 			if (NumFiles < MAX_FILES) 
 			{
-				strncpy(&filenames[NumFiles * 14], find.name, FILENAME_LEN);
+				strncpy(&filenames[NumFiles * FILENAME_BUFSIZE], find.name, FILENAME_LEN);
 				if (player_mode) 
 				{
 					char* p;
-					p = strchr(&filenames[NumFiles * 14], '.');
+					p = strchr(&filenames[NumFiles * FILENAME_BUFSIZE], '.');
 					if (p)* p = '\0';
 				}
 				NumFiles++;
@@ -1275,7 +1337,7 @@ ReadFileNames:
 	}
 	if ((NumFiles < 1) && demo_mode) 
 	{
-		nm_messagebox(NULL, 1, TXT_OK, "%s %s\n%s", TXT_NO_DEMO_FILES, TXT_USE_F5, TXT_TO_CREATE_ONE);
+		nm_messagebox(NULL, 1, TXT_OK, TXT_NO_DEMO_FILES);
 		exit_value = 0;
 		goto ExitFileMenu;
 	}
@@ -1288,7 +1350,7 @@ ReadFileNames:
 
 	if (NumFiles < 1)
 	{
-		nm_messagebox(NULL, 1, "Ok", "%s\n '%s' %s", TXT_NO_FILES_MATCHING, filespec, TXT_WERE_FOUND);
+		nm_messagebox(NULL, 1, TXT_OK, TXT_NO_FILES_MATCHING, filespec);
 		exit_value = 0;
 		goto ExitFileMenu;
 	}
@@ -1324,10 +1386,10 @@ ReadFileNames:
 	}
 	else 
 	{
-		newmenu_file_sort(NumFiles - 1, &filenames[14]);		// Don't sort first one!
+		newmenu_file_sort(NumFiles - 1, &filenames[FILENAME_BUFSIZE]);		// Don't sort first one!
 		for (i = 0; i < NumFiles; i++) 
 		{
-			if (!_strfcmp(Players[Player_num].callsign, &filenames[i * 14]))
+			if (!_strfcmp(Players[Player_num].callsign, &filenames[i * FILENAME_BUFSIZE]))
 				citem = i;
 		}
 	}
@@ -1347,14 +1409,14 @@ ReadFileNames:
 			{
 				int x = 1;
 				if (player_mode)
-					x = nm_messagebox(NULL, 2, TXT_YES, TXT_NO, "%s %s?", TXT_DELETE_PILOT, &filenames[citem * 14] + ((player_mode && filenames[citem * 14] == '$') ? 1 : 0));
+					x = nm_messagebox(NULL, 2, TXT_YES, TXT_NO, TXT_DELETE_PILOT, &filenames[citem * FILENAME_BUFSIZE] + ((player_mode && filenames[citem * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 				else if (demo_mode)
-					x = nm_messagebox(NULL, 2, TXT_YES, TXT_NO, "%s %s?", TXT_DELETE_DEMO, &filenames[citem * 14] + ((demo_mode && filenames[citem * 14] == '$') ? 1 : 0));
+					x = nm_messagebox(NULL, 2, TXT_YES, TXT_NO, TXT_DELETE_DEMO, &filenames[citem * FILENAME_BUFSIZE] + ((demo_mode && filenames[citem * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 				if (x == 0) 
 				{
 					char* p;
 					int ret;
-					p = &filenames[(citem * 14) + strlen(&filenames[citem * 14])];
+					p = &filenames[(citem * FILENAME_BUFSIZE) + strlen(&filenames[citem * FILENAME_BUFSIZE])];
 					if (player_mode)
 						* p = '.';
 					ret = _unlink(&filenames[citem * 14]);
@@ -1363,15 +1425,15 @@ ReadFileNames:
 
 					if ((!ret) && player_mode) 
 					{
-						delete_player_saved_games(&filenames[citem * 14]);
+						delete_player_saved_games(&filenames[citem * FILENAME_BUFSIZE]);
 					}
 
 					if (ret) 
 					{
 						if (player_mode)
-							nm_messagebox(NULL, 1, TXT_OK, "%s %s %s", TXT_COULDNT, TXT_DELETE_PILOT, &filenames[citem * 14] + ((player_mode && filenames[citem * 14] == '$') ? 1 : 0));
+							nm_messagebox(NULL, 1, TXT_OK, transl_get_string("CouldNotDeletePilot"), &filenames[citem * 14] + ((player_mode && filenames[citem * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 						else if (demo_mode)
-							nm_messagebox(NULL, 1, TXT_OK, "%s %s %s", TXT_COULDNT, TXT_DELETE_DEMO, &filenames[citem * 14] + ((demo_mode && filenames[citem * 14] == '$') ? 1 : 0));
+							nm_messagebox(NULL, 1, TXT_OK, transl_get_string("CouldNotDeleteDemo"), &filenames[citem * 14] + ((demo_mode && filenames[citem * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 					}
 					else if (demo_mode)
 						demos_deleted = 1;
@@ -1429,7 +1491,7 @@ ReadFileNames:
 					if (cc >= NumFiles) cc = 0;
 					if (citem == cc) break;
 
-					if (toupper(filenames[cc * 14]) == toupper(ascii)) 
+					if (toupper(filenames[cc * FILENAME_BUFSIZE]) == toupper(ascii))
 					{
 						citem = cc;
 						break;
@@ -1440,7 +1502,6 @@ ReadFileNames:
 		}
 		}
 		if (done) break;
-
 
 		if (citem < 0)
 			citem = 0;
@@ -1479,9 +1540,9 @@ ReadFileNames:
 						grd_curcanv->cv_font = Gamefonts[GFONT_MEDIUM_2];
 					else
 						grd_curcanv->cv_font = Gamefonts[GFONT_MEDIUM_1];
-					gr_get_string_size(&filenames[i * 14], &w, &h, &aw);
+					gr_get_string_size(&filenames[i * FILENAME_BUFSIZE], &w, &h, &aw);
 					gr_rect(100, y - 1, 220, y + 11);
-					gr_string(105, y, (&filenames[i * 14]) + ((player_mode && filenames[i * 14] == '$') ? 1 : 0));
+					gr_string(105, y, (&filenames[i * FILENAME_BUFSIZE]) + ((player_mode && filenames[i * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 				}
 			}
 		}
@@ -1497,9 +1558,9 @@ ReadFileNames:
 					grd_curcanv->cv_font = Gamefonts[GFONT_MEDIUM_2];
 				else
 					grd_curcanv->cv_font = Gamefonts[GFONT_MEDIUM_1];
-				gr_get_string_size(&filenames[i * 14], &w, &h, &aw);
+				gr_get_string_size(&filenames[i * FILENAME_BUFSIZE], &w, &h, &aw);
 				gr_rect(100, y - 1, 220, y + 11);
-				gr_string(105, y, (&filenames[i * 14]) + ((player_mode && filenames[i * 14] == '$') ? 1 : 0));
+				gr_string(105, y, (&filenames[i * FILENAME_BUFSIZE]) + ((player_mode && filenames[i * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 			}
 			i = citem;
 			if ((i >= 0) && (i < NumFiles)) 
@@ -1509,9 +1570,9 @@ ReadFileNames:
 					grd_curcanv->cv_font = Gamefonts[GFONT_MEDIUM_2];
 				else
 					grd_curcanv->cv_font = Gamefonts[GFONT_MEDIUM_1];
-				gr_get_string_size(&filenames[i * 14], &w, &h, &aw);
+				gr_get_string_size(&filenames[i * FILENAME_BUFSIZE], &w, &h, &aw);
 				gr_rect(100, y - 1, 220, y + 11);
-				gr_string(105, y, (&filenames[i * 14]) + ((player_mode && filenames[i * 14] == '$') ? 1 : 0));
+				gr_string(105, y, (&filenames[i * FILENAME_BUFSIZE]) + ((player_mode && filenames[i * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 			}
 		}
 		I_DrawCurrentCanvas(0);
@@ -1521,7 +1582,7 @@ ReadFileNames:
 ExitFileMenuEarly:
 	if (citem > -1) 
 	{
-		strncpy(filename, (&filenames[citem * 14]) + ((player_mode && filenames[citem * 14] == '$') ? 1 : 0), 13);
+		strncpy(filename, (&filenames[citem * FILENAME_BUFSIZE]) + ((player_mode && filenames[citem * FILENAME_BUFSIZE] == '$') ? 1 : 0), FILENAME_SIZE - 1);
 		exit_value = 1;
 	}
 	else 
@@ -1823,7 +1884,7 @@ int newmenu_filelist(const char* title, const char* filespec, char* filename)
 {
 	int i, NumFiles;
 	char* Filenames[MAX_FILES];
-	char FilenameText[MAX_FILES][14];
+	char FilenameText[MAX_FILES][FILENAME_BUFSIZE];
 	FILEFINDSTRUCT find;
 
 	NumFiles = 0;

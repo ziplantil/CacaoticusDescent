@@ -150,9 +150,9 @@ int new_player_config()
 RetrySelection:
 	for (i = 0; i < CONTROL_MAX_TYPES; i++) 
 	{
-		m[i].type = NM_TYPE_MENU; m[i].text = CONTROL_TEXT(i);
+		m[i].type = NM_TYPE_MENU; nm_copy_text(&m[i], CONTROL_TEXT(i));
 	}
-	m[0].text = TXT_CONTROL_KEYBOARD;
+	nm_copy_text(&m[0], TXT_CONTROL_KEYBOARD);
 
 	control_choice = Config_control_type;				// Assume keyboard
 
@@ -170,7 +170,7 @@ RetrySelection:
 
 	if (Config_control_type == CONTROL_THRUSTMASTER_FCS) 
 	{
-		i = nm_messagebox(TXT_IMPORTANT_NOTE, 2, "Choose another", TXT_OK, TXT_FCS);
+		i = nm_messagebox(TXT_IMPORTANT_NOTE, 2, transl_get_string("ChooseAnother"), TXT_OK, TXT_FCS);
 		if (i == 0) goto RetrySelection;
 	}
 

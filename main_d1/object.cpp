@@ -1382,10 +1382,8 @@ void dead_player_frame(void)
 		if (time_dead > DEATH_SEQUENCE_EXPLODE_TIME) {
 			if (!Player_exploded) {
 
-				if (Players[Player_num].hostages_on_board > 1)
-					HUD_init_message(TXT_SHIP_DESTROYED_2, Players[Player_num].hostages_on_board);
-				else if (Players[Player_num].hostages_on_board == 1)
-					HUD_init_message(TXT_SHIP_DESTROYED_1);
+				if (Players[Player_num].hostages_on_board)
+					HUD_init_message(transl_fmt_string_i(transl_get_plural_key("TXT_SHIP_DESTROYED_1", Players[Player_num].hostages_on_board), Players[Player_num].hostages_on_board));
 				else
 					HUD_init_message(TXT_SHIP_DESTROYED_0);
 

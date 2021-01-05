@@ -172,11 +172,11 @@ int state_get_save_file(char* fname, char* dsc, int multi)
 			strcpy(desc[i], TXT_EMPTY);
 			//rpad_string( desc[i], DESC_LENGTH-1 );
 		}
-		m[i].type = NM_TYPE_INPUT_MENU; m[i].text = desc[i]; m[i].text_len = DESC_LENGTH - 1;
+		m[i].type = NM_TYPE_INPUT_MENU; nm_copy_text(&m[i], desc[i]); m[i].text_len = DESC_LENGTH - 1;
 	}
 
 	sc_last_item = -1;
-	choice = newmenu_do1(NULL, "Save Game", NUM_SAVES, m, NULL, state_default_item);
+	choice = newmenu_do1(NULL, transl_get_string("SaveGame"), NUM_SAVES, m, NULL, state_default_item);
 
 	for (i = 0; i < NUM_SAVES; i++) 
 	{
@@ -187,7 +187,8 @@ int state_get_save_file(char* fname, char* dsc, int multi)
 	if (choice > -1) 
 	{
 		strcpy(fname, filename[choice]);
-		strcpy(dsc, desc[choice]);
+		//strcpy(dsc, desc[choice]);
+		strcpy(dsc, m[choice].text);
 		state_default_item = choice;
 		return choice + 1;
 	}
@@ -205,7 +206,7 @@ int state_get_restore_file(char* fname, int multi)
 	int valid;
 
 	nsaves = 0;
-	m[0].type = NM_TYPE_TEXT; m[0].text = (char*)"\n\n\n\n";
+	m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], "\n\n\n\n");
 	for (i = 0; i < NUM_SAVES; i++) 
 	{
 		sc_bmp[i] = NULL;
@@ -228,7 +229,7 @@ int state_get_restore_file(char* fname, int multi)
 					// Read description
 					fread(desc[i], sizeof(char) * DESC_LENGTH, 1, fp);
 					//rpad_string( desc[i], DESC_LENGTH-1 );
-					m[i + 1].type = NM_TYPE_MENU; m[i + 1].text = desc[i];;
+					m[i + 1].type = NM_TYPE_MENU; nm_copy_text(&m[i + 1], desc[i]);
 					// Read thumbnail
 					sc_bmp[i] = gr_create_bitmap(THUMBNAIL_W, THUMBNAIL_H);
 					fread(sc_bmp[i]->bm_data, THUMBNAIL_W * THUMBNAIL_H, 1, fp);
@@ -242,18 +243,18 @@ int state_get_restore_file(char* fname, int multi)
 		{
 			strcpy(desc[i], TXT_EMPTY);
 			//rpad_string( desc[i], DESC_LENGTH-1 );
-			m[i + 1].type = NM_TYPE_TEXT; m[i + 1].text = desc[i];
+			m[i + 1].type = NM_TYPE_TEXT; nm_copy_text(&m[i + 1], desc[i]);
 		}
 	}
 
 	if (nsaves < 1) 
 	{
-		nm_messagebox(NULL, 1, "Ok", "No saved games were found!");
+		nm_messagebox(NULL, 1, TXT_OK, transl_get_string("NoSaves"));
 		return 0;
 	}
 
 	sc_last_item = -1;
-	choice = newmenu_do3(NULL, "Select Game to Restore", NUM_SAVES + 1, m, state_callback, state_default_item + 1, NULL, 190, -1);
+	choice = newmenu_do3(NULL, transl_get_string("SelectGameToRestore"), NUM_SAVES + 1, m, state_callback, state_default_item + 1, NULL, 190, -1);
 
 	for (i = 0; i < NUM_SAVES; i++) 
 	{
@@ -395,7 +396,7 @@ int state_save_all(int between_levels)
 			multi_initiate_save_game();
 		else
 #endif  
-			HUD_init_message("Can't save in a multiplayer game!");
+			HUD_init_message(transl_get_string("NoSaveInMultiplayer"));
 		return 0;
 	}
 
@@ -674,7 +675,7 @@ int state_restore_all(int in_game)
 			multi_initiate_restore_game();
 		else
 #endif
-			HUD_init_message("Can't restore in a multiplayer game!");
+			HUD_init_message(transl_get_string("NoRestoreInMultiplayer"));
 		return 0;
 	}
 
@@ -694,7 +695,7 @@ int state_restore_all(int in_game)
 	if (in_game) 
 	{
 		int choice;
-		choice = nm_messagebox(NULL, 2, "Yes", "No", "Restore Game?");
+		choice = nm_messagebox(NULL, 2, TXT_YES, TXT_NO, transl_get_string("ConfirmRestoreGame"));
 		if (choice != 0) 
 		{
 			start_time();
@@ -764,7 +765,7 @@ int state_restore_all_sub(char* filename, int multi)
 
 	if (!load_mission_by_name(mission)) 
 	{
-		nm_messagebox(NULL, 1, "Ok", "Error!\nUnable to load mission\n'%s'\n", mission);
+		nm_messagebox(NULL, 1, TXT_OK, transl_get_string("CannotLoadMission"), mission);
 		fclose(fp);
 		return 0;
 	}

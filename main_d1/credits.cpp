@@ -59,9 +59,9 @@ uint8_t fade_values[200] = { 1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,8,9,9,10,10,
 
 extern uint8_t* gr_bitblt_fade_table;
 
-grs_font* header_font;
-grs_font* title_font;
-grs_font* names_font;
+grs_fontstyle* header_font;
+grs_fontstyle* title_font;
+grs_fontstyle* names_font;
 
 void credits_show()
 {
@@ -93,9 +93,12 @@ void credits_show()
 	}
 
 	gr_use_palette_table("credits.256");
-	header_font = gr_init_font("font1-1.fnt");
-	title_font = gr_init_font("font2-3.fnt");
-	names_font = gr_init_font("font2-2.fnt");
+	header_font = gr_init_fontstyle("font1-1.fnt");
+	gamefont_load_extrafonts(header_font, GFONT_BIG_1);
+	title_font = gr_init_fontstyle("font2-3.fnt");
+	gamefont_load_extrafonts(title_font, GFONT_MEDIUM_3);
+	names_font = gr_init_fontstyle("font2-2.fnt");
+	gamefont_load_extrafonts(names_font, GFONT_MEDIUM_2);
 	backdrop.bm_data = NULL;
 	pcx_error = pcx_read_bitmap("stars.pcx", &backdrop, grd_curcanv->cv_bitmap.bm_type, backdrop_palette);
 	if (pcx_error != PCX_ERROR_NONE)
@@ -230,9 +233,9 @@ void credits_show()
 
 			if ((k > 0) || (done > NUM_LINES)) 
 			{
-				gr_close_font(header_font);
-				gr_close_font(title_font);
-				gr_close_font(names_font);
+				gr_close_fontstyle(header_font);
+				gr_close_fontstyle(title_font);
+				gr_close_fontstyle(names_font);
 				gr_palette_fade_out(gr_palette, 32, 0);
 				gr_use_palette_table("palette.256");
 				free(backdrop.bm_data);

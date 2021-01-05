@@ -219,7 +219,7 @@ void player_dead_message(void)
 			HUD_color = BM_XRGB(0, 28, 0);
 		gr_set_fontcolor(HUD_color, -1);
 
-		gr_printf(0x8000, grd_curcanv->cv_bitmap.bm_h - 8, TXT_PRESS_ANY_KEY);
+		gr_printf(0x8000, grd_curcanv->cv_bitmap.bm_h - (3 + Gamefonts[GFONT_SMALL]->ft_h), TXT_PRESS_ANY_KEY);
 		gr_set_curfont(GAME_FONT);
 	}
 

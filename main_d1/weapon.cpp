@@ -122,7 +122,7 @@ int player_has_weapon(int weapon_num, int secondary_flag)
 //if message flag set, print message saying selected
 void select_weapon(int weapon_num, int secondary_flag, int print_message, int wait_for_rearm)
 {
-	char* weapon_name;
+	const char* weapon_name;
 
 #ifndef SHAREWARE
 	if (Newdemo_state == ND_STATE_RECORDING)
@@ -150,7 +150,10 @@ void select_weapon(int weapon_num, int secondary_flag, int print_message, int wa
 			if (wait_for_rearm) digi_play_sample(SOUND_ALREADY_SELECTED, F1_0);
 		}
 		Primary_weapon = weapon_num;
-		weapon_name = PRIMARY_WEAPON_NAMES(weapon_num);
+		weapon_name = _PRIMARY_WEAPON_NAMES[weapon_num];
+
+		if (print_message)
+			HUD_init_message(transl_fmt_string_t("SelectedPrimary", weapon_name));
 	}
 	else 
 	{
@@ -173,11 +176,11 @@ void select_weapon(int weapon_num, int secondary_flag, int print_message, int wa
 			if (wait_for_rearm) digi_play_sample_once(SOUND_ALREADY_SELECTED, F1_0);
 		}
 		Secondary_weapon = weapon_num;
-		weapon_name = SECONDARY_WEAPON_NAMES(weapon_num);
-	}
+		weapon_name = _SECONDARY_WEAPON_NAMES[weapon_num];
 
-	if (print_message)
-		HUD_init_message("%s %s", weapon_name, TXT_SELECTED);
+		if (print_message)
+			HUD_init_message(transl_fmt_string_t("SelectedSecondary", weapon_name));
+	}
 
 }
 
@@ -186,12 +189,12 @@ void select_weapon(int weapon_num, int secondary_flag, int print_message, int wa
 void do_weapon_select(int weapon_num, int secondary_flag)
 {
 	int	weapon_status = player_has_weapon(weapon_num, secondary_flag);
-	char* weapon_name;
+	const char* weapon_name;
 
 #ifdef SHAREWARE	// do special hud msg. for picking registered weapon in shareware version.
 	if (weapon_num >= NUM_SHAREWARE_WEAPONS) {
 		weapon_name = secondary_flag ? SECONDARY_WEAPON_NAMES(weapon_num) : PRIMARY_WEAPON_NAMES(weapon_num);
-		HUD_init_message("%s %s!", weapon_name, TXT_NOT_IN_SHAREWARE);
+		HUD_init_message(TXT_NOT_IN_SHAREWARE, weapon_name);
 		digi_play_sample(SOUND_BAD_SELECTION, F1_0);
 		return;
 	}
@@ -199,26 +202,26 @@ void do_weapon_select(int weapon_num, int secondary_flag)
 
 	if (!secondary_flag) 
 	{
-		weapon_name = PRIMARY_WEAPON_NAMES(weapon_num);
+		weapon_name = _PRIMARY_WEAPON_NAMES[weapon_num];
 		if ((weapon_status & HAS_WEAPON_FLAG) == 0) 
 		{
-			HUD_init_message("%s %s!", TXT_DONT_HAVE, weapon_name);
+			HUD_init_message(transl_fmt_string_t("NotHavePrimary", weapon_name));
 			digi_play_sample(SOUND_BAD_SELECTION, F1_0);
 			return;
 		}
 		else if ((weapon_status & HAS_AMMO_FLAG) == 0) 
 		{
-			HUD_init_message("%s %s!", TXT_DONT_HAVE_AMMO, weapon_name);
+			HUD_init_message(transl_fmt_string_t("NotHavePrimaryAmmo", weapon_name));
 			digi_play_sample(SOUND_BAD_SELECTION, F1_0);
 			return;
 		}
 	}
 	else 
 	{
-		weapon_name = SECONDARY_WEAPON_NAMES(weapon_num);
+		weapon_name = _SECONDARY_WEAPON_NAMES[weapon_num];
 		if (weapon_status != HAS_ALL) 
 		{
-			HUD_init_message("%s %s%s", TXT_HAVE_NO, weapon_name, TXT_SX);
+			HUD_init_message(transl_fmt_string_t("NotHaveSecondary", weapon_name));
 			digi_play_sample(SOUND_BAD_SELECTION, F1_0);
 			return;
 		}
@@ -343,7 +346,7 @@ int pick_up_secondary(int weapon_index, int count)
 
 	if (Players[Player_num].secondary_ammo[weapon_index] >= Secondary_ammo_max[weapon_index]) 
 	{
-		HUD_init_message("%s %i %ss!", TXT_ALREADY_HAVE, Players[Player_num].secondary_ammo[weapon_index], SECONDARY_WEAPON_NAMES(weapon_index));
+		HUD_init_message(transl_fmt_string_ti(transl_get_plural_key("AlreadyHaveSecondary", Players[Player_num].secondary_ammo[weapon_index]), _SECONDARY_WEAPON_NAMES[weapon_index], Players[Player_num].secondary_ammo[weapon_index]));
 		return 0;
 	}
 
@@ -371,13 +374,14 @@ int pick_up_secondary(int weapon_index, int count)
 	if (count > 1) 
 	{
 		PALETTE_FLASH_ADD(15, 15, 15);
-		HUD_init_message("%d %s%s", num_picked_up, SECONDARY_WEAPON_NAMES(weapon_index), TXT_SX);
+	//	HUD_init_message("%d %s%s", num_picked_up, SECONDARY_WEAPON_NAMES(weapon_index), TXT_SX);
 	}
 	else 
 	{
 		PALETTE_FLASH_ADD(10, 10, 10);
-		HUD_init_message("%s!", SECONDARY_WEAPON_NAMES(weapon_index));
+	//	HUD_init_message("%s!", SECONDARY_WEAPON_NAMES(weapon_index));
 	}
+	HUD_init_message(transl_fmt_string_ti(transl_get_plural_key("PickedUpSecondary", num_picked_up), _SECONDARY_WEAPON_NAMES[weapon_index], num_picked_up));
 
 	return 1;
 }
@@ -391,7 +395,7 @@ int pick_up_primary(int weapon_index)
 
 	if (Players[Player_num].primary_weapon_flags & flag) //already have
 	{
-		HUD_init_message("%s %s!", TXT_ALREADY_HAVE_THE, PRIMARY_WEAPON_NAMES(weapon_index));
+		HUD_init_message(transl_fmt_string_t("AlreadyHavePrimary", _PRIMARY_WEAPON_NAMES[weapon_index]));
 		return 0;
 	}
 
@@ -401,7 +405,7 @@ int pick_up_primary(int weapon_index)
 		select_weapon(weapon_index, 0, 0, 1);
 
 	PALETTE_FLASH_ADD(7, 14, 21);
-	HUD_init_message("%s!", PRIMARY_WEAPON_NAMES(weapon_index));
+	HUD_init_message(transl_fmt_string_t("PickedUpPrimary", _PRIMARY_WEAPON_NAMES[weapon_index]));
 
 	return 1;
 }

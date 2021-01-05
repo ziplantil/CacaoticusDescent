@@ -205,11 +205,11 @@ int pick_up_energy(void)
 		Players[Player_num].energy += 3 * F1_0 + 3 * F1_0 * (NDL - Difficulty_level);
 		if (Players[Player_num].energy > ENERGY_MAX)
 			Players[Player_num].energy = ENERGY_MAX;
-		powerup_basic(15, 15, 7, ENERGY_SCORE, "%s %s %d", TXT_ENERGY, TXT_BOOSTED_TO, f2ir(Players[Player_num].energy));
+		powerup_basic(15, 15, 7, ENERGY_SCORE, transl_fmt_string_i("EnergyIncreased", f2ir(Players[Player_num].energy)));
 		used = 1;
 	}
 	else
-		HUD_init_message(TXT_MAXED_OUT, TXT_ENERGY);
+		HUD_init_message(transl_fmt_string_t("MaxedOut", "TXT_ENERGY"));
 
 	return used;
 }
@@ -221,12 +221,13 @@ int pick_up_vulcan_ammo(void)
 	int	pwsave = Primary_weapon;		// Ugh, save selected primary weapon around the picking up of the ammo.  I apologize for this code.  Matthew A. Toschlog
 	if (pick_up_ammo(CLASS_PRIMARY, VULCAN_INDEX, VULCAN_AMMO_AMOUNT)) 
 	{
-		powerup_basic(7, 14, 21, VULCAN_AMMO_SCORE, "%s!", TXT_VULCAN_AMMO);
+		powerup_basic(7, 14, 21, VULCAN_AMMO_SCORE, transl_fmt_string_t("PickedUpVulcanAmmo", "TXT_VULCAN_AMMO"));
 		used = 1;
 	}
 	else 
 	{
-		HUD_init_message("%s %d %s!", TXT_ALREADY_HAVE, f2i(VULCAN_AMMO_SCALE * Primary_ammo_max[VULCAN_INDEX]), TXT_VULCAN_ROUNDS);
+		int n = f2i(VULCAN_AMMO_SCALE * Primary_ammo_max[VULCAN_INDEX]);
+		HUD_init_message(transl_fmt_string_i(transl_get_plural_key("AlreadyHaveAmmo", n), n));
 		used = 0;
 	}
 	Primary_weapon = pwsave;
@@ -259,24 +260,24 @@ int do_powerup(object* obj)
 			Players[Player_num].shields += 3 * F1_0 + 3 * F1_0 * (NDL - Difficulty_level);
 			if (Players[Player_num].shields > SHIELD_MAX)
 				Players[Player_num].shields = SHIELD_MAX;
-			powerup_basic(0, 0, 15, SHIELD_SCORE, "%s %s %d", TXT_SHIELD, TXT_BOOSTED_TO, f2ir(Players[Player_num].shields));
+			powerup_basic(0, 0, 15, SHIELD_SCORE, transl_fmt_string_i("ShieldIncreased", f2ir(Players[Player_num].shields)));
 			used = 1;
 		}
 		else
-			HUD_init_message(TXT_MAXED_OUT, TXT_SHIELD);
+			HUD_init_message(transl_fmt_string_t("MaxedOut", "TXT_SHIELD"));
 		break;
 	case POW_LASER:
 		if (Players[Player_num].laser_level >= MAX_LASER_LEVEL) 
 		{
 			Players[Player_num].laser_level = MAX_LASER_LEVEL;
-			HUD_init_message(TXT_MAXED_OUT, TXT_LASER);
+			HUD_init_message(transl_fmt_string_t("MaxedOut", "TXT_LASER"));
 		}
 		else 
 		{
 			if (Newdemo_state == ND_STATE_RECORDING)
 				newdemo_record_laser_level(Players[Player_num].laser_level, Players[Player_num].laser_level + 1);
 			Players[Player_num].laser_level++;
-			powerup_basic(10, 0, 10, LASER_SCORE, "%s %s %d", TXT_LASER, TXT_BOOSTED_TO, Players[Player_num].laser_level + 1);
+			powerup_basic(10, 0, 10, LASER_SCORE, transl_fmt_string_i("LaserUpgrade", Players[Player_num].laser_level + 1));
 			update_laser_weapon_info();
 			used = 1;
 		}
@@ -298,7 +299,7 @@ int do_powerup(object* obj)
 #endif
 		digi_play_sample(Powerup_info[obj->id].hit_sound, F1_0);
 		Players[Player_num].flags |= PLAYER_FLAGS_BLUE_KEY;
-		powerup_basic(0, 0, 15, KEY_SCORE, "%s %s", TXT_BLUE, TXT_ACCESS_GRANTED);
+		powerup_basic(0, 0, 15, KEY_SCORE, transl_fmt_string_t("AccessGranted", "ColorBlue"));
 		if (Game_mode & GM_MULTI)
 			used = 0;
 		else
@@ -312,7 +313,7 @@ int do_powerup(object* obj)
 #endif
 		digi_play_sample(Powerup_info[obj->id].hit_sound, F1_0);
 		Players[Player_num].flags |= PLAYER_FLAGS_RED_KEY;
-		powerup_basic(15, 0, 0, KEY_SCORE, "%s %s", TXT_RED, TXT_ACCESS_GRANTED);
+		powerup_basic(15, 0, 0, KEY_SCORE, transl_fmt_string_t("AccessGranted", "ColorRed"));
 		if (Game_mode & GM_MULTI)
 			used = 0;
 		else
@@ -326,14 +327,14 @@ int do_powerup(object* obj)
 #endif
 		digi_play_sample(Powerup_info[obj->id].hit_sound, F1_0);
 		Players[Player_num].flags |= PLAYER_FLAGS_GOLD_KEY;
-		powerup_basic(15, 15, 7, KEY_SCORE, "%s %s", TXT_YELLOW, TXT_ACCESS_GRANTED);
+		powerup_basic(15, 15, 7, KEY_SCORE, transl_fmt_string_t("AccessGranted", "ColorYellow"));
 		if (Game_mode & GM_MULTI)
 			used = 0;
 		else
 			used = 1;
 		break;
 	case POW_QUAD_FIRE:
-		if (!(Players[Player_num].flags & PLAYER_FLAGS_QUAD_LASERS)) 
+		if (!(Players[Player_num].flags & PLAYER_FLAGS_QUAD_LASERS))
 		{
 			Players[Player_num].flags |= PLAYER_FLAGS_QUAD_LASERS;
 			powerup_basic(15, 15, 7, QUAD_FIRE_SCORE, "%s!", TXT_QUAD_LASERS);
@@ -341,7 +342,8 @@ int do_powerup(object* obj)
 			used = 1;
 		}
 		else
-			HUD_init_message("%s %s!", TXT_ALREADY_HAVE, TXT_QUAD_LASERS);
+			HUD_init_message(transl_fmt_string_t("AlreadyHavePowerup", "TXT_QUAD_LASERS"));
+			//HUD_init_message("%s %s!", TXT_ALREADY_HAVE, TXT_QUAD_LASERS);
 		if (!used && !(Game_mode & GM_MULTI))
 			used = pick_up_energy();
 		break;
@@ -397,7 +399,7 @@ int do_powerup(object* obj)
 	case	POW_CLOAK:
 		if (Players[Player_num].flags & PLAYER_FLAGS_CLOAKED) 
 		{
-			HUD_init_message("%s %s!", TXT_ALREADY_ARE, TXT_CLOAKED);
+			HUD_init_message(transl_fmt_string_t("YouAlreadyAre", "TXT_CLOAKED"));
 			break;
 		}
 		else 
@@ -409,21 +411,21 @@ int do_powerup(object* obj)
 			if (Game_mode & GM_MULTI)
 				multi_send_cloak();
 #endif
-			powerup_basic(-10, -10, -10, CLOAK_SCORE, "%s!", TXT_CLOAKING_DEVICE);
+			powerup_basic(-10, -10, -10, CLOAK_SCORE, transl_fmt_string_t("PickedUpPowerup", "TXT_CLOAKING_DEVICE"));
 			used = 1;
 			break;
 		}
 	case	POW_INVULNERABILITY:
 		if (Players[Player_num].flags & PLAYER_FLAGS_INVULNERABLE) 
 		{
-			HUD_init_message("%s %s!", TXT_ALREADY_ARE, TXT_INVULNERABLE);
+			HUD_init_message(transl_fmt_string_t("YouAlreadyAre", "TXT_INVULNERABLE"));
 			break;
 		}
 		else 
 		{
 			Players[Player_num].invulnerable_time = GameTime;
 			Players[Player_num].flags |= PLAYER_FLAGS_INVULNERABLE;
-			powerup_basic(7, 14, 21, INVULNERABILITY_SCORE, "%s!", TXT_INVULNERABILITY);
+			powerup_basic(7, 14, 21, INVULNERABILITY_SCORE, transl_fmt_string_t("PickedUpPowerup", "TXT_INVULNERABILITY"));
 			used = 1;
 			break;
 		}

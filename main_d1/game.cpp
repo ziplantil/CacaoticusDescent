@@ -883,7 +883,7 @@ void ftoa(char* string, fix f)
 	if (fractional < 0)
 		fractional *= -1;
 	if (fractional > 99) fractional = 99;
-	sprintf(string, "%d.%02d", decimal, fractional);
+	sprintf(string, transl_get_string("ftoa"), decimal, fractional);
 }
 
 void show_framerate()
@@ -1119,13 +1119,16 @@ void render_countdown_gauge()
 	if (!Endlevel_sequence && Fuelcen_control_center_destroyed && (Fuelcen_seconds_left > -1) && (Fuelcen_seconds_left < 127)) 
 	{
 		int	y;
-		gr_set_curfont(Gamefonts[4]);    //GAME_FONT );
+		gr_set_curfont(Gamefonts[GFONT_SMALL]);    //GAME_FONT );
 		gr_set_fontcolor(gr_getcolor(0, 63, 0), -1);
 		y = 20;
 		if (!((Cockpit_mode == CM_STATUS_BAR) && (Game_window_w >= 19)))
 			y += 5;
 
-		gr_printf(0x8000, y, "T-%d s", Fuelcen_seconds_left);
+		if (Gamefonts[GFONT_SMALL]->ft_h > 5)
+			y = 6 + 3 * Gamefonts[GFONT_SMALL]->ft_h;
+
+		gr_printf(0x8000, y, transl_fmt_string_i("Countdown", Fuelcen_seconds_left));
 	}
 }
 
@@ -1137,7 +1140,7 @@ void game_draw_multi_message()
 	if ((Game_mode & GM_MULTI) && (multi_sending_message)) {
 		gr_set_curfont(GAME_FONT);    //GAME_FONT );
 		gr_set_fontcolor(gr_getcolor(0, 63, 0), -1);
-		sprintf(temp_string, "%s: %s_", TXT_MESSAGE, Network_message);
+		sprintf(temp_string, TXT_MESSAGE, Network_message);
 		draw_centered_text(grd_curcanv->cv_bitmap.bm_h / 2 - 16, temp_string);
 
 	}
@@ -1145,7 +1148,7 @@ void game_draw_multi_message()
 	if ((Game_mode & GM_MULTI) && (multi_defining_message)) {
 		gr_set_curfont(GAME_FONT);    //GAME_FONT );
 		gr_set_fontcolor(gr_getcolor(0, 63, 0), -1);
-		sprintf(temp_string, "%s #%d: %s_", TXT_MACRO, multi_defining_message, Network_message);
+		sprintf(temp_string, transl_fmt_string_is("TXT_MACRO", multi_defining_message, Network_message));
 		draw_centered_text(grd_curcanv->cv_bitmap.bm_h / 2 - 16, temp_string);
 	}
 }
@@ -1200,7 +1203,7 @@ void game_draw_hud_stuff()
 	{
 		gr_set_curfont(HELP_FONT);
 		gr_set_fontcolor(gr_getcolor(31, 31, 31), -1); // gr_getcolor(31,0,0));
-		gr_ustring(0x8000, 85 / 2, "Debug Pause - Press P to exit");
+		gr_string(0x8000, 85 / 2, "Debug Pause - Press P to exit");
 	}
 #endif
 
@@ -1209,8 +1212,8 @@ void game_draw_hud_stuff()
 	{
  		gr_set_curfont( HELP_FONT );
  		gr_set_fontcolor( gr_getcolor(31, 31, 31), -1 );
- 		gr_ustring( 124, 10, "Repairing");
- 		gr_ustring( 0x8000, 20, "Press SHIFT-Q to abort" );
+ 		gr_string( 124, 10, "Repairing");
+ 		gr_string( 0x8000, 20, "Press SHIFT-Q to abort" );
  	}
 #endif
 
@@ -1233,7 +1236,7 @@ void game_draw_hud_stuff()
 
 		if (Newdemo_state == ND_STATE_PLAYBACK) {
 			if (Newdemo_vcr_state != ND_STATE_PRINTSCREEN) {
-				sprintf(message, "%s (%d%%%% %s)", TXT_DEMO_PLAYBACK, newdemo_get_percent_done(), TXT_DONE);
+				sprintf(message, transl_fmt_string_i(TXT_DEMO_PLAYBACK, newdemo_get_percent_done()));
 			}
 			else {
 				sprintf(message, "");
@@ -1281,7 +1284,7 @@ void game_draw_hud_stuff()
 				x = 20;
 			}
 
-		gr_printf(x, y, "%s %2d%%", TXT_CRUISE, f2i(Cruise_speed));
+		gr_printf(x, y, transl_fmt_string_i("TXT_CRUISE", f2i(Cruise_speed)));
 
 	}
 
@@ -1436,7 +1439,7 @@ void save_screen_shot(int automap_flag)
 	fix t1;
 	char message[100];
 	grs_canvas* screen_canv = &grd_curscreen->sc_canvas;
-	grs_font* save_font;
+	grs_fontstyle* save_font;
 	static int savenum = 0;
 	grs_canvas* temp_canv, * save_canv;
 	char savename[13];
@@ -1456,7 +1459,7 @@ void save_screen_shot(int automap_flag)
 
 	if (savenum > 99) savenum = 0;
 	sprintf(savename, "screen%02d.pcx", savenum++);
-	sprintf(message, "%s '%s'", TXT_DUMPING_SCREEN, savename);
+	sprintf(message, TXT_DUMPING_SCREEN, savename);
 
 	gr_set_current_canvas(&VR_screen_pages[VR_current_page]);
 	save_font = grd_curcanv->cv_font;
@@ -1720,18 +1723,18 @@ void do_cheat_menu()
 
 	sprintf(score_text, "%d", Players[Player_num].score);
 
-	mm[0].type = NM_TYPE_CHECK; mm[0].value = Players[Player_num].flags & PLAYER_FLAGS_INVULNERABLE; mm[0].text = (char*)"Invulnerability";
-	mm[1].type = NM_TYPE_CHECK; mm[1].value = Players[Player_num].flags & PLAYER_FLAGS_IMMATERIAL; mm[1].text = (char*)"Immaterial";
-	mm[2].type = NM_TYPE_CHECK; mm[2].value = 0; mm[2].text = (char*)"All keys";
-	mm[3].type = NM_TYPE_NUMBER; mm[3].value = f2i(Players[Player_num].energy); mm[3].text = (char*)"% Energy"; mm[3].min_value = 0; mm[3].max_value = 200;
-	mm[4].type = NM_TYPE_NUMBER; mm[4].value = f2i(Players[Player_num].shields); mm[4].text = (char*)"% Shields"; mm[4].min_value = 0; mm[4].max_value = 200;
-	mm[5].type = NM_TYPE_TEXT; mm[5].text = (char*)"Score:";
-	mm[6].type = NM_TYPE_INPUT; mm[6].text_len = 10; mm[6].text = score_text;
-	mm[7].type = NM_TYPE_RADIO; mm[7].value = (Players[Player_num].laser_level == 0); mm[7].group = 0; mm[7].text = (char*)"Laser level 1";
-	mm[8].type = NM_TYPE_RADIO; mm[8].value = (Players[Player_num].laser_level == 1); mm[8].group = 0; mm[8].text = (char*)"Laser level 2";
-	mm[9].type = NM_TYPE_RADIO; mm[9].value = (Players[Player_num].laser_level == 2); mm[9].group = 0; mm[9].text = (char*)"Laser level 3";
-	mm[10].type = NM_TYPE_RADIO; mm[10].value = (Players[Player_num].laser_level == 3); mm[10].group = 0; mm[10].text = (char*)"Laser level 4";
-	mm[11].type = NM_TYPE_NUMBER; mm[11].value = Players[Player_num].secondary_ammo[CONCUSSION_INDEX]; mm[11].text = (char*)"Missiles"; mm[11].min_value = 0; mm[11].max_value = 200;
+	mm[0].type = NM_TYPE_CHECK; mm[0].value = Players[Player_num].flags & PLAYER_FLAGS_INVULNERABLE; nm_copy_text(&mm[0], "Invulnerability");
+	mm[1].type = NM_TYPE_CHECK; mm[1].value = Players[Player_num].flags & PLAYER_FLAGS_IMMATERIAL; nm_copy_text(&mm[1], "Immaterial");
+	mm[2].type = NM_TYPE_CHECK; mm[2].value = 0; nm_copy_text(&mm[2], "All keys");
+	mm[3].type = NM_TYPE_NUMBER; mm[3].value = f2i(Players[Player_num].energy); nm_copy_text(&mm[3], "% Energy"); mm[3].min_value = 0; mm[3].max_value = 200;
+	mm[4].type = NM_TYPE_NUMBER; mm[4].value = f2i(Players[Player_num].shields); nm_copy_text(&mm[4], "% Shields"); mm[4].min_value = 0; mm[4].max_value = 200;
+	mm[5].type = NM_TYPE_TEXT; nm_copy_text(&mm[5], "Score:");
+	mm[6].type = NM_TYPE_INPUT; mm[6].text_len = 10; nm_copy_text(&mm[6], score_text);
+	mm[7].type = NM_TYPE_RADIO; mm[7].value = (Players[Player_num].laser_level == 0); mm[7].group = 0; nm_copy_text(&mm[7], "Laser level 1");
+	mm[8].type = NM_TYPE_RADIO; mm[8].value = (Players[Player_num].laser_level == 1); mm[8].group = 0; nm_copy_text(&mm[8], "Laser level 2");
+	mm[9].type = NM_TYPE_RADIO; mm[9].value = (Players[Player_num].laser_level == 2); mm[9].group = 0; nm_copy_text(&mm[9], "Laser level 3");
+	mm[10].type = NM_TYPE_RADIO; mm[10].value = (Players[Player_num].laser_level == 3); mm[10].group = 0; nm_copy_text(&mm[10], "Laser level 4");
+	mm[11].type = NM_TYPE_NUMBER; mm[11].value = Players[Player_num].secondary_ammo[CONCUSSION_INDEX]; nm_copy_text(&mm[11], "Missiles"); mm[11].min_value = 0; mm[11].max_value = 200;
 
 	mmn = newmenu_do("Wimp Menu", NULL, 12, mm, NULL);
 
@@ -1813,7 +1816,7 @@ typedef struct bkg
 bkg bg = { 0,0,0,0,NULL };
 
 //show a message in a nice little box
-void show_boxed_message(char* msg)
+void show_boxed_message(const char* msg)
 {
 	int w, h, aw;
 	int x, y;
@@ -1840,7 +1843,7 @@ void show_boxed_message(char* msg)
 	nm_draw_background(x - 15, y - 15, x + w + 15 - 1, y + h + 15 - 1);
 
 	gr_set_fontcolor(gr_getcolor(31, 31, 31), -1);
-	gr_ustring(0x8000, y, msg);
+	gr_string(0x8000, y, msg);
 
 }
 
@@ -1943,17 +1946,17 @@ void show_help()
 
 	//if (VR_render_mode != VR_NONE) //[ISB] I'm confused
 	{
-		m[0].type = NM_TYPE_TEXT; m[0].text = TXT_HELP_ESC;
-		m[1].type = NM_TYPE_TEXT; m[1].text = TXT_HELP_ALT_F2;
-		m[2].type = NM_TYPE_TEXT; m[2].text = TXT_HELP_ALT_F3;
-		m[3].type = NM_TYPE_TEXT; m[3].text = TXT_HELP_F2;
-		m[4].type = NM_TYPE_TEXT; m[4].text = TXT_HELP_F4;
-		m[5].type = NM_TYPE_TEXT; m[5].text = TXT_HELP_F5;
-		m[6].type = NM_TYPE_TEXT; m[6].text = TXT_HELP_PAUSE;
-		m[7].type = NM_TYPE_TEXT; m[7].text = TXT_HELP_1TO5;
-		m[8].type = NM_TYPE_TEXT; m[8].text = TXT_HELP_6TO10;
-		m[9].type = NM_TYPE_TEXT; m[9].text = (char*)"";
-		m[10].type = NM_TYPE_TEXT; m[10].text = TXT_HELP_TO_VIEW;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_HELP_ESC);
+		m[1].type = NM_TYPE_TEXT; nm_copy_text(&m[1], TXT_HELP_ALT_F2);
+		m[2].type = NM_TYPE_TEXT; nm_copy_text(&m[2], TXT_HELP_ALT_F3);
+		m[3].type = NM_TYPE_TEXT; nm_copy_text(&m[3], TXT_HELP_F2);
+		m[4].type = NM_TYPE_TEXT; nm_copy_text(&m[4], TXT_HELP_F4);
+		m[5].type = NM_TYPE_TEXT; nm_copy_text(&m[5], TXT_HELP_F5);
+		m[6].type = NM_TYPE_TEXT; nm_copy_text(&m[6], TXT_HELP_PAUSE);
+		m[7].type = NM_TYPE_TEXT; nm_copy_text(&m[7], TXT_HELP_1TO5);
+		m[8].type = NM_TYPE_TEXT; nm_copy_text(&m[8], TXT_HELP_6TO10);
+		m[9].type = NM_TYPE_TEXT; nm_copy_text(&m[9], "");
+		m[10].type = NM_TYPE_TEXT; nm_copy_text(&m[10], TXT_HELP_TO_VIEW);
 		newmenu_do(NULL, TXT_KEYS, 11, m, NULL);
 	}
 }
@@ -2671,7 +2674,7 @@ void ReadControls()
 					int new_level_num;
 					int item;
 					digi_play_sample(SOUND_CHEATER, F1_0);
-					m.type = NM_TYPE_INPUT; m.text_len = 10; m.text = text;
+					m.type = NM_TYPE_INPUT; m.text_len = 10; nm_copy_text(&m, text);
 					item = newmenu_do(NULL, TXT_WARP_TO_LEVEL, 1, &m, NULL);
 					if (item != -1) {
 						new_level_num = atoi(m.text);
@@ -2843,19 +2846,19 @@ void ReadControls()
 				newmenu_item m[6];
 
 				filename[0] = '\0';
-				m[0].type = NM_TYPE_TEXT; m[0].text = (char*)"output file name";
-				m[1].type = NM_TYPE_INPUT; m[1].text_len = 8; m[1].text = filename;
+				m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], "output file name");
+				m[1].type = NM_TYPE_INPUT; m[1].text_len = 8; nm_copy_text(&m[1], filename);
 				c = newmenu_do(NULL, NULL, 2, m, NULL);
 				if (c == -2)
 					break;
-				strcat(filename, ".dem");
+				strcat(m[1].text, ".dem");
 				num[0] = '\0';
-				m[0].type = NM_TYPE_TEXT; m[0].text = (char*)"strip how many bytes";
-				m[1].type = NM_TYPE_INPUT; m[1].text_len = 16; m[1].text = num;
+				m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], "strip how many bytes");
+				m[1].type = NM_TYPE_INPUT; m[1].text_len = 16; nm_copy_text(&m[1], num);
 				c = newmenu_do(NULL, NULL, 2, m, NULL);
 				if (c == -2)
 					break;
-				how_many = atoi(num);
+				how_many = atoi(m[1].text);
 				if (how_many <= 0)
 					break;
 				newdemo_strip_frames(filename, how_many);
@@ -2982,7 +2985,7 @@ void ReadControls()
 				char text[10] = "";
 				int new_level_num;
 				int item;
-				m.type = NM_TYPE_INPUT; m.text_len = 10; m.text = text;
+				m.type = NM_TYPE_INPUT; m.text_len = 10; nm_copy_text(&m, text);
 				item = newmenu_do(NULL, TXT_WARP_TO_LEVEL, 1, &m, NULL);
 				if (item != -1) {
 					new_level_num = atoi(m.text);

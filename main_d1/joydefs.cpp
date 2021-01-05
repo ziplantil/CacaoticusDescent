@@ -52,8 +52,8 @@ int joycal_message(char* title, char* text)
 {
 	int i;
 	newmenu_item	m[2];
-	m[0].type = NM_TYPE_TEXT; m[0].text = text;
-	m[1].type = NM_TYPE_MENU; m[1].text = TXT_OK;
+	m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], text);
+	m[1].type = NM_TYPE_MENU; nm_copy_text(&m[1], TXT_OK);
 	i = newmenu_do(title, NULL, 2, m, NULL);
 	if (i < 0)
 		return 1;
@@ -257,7 +257,7 @@ void joydefs_calibrate()
 }
 
 
-const char *control_text[CONTROL_MAX_TYPES] = { "Keyboard only", "Joystick (1-2)", "Gamepad", "Joystick w/ throttle", "-", "Mouse", "-"};
+const char *control_text[CONTROL_MAX_TYPES] = { "ControlType0", "ControlType1", "ControlType2", "ControlType3", "ControlType4", "ControlType5", "ControlType6" };
 int choco_menu_remap[CONTROL_MAX_TYPES] = { 0, 1, 2, 3, 5, 0, 0 }; //Remaps the new options to the old input ID
 int choco_id_to_menu_remap[CONTROL_MAX_TYPES] = { 0, 1, 2, 3, 0, 4, 0 }; //Remaps an old ID to the new menu option
 
@@ -311,19 +311,19 @@ void joydefs_config()
 	do 
 	{
 		nitems = 8;
-		m[0].type = NM_TYPE_RADIO; m[0].text = const_cast<char*>(control_text[0]); m[0].value = 0; m[0].group = 0;
-		m[1].type = NM_TYPE_RADIO; m[1].text = const_cast<char*>(control_text[1]); m[1].value = 0; m[1].group = 0;
-		m[2].type = NM_TYPE_RADIO; m[2].text = const_cast<char*>(control_text[2]); m[2].value = 0; m[2].group = 0;
-		m[3].type = NM_TYPE_RADIO; m[3].text = const_cast<char*>(control_text[3]); m[3].value = 0; m[3].group = 0;
-		m[4].type = NM_TYPE_RADIO; m[4].text = const_cast<char*>(control_text[5]); m[4].value = 0; m[4].group = 0;
-		m[5].type = NM_TYPE_MENU; m[5].text = TXT_CUST_ABOVE;
-		m[6].type = NM_TYPE_TEXT; m[6].text = (char*)"";
-		m[7].type = NM_TYPE_MENU; m[7].text = TXT_CUST_KEYBOARD;
+		m[0].type = NM_TYPE_RADIO; nm_copy_text(&m[0], transl_get_string(control_text[0])); m[0].value = 0; m[0].group = 0;
+		m[1].type = NM_TYPE_RADIO; nm_copy_text(&m[1], transl_get_string(control_text[1])); m[1].value = 0; m[1].group = 0;
+		m[2].type = NM_TYPE_RADIO; nm_copy_text(&m[2], transl_get_string(control_text[2])); m[2].value = 0; m[2].group = 0;
+		m[3].type = NM_TYPE_RADIO; nm_copy_text(&m[3], transl_get_string(control_text[3])); m[3].value = 0; m[3].group = 0;
+		m[4].type = NM_TYPE_RADIO; nm_copy_text(&m[4], transl_get_string(control_text[5])); m[4].value = 0; m[4].group = 0;
+		m[5].type = NM_TYPE_MENU; nm_copy_text(&m[5], TXT_CUST_ABOVE);
+		m[6].type = NM_TYPE_TEXT; nm_copy_text(&m[6], "");
+		m[7].type = NM_TYPE_MENU; nm_copy_text(&m[7], TXT_CUST_KEYBOARD);
 
 		if (kc_use_external_control) 
 		{
 			sprintf(xtext, "Enable %s", kc_external_name);
-			m[10].type = NM_TYPE_CHECK; m[10].text = xtext; m[10].value = kc_enable_external_control;
+			m[10].type = NM_TYPE_CHECK; nm_copy_text(&m[10], xtext); m[10].value = kc_enable_external_control;
 			nitems = nitems + 1;
 		}
 
@@ -345,9 +345,9 @@ void joydefs_config()
 				// nothing...
 				Config_control_type = 0;
 			else if (Config_control_type < 5)
-				kconfig(1, const_cast<char*>(control_text[Config_control_type]));
+				kconfig(1, transl_get_string(control_text[Config_control_type]));
 			else
-				kconfig(2, const_cast<char*>(control_text[Config_control_type]));
+				kconfig(2, transl_get_string(control_text[Config_control_type]));
 
 			masks = 0;
 			for (i = 0; i < 4; i++)

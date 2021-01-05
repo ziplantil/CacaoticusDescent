@@ -20,6 +20,13 @@ COPYRIGHT 1993-1998 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #define MAX_SECRET_LEVELS_PER_MISSION	5
 #define MISSION_NAME_LEN 					21
 
+//values for built-in mission
+
+#define BIM_LAST_LEVEL			27
+#define BIM_LAST_SECRET_LEVEL	-3
+#define BIM_BRIEFING_FILE		"briefing.tex"
+#define BIM_ENDING_FILE			"endreg.tex"
+
  //mission list entry
 typedef struct mle {
 	char	filename[9];							//filename without extension

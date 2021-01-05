@@ -42,6 +42,7 @@ COPYRIGHT 1993-1998 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #include "network.h"
 #include "multi.h"
 #include "multibot.h"
+#include "locale/transl.h"
 
 // The max number of fuel stations per mine.
 
@@ -610,13 +611,19 @@ void controlcen_proc(FuelCenter * controlcen)
 	if ((old_time < COUNTDOWN_VOICE_TIME) && (controlcen->Timer >= COUNTDOWN_VOICE_TIME)) 
 	{
 		digi_play_sample(SOUND_COUNTDOWN_13_SECS, F3_0);
+		const char* msg = transl_get_string("SelfDestructIn10Seconds");
+		if (msg && *msg) HUD_init_message(msg);
 	}
 	if (f2i(old_time) != f2i(controlcen->Timer)) 
 	{
 		if ((Fuelcen_seconds_left >= 0) && (Fuelcen_seconds_left < 10))
 			digi_play_sample(SOUND_COUNTDOWN_0_SECS + Fuelcen_seconds_left, F3_0);
 		if (Fuelcen_seconds_left == DIFF_CONTROL_CENTER_EXPLOSION_TIME - 1)
+		{
 			digi_play_sample(SOUND_COUNTDOWN_29_SECS, F3_0);
+			const char* msg = transl_get_string("SelfDestructSequenceBegin");
+			if (msg && *msg) HUD_init_message(msg);
+		}
 	}
 
 	if (controlcen->Timer < i2f(DIFF_CONTROL_CENTER_EXPLOSION_TIME))

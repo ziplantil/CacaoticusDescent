@@ -51,14 +51,14 @@ typedef struct kc_item
 	short w1;
 	short w2;
 	short u, d, l, r;
-	short text_num1;
+	const char* tkey;
 	uint8_t type;
 	uint8_t value;		// what key,button,etc
 } kc_item;
 
 extern control_info Controls;
 extern void controls_read_all();
-extern void kconfig(int n, char* title);
+extern void kconfig(int n, const char* title);
 
 extern uint8_t Config_digi_volume;
 extern uint8_t Config_midi_volume;

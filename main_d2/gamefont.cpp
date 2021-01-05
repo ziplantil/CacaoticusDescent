@@ -32,7 +32,7 @@ const char * Gamefont_filenames[] = {	"font1-1.fnt",			// Font 0
 											"font3-1h.fnt",		// Font 4 High-res
 										};
 
-grs_font *Gamefonts[MAX_FONTS];
+grs_fontstyle *Gamefonts[MAX_FONTS];
 
 int Gamefont_installed=0;
 

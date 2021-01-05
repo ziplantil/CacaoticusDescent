@@ -550,11 +550,12 @@ int MakeNewPlayerFile(int allow_abort)
 	strncpy(text, Players[Player_num].callsign, CALLSIGN_LEN);
 
 try_again:
-	m.type = NM_TYPE_INPUT; m.text_len = 8; m.text = text;
+	m.type = NM_TYPE_INPUT; m.text_len = 8; nm_copy_text(&m, text);
 
 	Newmenu_allowed_chars = playername_allowed_chars;
 	x = newmenu_do(NULL, TXT_ENTER_PILOT_NAME, 1, &m, NULL);
 	Newmenu_allowed_chars = NULL;
+	strcpy(text, m.text);
 
 	if (x < 0) {
 		if (allow_abort) return 0;
@@ -578,7 +579,7 @@ try_again:
 
 	if (fp) 
 	{
-		nm_messagebox(NULL, 1, TXT_OK, "%s '%s' %s", TXT_PLAYER, text, TXT_ALREADY_EXISTS);
+		nm_messagebox(NULL, 1, TXT_OK, TXT_ALREADY_EXISTS, text);
 		fclose(fp);
 		goto try_again;
 	}
@@ -630,7 +631,7 @@ do_menu_again:
 		return 0;		// They hit Esc in file selector
 	}
 
-	if (filename[0] == '<') 
+	if (filename[0] == transl_get_string("TXT_CREATE_NEW")[0]) 
 	{
 		// They selected 'create new pilot'
 		if (!MakeNewPlayerFile(allow_abort_flag))
@@ -711,6 +712,13 @@ void LoadLevel(int level_num)
 
 	if (!load_level(level_name))
 		Current_level_num = level_num;
+
+	{
+		int j = Current_level_num;
+		if (j < 0) j = BIM_LAST_LEVEL - j;
+		if (_TRANSLATED_LEVEL_NAMES[j])
+			strcpy(Current_level_name, _TRANSLATED_LEVEL_NAMES[j]);
+	}
 
 #ifdef NETWORK
 	my_segments_checksum = netmisc_calc_checksum(Segments, sizeof(segment) * (Highest_segment_index + 1));
@@ -804,10 +812,10 @@ void DoEndLevelScoreGlitz(int network)
 	int level_points, skill_points, energy_points, shield_points, hostage_points;
 	int	all_hostage_points;
 	int	endgame_points;
-	char	all_hostage_text[64];
-	char	endgame_text[64];
+	char	all_hostage_text[90];
+	char	endgame_text[90];
 #define N_GLITZITEMS 9
-	char				m_str[N_GLITZITEMS][30];
+	char				m_str[N_GLITZITEMS][90];
 	newmenu_item	m[9];
 	int				i, c;
 	char				title[128];
@@ -843,7 +851,7 @@ void DoEndLevelScoreGlitz(int network)
 	if (!Cheats_enabled && (Players[Player_num].hostages_on_board == Players[Player_num].hostages_level)) 
 	{
 		all_hostage_points = Players[Player_num].hostages_on_board * 1000 * (Difficulty_level + 1);
-		sprintf(all_hostage_text, "%s%i\n", TXT_FULL_RESCUE_BONUS, all_hostage_points);
+		sprintf(all_hostage_text, transl_fmt_string_ti("ScoreFormatN", "TXT_FULL_RESCUE_BONUS", all_hostage_points));
 	}
 	else
 		all_hostage_points = 0;
@@ -851,7 +859,7 @@ void DoEndLevelScoreGlitz(int network)
 	if (!Cheats_enabled && !(Game_mode & GM_MULTI) && (Players[Player_num].lives) && (Current_level_num == Last_level)) //player has finished the game!
 	{
 		endgame_points = Players[Player_num].lives * 10000;
-		sprintf(endgame_text, "%s%i\n", TXT_SHIP_BONUS, endgame_points);
+		sprintf(endgame_text, transl_fmt_string_ti("ScoreFormatN", "TXT_SHIP_BONUS", endgame_points));
 		is_last_level = 1;
 	}
 	else
@@ -860,28 +868,29 @@ void DoEndLevelScoreGlitz(int network)
 	add_bonus_points_to_score(skill_points + energy_points + shield_points + hostage_points + all_hostage_points + endgame_points);
 
 	c = 0;
-	sprintf(m_str[c++], "%s%i", TXT_SHIELD_BONUS, shield_points);		// Return at start to lower menu...
-	sprintf(m_str[c++], "%s%i", TXT_ENERGY_BONUS, energy_points);
-	sprintf(m_str[c++], "%s%i", TXT_HOSTAGE_BONUS, hostage_points);
-	sprintf(m_str[c++], "%s%i", TXT_SKILL_BONUS, skill_points);
+	sprintf(m_str[c++], transl_fmt_string_ti("ScoreFormat", "TXT_SHIELD_BONUS", shield_points));		// Return at start to lower menu...
+	sprintf(m_str[c++], transl_fmt_string_ti("ScoreFormat", "TXT_ENERGY_BONUS", energy_points));
+	sprintf(m_str[c++], transl_fmt_string_ti("ScoreFormat", "TXT_HOSTAGE_BONUS", hostage_points));
+	sprintf(m_str[c++], transl_fmt_string_ti("ScoreFormat", "TXT_SKILL_BONUS", skill_points));
 
 	sprintf(m_str[c++], "%s", all_hostage_text);
 	if (!(Game_mode & GM_MULTI) && (Players[Player_num].lives) && (Current_level_num == Last_level))
 		sprintf(m_str[c++], "%s", endgame_text);
 
-	sprintf(m_str[c++], "%s%i\n", TXT_TOTAL_BONUS, shield_points + energy_points + hostage_points + skill_points + all_hostage_points + endgame_points);
-	sprintf(m_str[c++], "%s%i", TXT_TOTAL_SCORE, Players[Player_num].score);
+	sprintf(m_str[c++], transl_fmt_string_ti("ScoreFormatN", "TXT_TOTAL_BONUS", shield_points + energy_points + hostage_points + skill_points + all_hostage_points + endgame_points));
+	sprintf(m_str[c++], transl_fmt_string_ti("ScoreFormat", "TXT_TOTAL_SCORE", Players[Player_num].score));
 
 	for (i = 0; i < c; i++) 
 	{
 		m[i].type = NM_TYPE_TEXT;
-		m[i].text = m_str[i];
+		nm_copy_text(&m[i], m_str[i]);
 	}
 
+	char* title_t = title + sprintf(title, "%s", is_last_level ? "\n\n\n" : "\n");
 	if (Current_level_num < 0)
-		sprintf(title, "%s%s %d %s\n %s %s", is_last_level ? "\n\n\n" : "\n", TXT_SECRET_LEVEL, -Current_level_num, TXT_COMPLETE, Current_level_name, TXT_DESTROYED);
+		sprintf(title_t, transl_fmt_string_is("SecretLevelDestroyed", -Current_level_num, Current_level_name));
 	else
-		sprintf(title, "%s%s %d %s\n%s %s", is_last_level ? "\n\n\n" : "\n", TXT_LEVEL, Current_level_num, TXT_COMPLETE, Current_level_name, TXT_DESTROYED);
+		sprintf(title_t, transl_fmt_string_is("LevelDestroyed", Current_level_num, Current_level_name));
 
 	Assert(c <= N_GLITZITEMS);
 
@@ -924,7 +933,7 @@ void PlayerFinishedLevel(int secret_flag)
 		newmenu_item	m[1];
 
 		m[0].type = NM_TYPE_TEXT;
-		m[0].text = (char*)" ";			//TXT_SECRET_EXIT;
+		nm_copy_text(&m[0], " ");			//TXT_SECRET_EXIT;
 
 		newmenu_do2(NULL, TXT_SECRET_EXIT, 1, m, NULL, 0, "MENU.PCX");
 	}

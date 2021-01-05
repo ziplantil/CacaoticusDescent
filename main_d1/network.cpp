@@ -167,7 +167,7 @@ network_init(void)
 #define ENDLEVEL_IDLE_TIME	F1_0*10
 
 void
-network_endlevel_poll(int nitems, newmenu_item * menus, int* key, int citem)
+network_endlevel_poll(int nitems, newmenu_item* menus, int* key, int citem)
 {
 	// Polling loop for End-of-level menu
 
@@ -240,7 +240,7 @@ network_endlevel_poll(int nitems, newmenu_item * menus, int* key, int citem)
 		}
 		else
 		{
-			sprintf(menus[N_players].text, "%s: %d %s  ", TXT_TIME_REMAINING, Fuelcen_seconds_left, TXT_SECONDS);
+			sprintf(menus[N_players].text, transl_fmt_string_i("TXT_TIME_REMAINING", Fuelcen_seconds_left));
 			menus[N_players].redraw = 1;
 		}
 	}
@@ -248,7 +248,7 @@ network_endlevel_poll(int nitems, newmenu_item * menus, int* key, int citem)
 	if (num_ready == N_players) // All players have checked in or are disconnected
 	{
 		if (goto_secret)
-			* key = -3;
+			*key = -3;
 		else
 			*key = -2;
 	}
@@ -290,7 +290,7 @@ network_endlevel_poll2(int nitems, newmenu_item* menus, int* key, int citem)
 	if (num_ready == N_players) // All players have checked in or are disconnected
 	{
 		if (goto_secret)
-			* key = -3;
+			*key = -3;
 		else
 			*key = -2;
 	}
@@ -322,17 +322,17 @@ newmenu:
 	for (i = 0; i < N_players; i++)
 	{
 		m[i].type = NM_TYPE_TEXT;
-		m[i].text = menu_text[i];
+		nm_copy_text(&m[i], menu_text[i]);
 		sprintf(m[i].text, "%s %s", Players[i].callsign, CONNECT_STATES(Players[i].connected));
 		LastPacketTime[i] = timer_get_approx_seconds();
 	}
 	m[N_players].type = NM_TYPE_TEXT;
-	m[N_players].text = menu_text[N_players];
+	nm_copy_text(&m[N_players], menu_text[N_players]);
 
 	if (Fuelcen_seconds_left < 0)
 		sprintf(m[N_players].text, TXT_REACTOR_EXPLODED);
 	else
-		sprintf(m[N_players].text, "%s: %d %s  ", TXT_TIME_REMAINING, Fuelcen_seconds_left, TXT_SECONDS);
+		sprintf(m[N_players].text, transl_fmt_string_i("TXT_TIME_REMAINING", Fuelcen_seconds_left));
 
 menu:
 	sprintf(text, "%s\n%s", TXT_WAITING, TXT_ESC_ABORT);
@@ -343,7 +343,7 @@ menu:
 		newmenu_item m2[2];
 
 		m2[0].type = m2[1].type = NM_TYPE_MENU;
-		m2[0].text = TXT_YES; m2[1].text = TXT_NO;
+		nm_copy_text(&m2[0], TXT_YES); nm_copy_text(&m2[1], TXT_NO);
 		choice = newmenu_do1(NULL, TXT_SURE_LEAVE_GAME, 2, m2, network_endlevel_poll2, 1);
 		if (choice == 0)
 		{
@@ -362,7 +362,7 @@ menu:
 		goto menu;
 
 	if (choice == -3)
-		* secret = 1; // If any player went to the secret level, we go to the secret level
+		*secret = 1; // If any player went to the secret level, we go to the secret level
 
 	network_send_endlevel_packet();
 	network_send_endlevel_packet();
@@ -496,7 +496,7 @@ network_new_player(sequence_packet* their)
 
 	digi_play_sample(SOUND_HUD_MESSAGE, F1_0);
 
-	HUD_init_message("'%s' %s\n", their->player.callsign, TXT_JOINING);
+	HUD_init_message(TXT_JOINING, their->player.callsign);
 
 	multi_make_ghost_player(pnum);
 
@@ -631,7 +631,7 @@ void network_welcome_player(sequence_packet* their)
 
 		digi_play_sample(SOUND_HUD_MESSAGE, F1_0);
 
-		HUD_init_message("'%s' %s", Players[player_num].callsign, TXT_REJOIN);
+		HUD_init_message(TXT_REJOIN, Players[player_num].callsign);
 	}
 
 	// Send updated Objects data to the new/returning player
@@ -945,7 +945,7 @@ void network_send_rejoin_sync(int player_num)
 		for (i = 0; i < N_players; i++)
 		{
 			if ((i != player_num) && (i != Player_num) && (Players[i].connected))
-				ipx_send_packet_data((uint8_t*)& Network_player_rejoining, sizeof(sequence_packet), Netgame.players[i].server, Netgame.players[i].node, Players[i].net_address);
+				ipx_send_packet_data((uint8_t*)&Network_player_rejoining, sizeof(sequence_packet), Netgame.players[i].server, Netgame.players[i].node, Players[i].net_address);
 		}
 	}
 
@@ -972,9 +972,9 @@ void network_send_rejoin_sync(int player_num)
 
 	mprintf((0, "Sending rejoin sync packet!!!\n"));
 
-	ipx_send_internetwork_packet_data((uint8_t*)& Netgame, sizeof(netgame_info), Network_player_rejoining.player.server, Network_player_rejoining.player.node);
-	ipx_send_internetwork_packet_data((uint8_t*)& Netgame, sizeof(netgame_info), Network_player_rejoining.player.server, Network_player_rejoining.player.node); // repeat for safety
-	ipx_send_internetwork_packet_data((uint8_t*)& Netgame, sizeof(netgame_info), Network_player_rejoining.player.server, Network_player_rejoining.player.node); // repeat for safety
+	ipx_send_internetwork_packet_data((uint8_t*)&Netgame, sizeof(netgame_info), Network_player_rejoining.player.server, Network_player_rejoining.player.node);
+	ipx_send_internetwork_packet_data((uint8_t*)&Netgame, sizeof(netgame_info), Network_player_rejoining.player.server, Network_player_rejoining.player.node); // repeat for safety
+	ipx_send_internetwork_packet_data((uint8_t*)&Netgame, sizeof(netgame_info), Network_player_rejoining.player.server, Network_player_rejoining.player.node); // repeat for safety
 
 #ifndef SHAREWARE
 	network_send_door_updates();
@@ -1063,7 +1063,7 @@ network_dump_player(uint8_t* server, uint8_t* node, int why)
 	temp.type = PID_DUMP;
 	memcpy(temp.player.callsign, Players[Player_num].callsign, CALLSIGN_LEN + 1);
 	temp.player.connected = why;
-	ipx_send_internetwork_packet_data((uint8_t*)& temp, sizeof(sequence_packet), server, node);
+	ipx_send_internetwork_packet_data((uint8_t*)&temp, sizeof(sequence_packet), server, node);
 }
 
 void
@@ -1079,7 +1079,7 @@ network_send_game_list_request(void)
 	memcpy(me.player.server, ipx_get_my_server_address(), 4);
 	me.type = PID_GAME_LIST;
 
-	ipx_send_broadcast_packet_data((uint8_t*)& me, sizeof(sequence_packet));
+	ipx_send_broadcast_packet_data((uint8_t*)&me, sizeof(sequence_packet));
 }
 
 void
@@ -1138,7 +1138,7 @@ network_send_endlevel_sub(int player_num)
 	for (i = 0; i < N_players; i++)
 	{
 		if ((i != Player_num) && (i != player_num) && (Players[i].connected))
-			ipx_send_packet_data((uint8_t*)& end, sizeof(endlevel_info), Netgame.players[i].server, Netgame.players[i].node, Players[i].net_address);
+			ipx_send_packet_data((uint8_t*)&end, sizeof(endlevel_info), Netgame.players[i].server, Netgame.players[i].node, Players[i].net_address);
 	}
 }
 
@@ -1169,9 +1169,9 @@ network_send_game_info(sequence_packet* their)
 		Netgame.game_status = NETSTAT_ENDLEVEL;
 
 	if (!their)
-		ipx_send_broadcast_packet_data((uint8_t*)& Netgame, sizeof(netgame_info));
+		ipx_send_broadcast_packet_data((uint8_t*)&Netgame, sizeof(netgame_info));
 	else
-		ipx_send_internetwork_packet_data((uint8_t*)& Netgame, sizeof(netgame_info), their->player.server, their->player.node);
+		ipx_send_internetwork_packet_data((uint8_t*)&Netgame, sizeof(netgame_info), their->player.server, their->player.node);
 
 	Netgame.type = old_type;
 	Netgame.game_status = old_status;
@@ -1198,7 +1198,7 @@ int network_send_request(void)
 	My_Seq.type = PID_REQUEST;
 	My_Seq.player.connected = Current_level_num;
 
-	ipx_send_internetwork_packet_data((uint8_t*)& My_Seq, sizeof(sequence_packet), Netgame.players[i].server, Netgame.players[i].node);
+	ipx_send_internetwork_packet_data((uint8_t*)&My_Seq, sizeof(sequence_packet), Netgame.players[i].server, Netgame.players[i].node);
 	return i;
 }
 
@@ -1548,7 +1548,7 @@ void network_sync_poll(int nitems, newmenu_item* menus, int* key, int citem)
 	network_listen();
 
 	if (Network_status != NETSTAT_WAITING)	// Status changed to playing, exit the menu
-		* key = -2;
+		*key = -2;
 
 	if (!Network_rejoined && (timer_get_approx_seconds() > t1 + F1_0 * 2))
 	{
@@ -1561,7 +1561,7 @@ void network_sync_poll(int nitems, newmenu_item* menus, int* key, int citem)
 		mprintf((0, "Re-sending join request.\n"));
 		i = network_send_request();
 		if (i < 0)
-			* key = -2;
+			*key = -2;
 	}
 }
 
@@ -1598,7 +1598,7 @@ void network_start_poll(int nitems, newmenu_item* menus, int* key, int citem)
 	}
 
 	if (nm > MaxNumNetPlayers) {
-		nm_messagebox(TXT_ERROR, 1, TXT_OK, "%s %d %s", TXT_SORRY_ONLY, MaxNumNetPlayers, TXT_NETPLAYERS_IN);
+		nm_messagebox(TXT_ERROR, 1, TXT_OK, transl_fmt_string_i("TXT_SORRY_ONLY", MaxNumNetPlayers));
 		// Turn off the last player highlighted
 		for (i = N_players; i > 0; i--)
 			if (menus[i].value == 1)
@@ -1667,7 +1667,7 @@ void network_game_param_poll(int nitems, newmenu_item* menus, int* key, int cite
 	}
 #endif
 	if (last_cinvul != menus[opt_cinvul].value) {
-		sprintf(menus[opt_cinvul].text, "%s: %d %s", TXT_REACTOR_LIFE, menus[opt_cinvul].value * 5, TXT_MINUTES_ABBREV);
+		sprintf(menus[opt_cinvul].text, transl_fmt_string_i("TXT_REACTOR_LIFE", menus[opt_cinvul].value * 5));
 		last_cinvul = menus[opt_cinvul].value;
 		menus[opt_cinvul].redraw = 1;
 	}
@@ -1700,14 +1700,14 @@ int network_get_game_params(char* game_name, int* mode, int* game_flags, int* le
 	Netgame.control_invul_time = control_invul_time;
 #endif
 
-	sprintf(name, "%s%s", Players[Player_num].callsign, TXT_S_GAME);
+	sprintf(name, TXT_S_GAME, Players[Player_num].callsign);
 	sprintf(slevel, "1");
 
 	opt = 0;
-	m[opt].type = NM_TYPE_TEXT; m[opt].text = TXT_DESCRIPTION; opt++;
+	m[opt].type = NM_TYPE_TEXT; nm_copy_text(&m[opt], TXT_DESCRIPTION); opt++;
 
 	opt_name = opt;
-	m[opt].type = NM_TYPE_INPUT; m[opt].text = name; m[opt].text_len = NETGAME_NAME_LEN; opt++;
+	m[opt].type = NM_TYPE_INPUT; nm_copy_text(&m[opt], name); m[opt].text_len = NETGAME_NAME_LEN; opt++;
 
 	sprintf(level_text, "%s (1-%d)", TXT_LEVEL_, Last_level);
 	if (Last_secret_level < -1)
@@ -1717,42 +1717,42 @@ int network_get_game_params(char* game_name, int* mode, int* game_flags, int* le
 
 	Assert(strlen(level_text) < 32);
 
-	m[opt].type = NM_TYPE_TEXT; m[opt].text = level_text; opt++;
+	m[opt].type = NM_TYPE_TEXT; nm_copy_text(&m[opt], level_text); opt++;
 
 	opt_level = opt;
-	m[opt].type = NM_TYPE_INPUT; m[opt].text = slevel; m[opt].text_len = 4; opt++;
+	m[opt].type = NM_TYPE_INPUT; nm_copy_text(&m[opt], slevel); m[opt].text_len = 4; opt++;
 
 #ifdef ROCKWELL_CODE	
 	opt_mode = 0;
 #else
 	opt_mode = opt;
-	m[opt].type = NM_TYPE_TEXT; m[opt].text = TXT_MODE; opt++;
-	m[opt].type = NM_TYPE_RADIO; m[opt].text = TXT_ANARCHY; m[opt].value = 1; m[opt].group = 0; opt++;
-	m[opt].type = NM_TYPE_RADIO; m[opt].text = TXT_TEAM_ANARCHY; m[opt].value = 0; m[opt].group = 0; opt++;
-	m[opt].type = NM_TYPE_RADIO; m[opt].text = TXT_ANARCHY_W_ROBOTS; m[opt].value = 0; m[opt].group = 0; opt++;
-	m[opt].type = NM_TYPE_RADIO; m[opt].text = TXT_COOPERATIVE; m[opt].value = 0; m[opt].group = 0; opt++;
+	m[opt].type = NM_TYPE_TEXT; nm_copy_text(&m[opt], TXT_MODE); opt++;
+	m[opt].type = NM_TYPE_RADIO; nm_copy_text(&m[opt], TXT_ANARCHY); m[opt].value = 1; m[opt].group = 0; opt++;
+	m[opt].type = NM_TYPE_RADIO; nm_copy_text(&m[opt], TXT_TEAM_ANARCHY); m[opt].value = 0; m[opt].group = 0; opt++;
+	m[opt].type = NM_TYPE_RADIO; nm_copy_text(&m[opt], TXT_ANARCHY_W_ROBOTS); m[opt].value = 0; m[opt].group = 0; opt++;
+	m[opt].type = NM_TYPE_RADIO; nm_copy_text(&m[opt], TXT_COOPERATIVE); m[opt].value = 0; m[opt].group = 0; opt++;
 #endif
-	m[opt].type = NM_TYPE_TEXT; m[opt].text = TXT_OPTIONS; opt++;
+	m[opt].type = NM_TYPE_TEXT; nm_copy_text(&m[opt], TXT_OPTIONS); opt++;
 
 	opt_closed = opt;
-	m[opt].type = NM_TYPE_CHECK; m[opt].text = TXT_CLOSED_GAME; m[opt].value = 0; opt++;
+	m[opt].type = NM_TYPE_CHECK; nm_copy_text(&m[opt], TXT_CLOSED_GAME); m[opt].value = 0; opt++;
 #ifndef SHAREWARE
-	//	m[opt].type = NM_TYPE_CHECK; m[opt].text = TXT_SHOW_IDS; m[opt].value=0; opt++;
-	m[opt].type = NM_TYPE_CHECK; m[opt].text = TXT_SHOW_ON_MAP; m[opt].value = 0; opt++;
+	//	m[opt].type = NM_TYPE_CHECK; nm_copy_text(&m[opt], TXT_SHOW_IDS); m[opt].value=0; opt++;
+	m[opt].type = NM_TYPE_CHECK; nm_copy_text(&m[opt], TXT_SHOW_ON_MAP); m[opt].value = 0; opt++;
 #endif
 
 	opt_difficulty = opt;
-	m[opt].type = NM_TYPE_SLIDER; m[opt].value = Player_default_difficulty; m[opt].text = TXT_DIFFICULTY; m[opt].min_value = 0; m[opt].max_value = (NDL - 1); opt++;
+	m[opt].type = NM_TYPE_SLIDER; m[opt].value = Player_default_difficulty; nm_copy_text(&m[opt], TXT_DIFFICULTY); m[opt].min_value = 0; m[opt].max_value = (NDL - 1); opt++;
 
-	//	m[opt].type = NM_TYPE_TEXT; m[opt].text = "Reactor Invulnerability (mins)"; opt++;
+	//	m[opt].type = NM_TYPE_TEXT; nm_copy_text(&m[opt], "Reactor Invulnerability (mins)"); opt++;
 	//	opt_cinvul = opt;
 	//	sprintf( srinvul, "%d", control_invul_time );
-	//	m[opt].type = NM_TYPE_INPUT; m[opt].text = srinvul; m[opt].text_len=2; opt++;
+	//	m[opt].type = NM_TYPE_INPUT; nm_copy_text(&m[opt], srinvul); m[opt].text_len=2; opt++;
 
 	opt_cinvul = opt;
-	sprintf(srinvul, "%s: %d %s", TXT_REACTOR_LIFE, 5 * control_invul_time, TXT_MINUTES_ABBREV);
+	sprintf(srinvul, transl_fmt_string_i("TXT_REACTOR_LIFE", 5 * control_invul_time));
 	last_cinvul = control_invul_time;
-	m[opt].type = NM_TYPE_SLIDER; m[opt].value = control_invul_time; m[opt].text = srinvul; m[opt].min_value = 0; m[opt].max_value = 15; opt++;
+	m[opt].type = NM_TYPE_SLIDER; m[opt].value = control_invul_time; nm_copy_text(&m[opt], srinvul); m[opt].min_value = 0; m[opt].max_value = 15; opt++;
 
 	Assert(opt <= 16);
 
@@ -1773,7 +1773,7 @@ menu:
 
 
 		if (!_strnicmp(slevel, "s", 1))
-			* level = -atoi(slevel + 1);
+			*level = -atoi(slevel + 1);
 		else
 			*level = atoi(slevel);
 
@@ -1787,7 +1787,7 @@ menu:
 		* mode = NETGAME_COOPERATIVE;
 #else
 		if (m[opt_mode + 1].value)
-			* mode = NETGAME_ANARCHY;
+			*mode = NETGAME_ANARCHY;
 		else if (m[opt_mode + 2].value) {
 			*mode = NETGAME_TEAM_ANARCHY;
 		}
@@ -1799,19 +1799,19 @@ menu:
 			goto menu;
 		}
 		else if (m[opt_mode + 3].value)
-			* mode = NETGAME_ROBOT_ANARCHY;
+			*mode = NETGAME_ROBOT_ANARCHY;
 		else if (m[opt_mode + 4].value)
-			* mode = NETGAME_COOPERATIVE;
+			*mode = NETGAME_COOPERATIVE;
 		else Int3(); // Invalid mode -- see Rob
 #endif	// ifdef ROCKWELL
 
 		if (m[opt_closed].value)
-			* game_flags |= NETGAME_FLAG_CLOSED;
+			*game_flags |= NETGAME_FLAG_CLOSED;
 #ifndef SHAREWARE
 		//		if (m[opt_closed+1].value)
 		//			*game_flags |= NETGAME_FLAG_SHOW_ID;
 		if (m[opt_closed + 1].value)
-			* game_flags |= NETGAME_FLAG_SHOW_MAP;
+			*game_flags |= NETGAME_FLAG_SHOW_MAP;
 #endif
 
 		Difficulty_level = m[opt_difficulty].value;
@@ -2030,9 +2030,9 @@ network_send_sync(void)
 			continue;
 
 		// Send several times, extras will be ignored
-		ipx_send_internetwork_packet_data((uint8_t*)& Netgame, sizeof(netgame_info), Netgame.players[i].server, Netgame.players[i].node);
-		ipx_send_internetwork_packet_data((uint8_t*)& Netgame, sizeof(netgame_info), Netgame.players[i].server, Netgame.players[i].node);
-		ipx_send_internetwork_packet_data((uint8_t*)& Netgame, sizeof(netgame_info), Netgame.players[i].server, Netgame.players[i].node);
+		ipx_send_internetwork_packet_data((uint8_t*)&Netgame, sizeof(netgame_info), Netgame.players[i].server, Netgame.players[i].node);
+		ipx_send_internetwork_packet_data((uint8_t*)&Netgame, sizeof(netgame_info), Netgame.players[i].server, Netgame.players[i].node);
+		ipx_send_internetwork_packet_data((uint8_t*)&Netgame, sizeof(netgame_info), Netgame.players[i].server, Netgame.players[i].node);
 	}
 	network_read_sync_packet(&Netgame); // Read it myself, as if I had sent it
 }
@@ -2060,27 +2060,27 @@ network_select_teams(void)
 
 	// Here comes da menu
 menu:
-	m[0].type = NM_TYPE_INPUT; m[0].text = team_names[0]; m[0].text_len = CALLSIGN_LEN;
+	nm_copy_text(&m[0].type = NM_TYPE_INPUT; m[0], team_names[0]); m[0].text_len = CALLSIGN_LEN;
 
 	opt = 1;
 	for (i = 0; i < N_players; i++)
 	{
 		if (!(team_vector & (1 << i)))
 		{
-			m[opt].type = NM_TYPE_MENU; m[opt].text = Netgame.players[i].callsign; pnums[opt] = i; opt++;
+			m[opt].type = NM_TYPE_MENU; nm_copy_text(&m[opt], Netgame.players[i].callsign); pnums[opt] = i; opt++;
 		}
 	}
 	opt_team_b = opt;
-	m[opt].type = NM_TYPE_INPUT; m[opt].text = team_names[1]; m[opt].text_len = CALLSIGN_LEN; opt++;
+	m[opt].type = NM_TYPE_INPUT; nm_copy_text(&m[opt], team_names[1]); m[opt].text_len = CALLSIGN_LEN; opt++;
 	for (i = 0; i < N_players; i++)
 	{
 		if (team_vector & (1 << i))
 		{
-			m[opt].type = NM_TYPE_MENU; m[opt].text = Netgame.players[i].callsign; pnums[opt] = i; opt++;
+			m[opt].type = NM_TYPE_MENU; nm_copy_text(&m[opt], Netgame.players[i].callsign); pnums[opt] = i; opt++;
 		}
 	}
-	m[opt].type = NM_TYPE_TEXT; m[opt].text = ""; opt++;
-	m[opt].type = NM_TYPE_MENU; m[opt].text = TXT_ACCEPT; opt++;
+	m[opt].type = NM_TYPE_TEXT; nm_copy_text(&m[opt], ""); opt++;
+	m[opt].type = NM_TYPE_MENU; nm_copy_text(&m[opt], TXT_ACCEPT); opt++;
 
 	Assert(opt <= MAX_PLAYERS + 4);
 
@@ -2127,13 +2127,13 @@ network_select_players(void)
 
 	for (i = 0; i < MAX_PLAYERS; i++) {
 		sprintf(text[i], "%d.  %-16s", i + 1, "");
-		m[i].type = NM_TYPE_CHECK; m[i].text = text[i]; m[i].value = 0;
+		nm_copy_text(&m[i].type = NM_TYPE_CHECK; m[i], text[i]); m[i].value = 0;
 	}
 
 	m[0].value = 1;				// Assume server will play...
 
 	sprintf(text[0], "%d. %-16s", 1, Players[Player_num].callsign);
-	sprintf(title, "%s %d %s", TXT_TEAM_SELECT, MaxNumNetPlayers, TXT_TEAM_PRESS_ENTER);
+	sprintf(title, transl_fmt_string_i("TXT_TEAM_SELECT", MaxNumNetPlayers));
 
 GetPlayersAgain:
 	j = newmenu_do1(NULL, title, MAX_PLAYERS, m, network_start_poll, 1);
@@ -2166,7 +2166,7 @@ GetPlayersAgain:
 	}
 
 	if (N_players > MaxNumNetPlayers) {
-		nm_messagebox(TXT_ERROR, 1, TXT_OK, "%s %d %s", TXT_SORRY_ONLY, MaxNumNetPlayers, TXT_NETPLAYERS_IN);
+		nm_messagebox(TXT_ERROR, 1, TXT_OK, transl_fmt_string_i("TXT_SORRY_ONLY", MaxNumNetPlayers));
 		N_players = save_nplayers;
 		goto GetPlayersAgain;
 	}
@@ -2320,7 +2320,7 @@ void network_join_poll(int nitems, newmenu_item* menus, int* key, int citem)
 			Network_socket = IPX_DEFAULT_SOCKET;
 
 		if (Network_socket != osocket) {
-			sprintf(menus[0].text, "%s %+d", TXT_CURRENT_IPX_SOCKET, Network_socket);
+			sprintf(menus[0].text, TXT_CURRENT_IPX_SOCKET, Network_socket);
 			menus[0].redraw = 1;
 			mprintf((0, "Changing to socket %d\n", Network_socket));
 			network_listen();
@@ -2402,15 +2402,15 @@ network_wait_for_sync(void)
 
 	Network_status = NETSTAT_WAITING;
 
-	m[0].type = NM_TYPE_TEXT; m[0].text = text;
-	m[1].type = NM_TYPE_TEXT; m[1].text = TXT_NET_LEAVE;
+	nm_copy_text(&m[0].type = NM_TYPE_TEXT; m[0], text);
+	nm_copy_text(&m[1].type = NM_TYPE_TEXT; m[1], TXT_NET_LEAVE);
 
 	i = network_send_request();
 
 	if (i < 0)
 		return(-1);
 
-	sprintf(m[0].text, "%s\n'%s' %s", TXT_NET_WAITING, Netgame.players[i].callsign, TXT_NET_TO_ENTER);
+	sprintf(m[0].text, TXT_NET_WAITING, Netgame.players[i].callsign);
 
 menu:
 	choice = newmenu_do(NULL, TXT_WAIT, 2, m, network_sync_poll);
@@ -2433,7 +2433,7 @@ menu:
 		memcpy(me.player.callsign, Players[Player_num].callsign, CALLSIGN_LEN + 1);
 		memcpy(me.player.node, ipx_get_my_local_address(), 6);
 		memcpy(me.player.server, ipx_get_my_server_address(), 4);
-		ipx_send_internetwork_packet_data((uint8_t*)& me, sizeof(sequence_packet), Netgame.players[0].server, Netgame.players[0].node);
+		ipx_send_internetwork_packet_data((uint8_t*)&me, sizeof(sequence_packet), Netgame.players[0].server, Netgame.players[0].node);
 		N_players = 0;
 		Function_mode = FMODE_MENU;
 		Game_mode = GM_GAME_OVER;
@@ -2486,7 +2486,7 @@ network_wait_for_requests(void)
 
 	Network_status = NETSTAT_WAITING;
 
-	m[0].type = NM_TYPE_TEXT; m[0].text = TXT_NET_LEAVE;
+	nm_copy_text(&m[0].type = NM_TYPE_TEXT; m[0], TXT_NET_LEAVE);
 
 	mprintf((0, "Entered wait_for_requests : N_players = %d.\n", N_players));
 
@@ -2587,16 +2587,16 @@ void network_join_game()
 	memset(m, 0, sizeof(newmenu_item) * (MAX_ACTIVE_NETGAMES * 2));
 	memset(Active_games, 0, sizeof(netgame_info) * MAX_ACTIVE_NETGAMES);
 
-	m[0].text = menu_text[0];
+	nm_copy_text(&m[0], menu_text[0]);
 	m[0].type = NM_TYPE_TEXT;
 	if (Network_allow_socket_changes)
-		sprintf(m[0].text, "Current IPX Socket is default%+d", Network_socket);
+		sprintf(m[0].text, TXT_CURRENT_IPX_SOCKET, Network_socket);
 	else
 		sprintf(m[0].text, "");
 
 	for (i = 0; i < MAX_ACTIVE_NETGAMES; i++) {
-		m[2 * i + 1].text = menu_text[2 * i + 1];
-		m[2 * i + 2].text = menu_text[2 * i + 2];
+		nm_copy_text(&m[2 * i + 1], menu_text[2 * i + 1]);
+		nm_copy_text(&m[2 * i + 2], menu_text[2 * i + 2]);
 		m[2 * i + 1].type = NM_TYPE_MENU;
 		m[2 * i + 2].type = NM_TYPE_TEXT;
 		sprintf(m[(2 * i) + 1].text, "%d.                                       ", i + 1);
@@ -2763,7 +2763,7 @@ void network_timeout_player(int playernum)
 
 	digi_play_sample(SOUND_HUD_MESSAGE, F1_0);
 
-	HUD_init_message("%s %s", Players[playernum].callsign, TXT_DISCONNECTING);
+	HUD_init_message(TXT_DISCONNECTING, Players[playernum].callsign);
 	for (i = 0; i < N_players; i++)
 		if (Players[i].connected)
 			n++;
@@ -2825,7 +2825,7 @@ void network_do_frame(int force, int listen)
 				if ((Players[i].connected) && (i != Player_num)) {
 					MySyncPack.numpackets = Players[i].n_packets_sent++;
 					//					mprintf((0, "sync pack is %d bytes long.\n", sizeof(frame_info)));
-					ipx_send_packet_data((uint8_t*)& MySyncPack, sizeof(frame_info) - NET_XDATA_SIZE + MySyncPack.data_size, Netgame.players[i].server, Netgame.players[i].node, Players[i].net_address);
+					ipx_send_packet_data((uint8_t*)&MySyncPack, sizeof(frame_info) - NET_XDATA_SIZE + MySyncPack.data_size, Netgame.players[i].server, Netgame.players[i].node, Players[i].net_address);
 				}
 			}
 			MySyncPack.data_size = 0;		// Start data over at 0 length.
@@ -2974,7 +2974,7 @@ void network_read_pdata_packet(frame_info* pd)
 		create_player_appearance_effect(&Objects[TheirObjnum]);
 
 		digi_play_sample(SOUND_HUD_MESSAGE, F1_0);
-		HUD_init_message("'%s' %s", Players[TheirPlayernum].callsign, TXT_REJOIN);
+		HUD_init_message(TXT_REJOIN, Players[TheirPlayernum].callsign);
 
 #ifndef SHAREWARE
 		multi_send_score();

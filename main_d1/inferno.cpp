@@ -83,6 +83,7 @@ static char copyright[] = "DESCENT   COPYRIGHT (C) 1994,1995 PARALLAX SOFTWARE C
 #include "cdrom.h"
 #endif
 #include "gameseq.h"
+#include "locale/transl.h"
 
 #ifdef EDITOR
 #include "editor\editor.h"
@@ -292,6 +293,20 @@ void check_memory()
 	//it's fine don't worry about it
 }
 
+char lngbuf[9];
+
+const char* get_language()
+{
+	FILE* lngfile = fopen("LANGUAGE.CFG", "r");
+	if (lngfile)
+	{
+		fread(lngbuf, 1, 9, lngfile);
+		lngbuf[8] = '\0';
+		return lngbuf;
+	}
+	return "ENGLISH";
+}
+
 
 int Inferno_verbose = 0;
 
@@ -383,6 +398,11 @@ int D_DescentMain(int argc, const char** argv)
 	}*/
 
 	load_text();
+	{
+		char langhog[16];
+		sprintf(langhog, "%s.HOG", get_language());
+		if (!transl_load_language(langhog)) return 1;
+	}
 
 	//	set_exit_message("\n\n%s", TXT_THANKS);
 
@@ -482,6 +502,7 @@ int D_DescentMain(int argc, const char** argv)
 	mopen(1, 2, 1, 78, 5, "Errors & Serious Warnings");
 #endif
 
+	printf("Language=[%s] %s \"%s\"\n", transl_get_string("LanguageCode"), transl_get_string("EnglishName"), transl_get_string("NativeName"));
 	if (Inferno_verbose) printf("%s", TXT_VERBOSE_1);
 	ReadConfigFile();
 	if (Inferno_verbose) printf("\n%s", TXT_VERBOSE_2);

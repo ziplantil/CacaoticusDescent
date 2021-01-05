@@ -414,6 +414,27 @@ void mem_free(void* buffer)
 	free(buffer);
 }
 
+void* mem_realloc(void* ptr, unsigned int new_size, const char* var, const char* filename, int line, int fill_zero)
+{
+	if (Initialized == 0)
+		mem_init();
+
+	if (ptr == NULL)
+		return mem_malloc(new_size, var, filename, line, fill_zero);
+
+	void* res = realloc(ptr, new_size);
+
+	if (res == NULL) {
+		fprintf(stderr, "\nMEM_OUT_OF_MEMORY: Realloc returned NULL\n");
+		fprintf(stderr, "\tVar %s, file %s, line %d.\n", var, filename, line);
+		Error("MEM_OUT_OF_MEMORY");
+		Int3();
+		return NULL;
+	}
+
+	return res;
+}
+
 void mem_display_blocks(void)
 {
 	if (Initialized == 0) return;

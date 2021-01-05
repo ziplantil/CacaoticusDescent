@@ -731,7 +731,7 @@ void apply_damage_to_controlcen(object* controlcen, fix damage, short who)
 		if (Objects[who].id == Player_num) {
 			int secs = f2i(Netgame.control_invul_time - Players[Player_num].time_level) % 60;
 			int mins = f2i(Netgame.control_invul_time - Players[Player_num].time_level) / 60;
-			HUD_init_message("%s %d:%02d.", TXT_CNTRLCEN_INVUL, mins, secs);
+			HUD_init_message(transl_fmt_string_ii("TXT_CNTRLCEN_INVUL", mins, secs));
 		}
 		return;
 	}

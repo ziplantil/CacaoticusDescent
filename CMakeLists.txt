@@ -58,6 +58,9 @@ set(SHARED_SOURCES
 	fix/tables.cpp
 	iff/iff.cpp
 	iff/iff.h
+	locale/transl.cpp
+	locale/transl.h
+	locale/utf8.h
 	mem/mem.cpp
 	mem/mem.h
 	misc/byteswap.cpp

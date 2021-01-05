@@ -34,7 +34,7 @@ typedef struct hogfile
 	int 	length;
 } hogfile;
 
-#define MAX_HOGFILES 250
+#define MAX_HOGFILES 600
 
 #define HOG_FILENAME_MAX 64
 
@@ -50,6 +50,11 @@ char AltHogFilename[HOG_FILENAME_MAX];
 
 char AltHogDir[HOG_FILENAME_MAX];
 char AltHogdir_initialized = 0;
+
+hogfile LangHogFiles[MAX_HOGFILES];
+char LangHogfile_initialized = 0;
+int LangHogFilesNum = 0;
+char LangHogFilename[HOG_FILENAME_MAX];
 
 void cfile_use_alternate_hogdir(const char* path)
 {
@@ -188,6 +193,21 @@ FILE* cfile_find_libfile(const char* name, int* length)
 		}
 	}
 
+	if (LangHogfile_initialized)
+	{
+		for (i = 0; i < LangHogFilesNum; i++)
+		{
+			if (!_stricmp(LangHogFiles[i].name, name))
+			{
+				fp = cfile_get_filehandle(LangHogFilename, "rb");
+				if (fp == NULL) return NULL;
+				fseek(fp, LangHogFiles[i].offset, SEEK_SET);
+				*length = LangHogFiles[i].length;
+				return fp;
+			}
+		}
+	}
+
 #ifndef BUILD_DESCENT2 //must call cfile_init in Descent 2. Descent 1 can run without a hogfile if you really wanted. 
 	if (!Hogfile_initialized) 
 	{
@@ -209,6 +229,22 @@ FILE* cfile_find_libfile(const char* name, int* length)
 		}
 	}
 	return NULL;
+}
+
+int cfile_use_langfile(const char* name)
+{
+	if (name)
+	{
+		strncpy(LangHogFilename, name, HOG_FILENAME_MAX - 1);
+		cfile_init_hogfile(LangHogFilename, LangHogFiles, &LangHogFilesNum);
+		LangHogfile_initialized = 1;
+		return (LangHogFilesNum > 0);
+	}
+	else
+	{
+		LangHogfile_initialized = 0;
+		return 1;
+	}
 }
 
 int cfile_use_alternate_hogfile(const char* name)
