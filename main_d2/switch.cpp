@@ -38,6 +38,7 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #include "2d/palette.h"
 #include "robot.h"
 #include "bm.h"
+#include "locale/transl.h"
 
 #ifdef EDITOR
 #include "editor\editor.h"
@@ -320,17 +321,13 @@ int do_change_walls(int8_t trigger_num)
 	return ret;
 }
 
-void print_trigger_message (int pnum,int trig,int shot,const char *message)
+void print_trigger_message (int pnum,int trig,int shot,const char *tkey)
  {
-	char *pl;		//points to 's' or nothing for plural word
-
-   if (pnum!=Player_num)
+	if (pnum!=Player_num)
 		return;
 
-	pl = const_cast<char*>((Triggers[trig].num_links>1)?"s":"");
-  
     if (!(Triggers[trig].flags & TF_NO_MESSAGE) && shot)
-     HUD_init_message (message,pl);
+     HUD_init_message (transl_get_string(transl_get_plural_key(tkey, Triggers[trig].num_links)));
  }
  
 
@@ -465,7 +462,7 @@ int check_trigger_sub(int trigger_num, int pnum,int shot)
 
 			if (Game_mode & GM_MULTI) 
 			{
-				HUD_init_message("Secret Level Teleporter disabled in multiplayer!");
+				HUD_init_message(transl_get_string("NoSecretLevelInMulti"));
 				digi_play_sample( SOUND_BAD_SELECTION, F1_0 );
 				break;
 			}
@@ -478,14 +475,14 @@ int check_trigger_sub(int trigger_num, int pnum,int shot)
 
 			if ((Newdemo_state != ND_STATE_PLAYBACK) && truth) 
 			{
-				HUD_init_message("Secret Level destroyed.  Exit disabled.");
+				HUD_init_message(transl_get_string("CannotEnterSecretLevel"));
 				digi_play_sample( SOUND_BAD_SELECTION, F1_0 );
 				break;
 			}
 			#endif
 
 			#ifdef SHAREWARE
-				HUD_init_message("Secret Level Teleporter disabled in Descent 2 Demo");
+				HUD_init_message(transl_get_string("CannotEnterSecretLevelDemo"));
 				digi_play_sample( SOUND_BAD_SELECTION, F1_0 );
 				break;
 			#endif
@@ -509,43 +506,43 @@ int check_trigger_sub(int trigger_num, int pnum,int shot)
 		case TT_OPEN_DOOR:
 			mprintf((0,"D"));
 			do_link(trigger_num);
-			print_trigger_message (pnum,trigger_num,shot,"Door%s opened!");
+			print_trigger_message (pnum,trigger_num,shot,"TriggerDoorOpened");
 			
 			break;
 
 		case TT_CLOSE_DOOR:
 			do_close_door(trigger_num);
-			print_trigger_message (pnum,trigger_num,shot,"Door%s closed!");
+			print_trigger_message (pnum,trigger_num,shot,"TriggerDoorClosed");
 			break;
 
 		case TT_UNLOCK_DOOR:
 			mprintf((0,"D"));
 			do_unlock_doors(trigger_num);
-			print_trigger_message (pnum,trigger_num,shot,"Door%s unlocked!");
+			print_trigger_message (pnum,trigger_num,shot,"TriggerDoorUnlocked");
 			
 			break;
 	
 		case TT_LOCK_DOOR:
 			mprintf((0,"D"));
 			do_lock_doors(trigger_num);
-			print_trigger_message (pnum,trigger_num,shot,"Door%s locked!");
+			print_trigger_message (pnum,trigger_num,shot,"TriggerDoorLocked");
 
 			break;
 	
 		case TT_OPEN_WALL:
 			if (do_change_walls(trigger_num))
 				if (wall_is_forcefield(trig))
-					print_trigger_message (pnum,trigger_num,shot,"Force field%s deactivated!");
+					print_trigger_message (pnum,trigger_num,shot,"TriggerForceFieldOpened");
 				else
-					print_trigger_message (pnum,trigger_num,shot,"Wall%s opened!");
+					print_trigger_message (pnum,trigger_num,shot,"TriggerWallOpened");
 			break;
 
 		case TT_CLOSE_WALL:
 			if (do_change_walls(trigger_num))
 				if (wall_is_forcefield(trig))
-					print_trigger_message (pnum,trigger_num,shot,"Force field%s activated!");
+					print_trigger_message (pnum,trigger_num,shot,"TriggerForceFieldClosed");
 				else
-					print_trigger_message (pnum,trigger_num,shot,"Wall%s closed!");
+					print_trigger_message (pnum,trigger_num,shot,"TriggerWallClosed");
 			break;
 
 		case TT_ILLUSORY_WALL:
@@ -561,23 +558,23 @@ int check_trigger_sub(int trigger_num, int pnum,int shot)
 		case TT_ILLUSION_ON:
 			mprintf((0,"I"));
 			do_il_on(trigger_num);
-			print_trigger_message (pnum,trigger_num,shot,"Illusion%s on!");
+			print_trigger_message (pnum,trigger_num,shot,"TriggerIllusionOn");
 			break;
 	
 		case TT_ILLUSION_OFF:
 			mprintf((0,"i"));
 			do_il_off(trigger_num);
-			print_trigger_message (pnum,trigger_num,shot,"Illusion%s off!");
+			print_trigger_message (pnum,trigger_num,shot,"TriggerIllusionOff");
 			break;
 
 		case TT_LIGHT_OFF:
 			if (do_light_off(trigger_num))
-				print_trigger_message (pnum,trigger_num,shot,"Lights off!");
+				print_trigger_message (pnum,trigger_num,shot,"TriggerLightOff");
 			break;
 
 		case TT_LIGHT_ON:
 			if (do_light_on(trigger_num))
-				print_trigger_message (pnum,trigger_num,shot,"Lights on!");
+				print_trigger_message (pnum,trigger_num,shot,"TriggerLightOn");
 
 			break;
 

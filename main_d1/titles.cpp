@@ -453,7 +453,7 @@ int show_char_delay(const char *message, int delay, int robot_num, int cursor_fl
 	if (cursor_flag && delay) 
 	{
 		gr_set_fontcolor(Briefing_foreground_colors[Current_color], -1);
-		gr_printf(Briefing_text_x + 1, Briefing_text_y, "_");
+		gr_printf(Briefing_text_x + 1, Briefing_text_y, transl_get_string("BriefingCursor"));
 	}
 	for (i = 0; i < 2; i++) 
 	{
@@ -478,7 +478,7 @@ int show_char_delay(const char *message, int delay, int robot_num, int cursor_fl
 	if (cursor_flag && delay) 
 	{
 		gr_set_fontcolor(Erase_color, -1);
-		gr_printf(Briefing_text_x + 1, Briefing_text_y, "_");
+		gr_printf(Briefing_text_x + 1, Briefing_text_y, transl_get_string("BriefingCursor"));
 	}
 
 	//	Draw the character
@@ -592,7 +592,7 @@ void flash_cursor(int cursor_flag)
 	else
 		gr_set_fontcolor(Erase_color, -1);
 
-	gr_printf(Briefing_text_x + 1, Briefing_text_y, "_");
+	gr_printf(Briefing_text_x + 1, Briefing_text_y, transl_get_string("BriefingCursor"));
 
 }
 

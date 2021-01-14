@@ -3,16 +3,23 @@ _Cacaoticus Descent_ is a version of _[Chocolate Descent](https://github.com/Ins
 localization/translation support to the game.
 
 In order to run Cacaoticus Descent, you need to have a language
-.HOG. See the _data_ folder.
+.HOG (.LHG). See the _data\_d1_ and _data\_d2_ folders.
 
 To select a language, create a file called `LANGUAGE.CFG` in
-the game directory and enter the language .HOG name
-(without the file extension).
+the game directory and enter the language .LHG name
+(without the file extension). An in-game language menu
+is planned.
+
+See `LANGUAGE.TXT` for information on what an .LHG file
+contains and how to make one.
 
 ## TODO
-* Descent 2 (currently only D1 supported)
 * Test larger fonts (such as in multiplayer etc.)
 * Add RTL support
+
+## Language HOG (.LHG) details
+* `ENGLISH.LHG`: based on extracted strings, should be effectively identical to the original
+* `FINNISH.LHG`: translated by ziplantil (briefings not yet translated)
 
 The original _Chocolate Descent_ description follows.
 

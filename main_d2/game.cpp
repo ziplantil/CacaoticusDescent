@@ -1302,7 +1302,7 @@ void game_draw_time_left()
         i++;
 #endif
 
-        sprintf( temp_string, "Time left: %d secs", i );
+        sprintf( temp_string, transl_fmt_string_i("Unused_GameTimeLeft", i) );
 
         if (i>=0)
          gr_string(0, 32, temp_string );
@@ -1327,7 +1327,7 @@ void modex_clear_box(int x,int y,int w,int h)
 	gr_free_canvas(temp_canv);
 }
 
-extern void modex_printf(int x,int y,char *s,grs_font *font,int color);
+extern void modex_printf(int x,int y,const char *s,grs_fontstyle *font,int color);
 
 // mac routine to drop contents of screen to a pict file using copybits
 // save a PICT to a file
@@ -1362,7 +1362,7 @@ void SavePictScreen(int multiplayer)
 	pfilename = c2pstr(filename);
 	if (!multiplayer) {
 		show_cursor();
-		StandardPutFile("\pSave PICT as:", pfilename, &sf_reply);
+		StandardPutFile(transl_get_string("MacSavePICTas"), pfilename, &sf_reply);
 		if (!sf_reply.sfGood) 
 			goto end;
 		memcpy( &spec, &(sf_reply.sfFile), sizeof(FSSpec) );
@@ -1421,7 +1421,7 @@ void save_screen_shot(int automap_flag)
 	fix t1;
 	char message[100];
 	grs_canvas *screen_canv=&grd_curscreen->sc_canvas;
-	grs_font *save_font;
+	grs_fontstyle *save_font;
 	static int savenum=0;
 	static int stereo_savenum=0;
 	grs_canvas *temp_canv,*temp_canv2,*save_canv;
@@ -1467,11 +1467,11 @@ void save_screen_shot(int automap_flag)
 		sprintf(savename2,"right%02d.pcx",stereo_savenum);
 		if (VR_eye_switch) {char t[FILENAME_LEN]; strcpy(t,savename); strcpy(savename,savename2); strcpy(savename2,t);}
 		stereo_savenum++;
-		sprintf( message, "%s '%s' & '%s'", TXT_DUMPING_SCREEN, savename, savename2 );
+		sprintf( message, "%s", transl_fmt_string_ss("TXT_DUMPING_SCREEN_3D", savename, savename2));
 	}
 	else {
 		sprintf(savename,"screen%02d.pcx",savenum++);
-		sprintf( message, "%s '%s'", TXT_DUMPING_SCREEN, savename );
+		sprintf( message, "%s", transl_fmt_string_s("TXT_DUMPING_SCREEN", savename));
 	}
 
 	if (!automap_flag)		//if from automap, curcanv is already visible canv
@@ -1932,26 +1932,26 @@ void show_help()
 	int nitems;
 	newmenu_item m[25];
 
-	m[ 0].type = NM_TYPE_TEXT; m[ 0].text = TXT_HELP_ESC;
-	m[ 1].type = NM_TYPE_TEXT; m[ 1].text = TXT_HELP_ALT_F2;
-	m[ 2].type = NM_TYPE_TEXT; m[ 2].text = TXT_HELP_ALT_F3;
-	m[ 3].type = NM_TYPE_TEXT; m[ 3].text = TXT_HELP_F2;
-	m[ 4].type = NM_TYPE_TEXT; m[ 4].text = TXT_HELP_F3;
-	m[ 5].type = NM_TYPE_TEXT; m[ 5].text = TXT_HELP_F4;
-	m[ 6].type = NM_TYPE_TEXT; m[ 6].text = TXT_HELP_F5;
-	m[ 7].type = NM_TYPE_TEXT; m[ 7].text = TXT_HELP_PAUSE;
-	m[ 8].type = NM_TYPE_TEXT; m[ 8].text = TXT_HELP_MINUSPLUS;
-	m[ 9].type = NM_TYPE_TEXT; m[ 9].text = TXT_HELP_PRTSCN;
-	m[10].type = NM_TYPE_TEXT; m[10].text = TXT_HELP_1TO5;
-	m[11].type = NM_TYPE_TEXT; m[11].text = TXT_HELP_6TO10;
-	m[12].type = NM_TYPE_TEXT; m[12].text = const_cast<char*>("Shift-F1\t  Cycle left window");
-	m[13].type = NM_TYPE_TEXT; m[13].text = const_cast<char*>("Shift-F2\t  Cycle right window");
-	m[14].type = NM_TYPE_TEXT; m[14].text = const_cast<char*>("Shift-F4\t  GuideBot menu");
-	m[15].type = NM_TYPE_TEXT; m[15].text = const_cast<char*>("Alt-Shift-F4\t  Rename GuideBot");
-	m[16].type = NM_TYPE_TEXT; m[16].text = const_cast<char*>("Shift-F5\t  Drop primary");
-	m[17].type = NM_TYPE_TEXT; m[17].text = const_cast<char*>("Shift-F6\t  Drop secondary");
-	m[18].type = NM_TYPE_TEXT; m[18].text = const_cast<char*>("Shift-F7\t  Calibrate joystick");
-	m[19].type = NM_TYPE_TEXT; m[19].text = const_cast<char*>("Shift-number\t  GuideBot commands");
+	m[ 0].type = NM_TYPE_TEXT; nm_copy_text(&m[ 0], TXT_HELP_ESC);
+	m[ 1].type = NM_TYPE_TEXT; nm_copy_text(&m[ 1], TXT_HELP_ALT_F2);
+	m[ 2].type = NM_TYPE_TEXT; nm_copy_text(&m[ 2], TXT_HELP_ALT_F3);
+	m[ 3].type = NM_TYPE_TEXT; nm_copy_text(&m[ 3], TXT_HELP_F2);
+	m[ 4].type = NM_TYPE_TEXT; nm_copy_text(&m[ 4], TXT_HELP_F3);
+	m[ 5].type = NM_TYPE_TEXT; nm_copy_text(&m[ 5], TXT_HELP_F4);
+	m[ 6].type = NM_TYPE_TEXT; nm_copy_text(&m[ 6], TXT_HELP_F5);
+	m[ 7].type = NM_TYPE_TEXT; nm_copy_text(&m[ 7], TXT_HELP_PAUSE);
+	m[ 8].type = NM_TYPE_TEXT; nm_copy_text(&m[ 8], TXT_HELP_MINUSPLUS);
+	m[ 9].type = NM_TYPE_TEXT; nm_copy_text(&m[ 9], TXT_HELP_PRTSCN);
+	m[10].type = NM_TYPE_TEXT; nm_copy_text(&m[10], TXT_HELP_1TO5);
+	m[11].type = NM_TYPE_TEXT; nm_copy_text(&m[11], TXT_HELP_6TO10);
+	m[12].type = NM_TYPE_TEXT; nm_copy_text(&m[12], transl_get_string("HelpShiftF1"));
+	m[13].type = NM_TYPE_TEXT; nm_copy_text(&m[13], transl_get_string("HelpShiftF2"));
+	m[14].type = NM_TYPE_TEXT; nm_copy_text(&m[14], transl_get_string("HelpShiftF4"));
+	m[15].type = NM_TYPE_TEXT; nm_copy_text(&m[15], transl_get_string("HelpAltShiftF4"));
+	m[16].type = NM_TYPE_TEXT; nm_copy_text(&m[16], transl_get_string("HelpShiftF5"));
+	m[17].type = NM_TYPE_TEXT; nm_copy_text(&m[17], transl_get_string("HelpShiftF6"));
+	m[18].type = NM_TYPE_TEXT; nm_copy_text(&m[18], transl_get_string("HelpShiftF7"));
+	m[19].type = NM_TYPE_TEXT; nm_copy_text(&m[19], transl_get_string("HelpShiftNUm"));
 	nitems = 20;
 
 	full_palette_save();
@@ -2494,7 +2494,7 @@ void toggle_movie_saving()
 	if (Saving_movie_frames) {
 		newmenu_item m[1];
 
-		m[0].type=NM_TYPE_INPUT; m[0].text_len = 50; m[0].text = movie_path;
+		m[0].type=NM_TYPE_INPUT; m[0].text_len = 50; nm_copy_text(&m[0], movie_path);
 		exit = newmenu_do( NULL, "Directory for movie frames?" , 1, &(m[0]), NULL );
 
 		if (exit==-1) 
@@ -2503,6 +2503,7 @@ void toggle_movie_saving()
 			return;
 		}
 
+		strcpy(movie_path, m[0].text);
 		while (isspace(movie_path[strlen(movie_path)-1]))
 			movie_path[strlen(movie_path)-1] = 0;
 		if (movie_path[strlen(movie_path)-1]!='\\' && movie_path[strlen(movie_path)-1]!=':')

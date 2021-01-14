@@ -233,8 +233,8 @@ sequence_packet My_Seq;
 char WantPlayersInfo=0;
 char WaitingForPlayerInfo=0;
 
-char *RankStrings[]={"(unpatched) ","Cadet ","Ensign ","Lieutenant ","Lt.Commander ",
-								"Commander ","Captain ","Vice Admiral ","Admiral ","Demigod "};
+char *RankStrings[]={"MultiRankUnpatched","MultiRankCadet","MultiRankEnsign","MultiRankLieutenant","MultiRankLtCommander",
+								"MultiRankCommander","MultiRankCaptain","MultiRankViceAdmiral","MultiRankAdmiral","MultiRankDemigod"};
 
 extern obj_position Player_init[MAX_PLAYERS];
 
@@ -776,9 +776,9 @@ network_new_player(sequence_packet *their)
    ClipRank (&their->player.rank);
    
    if (FindArg("-norankings"))
-	  HUD_init_message("'%s' %s\n",their->player.callsign, TXT_JOINING);
+	  HUD_init_message(TXT_JOINING,their->player.callsign);
    else   
-     HUD_init_message("%s'%s' %s\n",RankStrings[their->player.rank],their->player.callsign, TXT_JOINING);
+     HUD_init_message(transl_fmt_string_ts("TXT_JOINING_RANK",RankStrings[their->player.rank],their->player.callsign));
 	
 	multi_make_ghost_player(pnum);
 
@@ -968,11 +968,11 @@ void network_welcome_player(sequence_packet *their)
 		Network_player_added = 0;
 
 		digi_play_sample(SOUND_HUD_MESSAGE, F1_0);
-		
+
 		if (FindArg("-norankings"))
-			HUD_init_message("'%s' %s", Players[player_num].callsign, TXT_REJOIN);
+			HUD_init_message(TXT_REJOIN, their->player.callsign);
 		else
-			HUD_init_message("%s'%s' %s", RankStrings[NetPlayers.players[player_num].rank],Players[player_num].callsign, TXT_REJOIN);
+			HUD_init_message(transl_fmt_string_ts("TXT_REJOIN_RANK", RankStrings[their->player.rank], their->player.callsign));
 	}
 
 	Players[player_num].KillGoalCount=0;
@@ -2210,11 +2210,11 @@ void network_process_dump(sequence_packet *their)
 			{
 				if (i!=network_who_is_master())
 				{
-					HUD_init_message ("%s attempted to kick you out.",their->player.callsign);
+					HUD_init_message (transl_fmt_string_s("MultiPlayerTriedToKickYou",their->player.callsign));
 				}
 				else
 				{
-				  sprintf (temp,"%s has kicked you out!",their->player.callsign);
+				  sprintf (temp,transl_fmt_string_s("MultiPlayerKickedYou",their->player.callsign));
 				  nm_messagebox(NULL, 1, TXT_OK, &temp);
 			    if (Network_status==NETSTAT_PLAYING)
 				  {
@@ -2854,7 +2854,7 @@ void network_start_poll( int nitems, newmenu_item * menus, int * key, int citem 
 	}
 
 	if ( nm > MaxNumNetPlayers )    {
-		nm_messagebox( TXT_ERROR, 1, TXT_OK, "%s %d %s", TXT_SORRY_ONLY, MaxNumNetPlayers, TXT_NETPLAYERS_IN );
+		nm_messagebox(TXT_ERROR, 1, TXT_OK, transl_fmt_string_i("TXT_SORRY_ONLY", MaxNumNetPlayers));
 		// Turn off the last player highlighted
 		for (i = N_players; i > 0; i--)
 			if (menus[i].value == 1) 
@@ -2878,7 +2878,7 @@ void network_start_poll( int nitems, newmenu_item * menus, int * key, int citem 
 		if (FindArg("-norankings"))
 	      sprintf( menus[N_players-1].text, "%d. %-20s", N_players,NetPlayers.players[N_players-1].callsign );
 		else
-	      sprintf( menus[N_players-1].text, "%d. %s%-20s", N_players, RankStrings[NetPlayers.players[N_players-1].rank],NetPlayers.players[N_players-1].callsign );
+	      sprintf( menus[N_players-1].text, "%d. %s%-20s", N_players, transl_get_string(RankStrings[NetPlayers.players[N_players-1].rank]),NetPlayers.players[N_players-1].callsign );
 
 		menus[N_players-1].redraw = 1;
 		if (N_players <= MaxNumNetPlayers)
@@ -2898,7 +2898,7 @@ void network_start_poll( int nitems, newmenu_item * menus, int * key, int citem 
 	 if (FindArg("-norankings"))	
 		 sprintf( menus[i].text, "%d. %-20s", i+1, NetPlayers.players[i].callsign );
 	 else
-		 sprintf( menus[i].text, "%d. %s%-20s", i+1, RankStrings[NetPlayers.players[i].rank],NetPlayers.players[i].callsign );
+		 sprintf( menus[i].text, "%d. %s%-20s", i+1, transl_get_string(RankStrings[NetPlayers.players[i].rank]),NetPlayers.players[i].callsign );
 			if (i < MaxNumNetPlayers)
 				menus[i].value = 1;
 			else
@@ -2995,7 +2995,7 @@ void network_game_param_poll( int nitems, newmenu_item * menus, int * key, int c
 
     if ( last_maxnet != menus[opt_maxnet].value )   
 	{
-		sprintf( menus[opt_maxnet].text, "Maximum players: %d", menus[opt_maxnet].value+2 );
+		sprintf( menus[opt_maxnet].text, transl_fmt_string_i("MultiMaximumPlayers", menus[opt_maxnet].value+2 ));
 		last_maxnet = menus[opt_maxnet].value;
 		menus[opt_maxnet].redraw = 1;
 	}               
@@ -3049,8 +3049,8 @@ int network_get_game_params( char * game_name, int *mode, int *game_flags, int *
 	strcpy(Netgame.mission_name, Mission_list[new_mission_num].filename);
 	strcpy(Netgame.mission_title, Mission_list[new_mission_num].mission_name);
 	Netgame.control_invul_time = control_invul_time;
-	
-	sprintf( name, "%s%s", Players[Player_num].callsign, TXT_S_GAME );
+
+	sprintf(name, TXT_S_GAME, Players[Player_num].callsign);
 	sprintf( slevel, "1" );
 
 	opt = 0;
@@ -3079,33 +3079,33 @@ int network_get_game_params( char * game_name, int *mode, int *game_flags, int *
 	m[opt].type = NM_TYPE_RADIO; m[opt].text = TXT_TEAM_ANARCHY; m[opt].value=0; m[opt].group=0; opt_team_anarchy=opt; opt++;
 	m[opt].type = NM_TYPE_RADIO; m[opt].text = TXT_ANARCHY_W_ROBOTS; m[opt].value=0; m[opt].group=0; opt++;
 	m[opt].type = NM_TYPE_RADIO; m[opt].text = TXT_COOPERATIVE; m[opt].value=0; m[opt].group=0; opt_coop=opt; opt++;
-	m[opt].type = NM_TYPE_RADIO; m[opt].text = "Capture the flag"; m[opt].value=0; m[opt].group=0; opt_capture=opt; opt++;
+	m[opt].type = NM_TYPE_RADIO; m[opt].text = transl_get_string("MultiCaptureTheFlag"); m[opt].value=0; m[opt].group=0; opt_capture=opt; opt++;
    
 	if (HoardEquipped())
 	{
-		m[opt].type = NM_TYPE_RADIO; m[opt].text = "Hoard"; m[opt].value=0; m[opt].group=0; opt++;
-		m[opt].type = NM_TYPE_RADIO; m[opt].text = "Team Hoard"; m[opt].value=0; m[opt].group=0; opt_team_hoard=opt; opt++;
+		m[opt].type = NM_TYPE_RADIO; m[opt].text = transl_get_string("MultiHoard"); m[opt].value=0; m[opt].group=0; opt++;
+		m[opt].type = NM_TYPE_RADIO; m[opt].text = transl_get_string("MultiTeamHoard"); m[opt].value=0; m[opt].group=0; opt_team_hoard=opt; opt++;
 	   m[opt].type = NM_TYPE_TEXT; m[opt].text = ""; opt++;
 	} 
 	else
 	 {  m[opt].type = NM_TYPE_TEXT; m[opt].text = ""; opt++; }
 
-	m[opt].type = NM_TYPE_RADIO; m[opt].text = "Open game"; m[opt].group=1; m[opt].value=0; opt++;
+	m[opt].type = NM_TYPE_RADIO; m[opt].text = transl_get_string("MultiOpenGame"); m[opt].group=1; m[opt].value=0; opt++;
 	opt_closed = opt;
 	m[opt].type = NM_TYPE_RADIO; m[opt].text = TXT_CLOSED_GAME; m[opt].group=1; m[opt].value=0; opt++;
    opt_refuse = opt;
-   m[opt].type = NM_TYPE_RADIO; m[opt].text = "Restricted Game              "; m[opt].group=1; m[opt].value=Netgame.RefusePlayers; opt++;
+   m[opt].type = NM_TYPE_RADIO; m[opt].text = transl_get_string("MultiRestrictedGame"); m[opt].group=1; m[opt].value=Netgame.RefusePlayers; opt++;
 
 //      m[opt].type = NM_TYPE_CHECK; m[opt].text = TXT_SHOW_IDS; m[opt].value=0; opt++;
 
    opt_maxnet = opt;
-   sprintf( srmaxnet, "Maximum players: %d", MaxNumNetPlayers);
+   sprintf( srmaxnet, transl_fmt_string_i("MultiMaximumPlayers", MaxNumNetPlayers));
    m[opt].type = NM_TYPE_SLIDER; m[opt].value=MaxNumNetPlayers-2; m[opt].text= srmaxnet; m[opt].min_value=0; 
    m[opt].max_value=MaxNumNetPlayers-2; opt++;
    last_maxnet=MaxNumNetPlayers-2;
 
    opt_moreopts=opt;
-   m[opt].type = NM_TYPE_MENU;  m[opt].text = "More options..."; opt++;
+   m[opt].type = NM_TYPE_MENU;  m[opt].text = transl_get_string("MultiMoreOptions"); opt++;
 
 	Assert(opt <= 20);
 
@@ -3581,9 +3581,9 @@ network_select_players(void)
    if (FindArg("-norankings"))
 		sprintf( text[0], "%d. %-20s", 1, Players[Player_num].callsign );
 	else
-		sprintf( text[0], "%d. %s%-20s", 1, RankStrings[NetPlayers.players[Player_num].rank],Players[Player_num].callsign );
+		sprintf( text[0], "%d. %s%-20s", 1, transl_get_string(RankStrings[NetPlayers.players[Player_num].rank]),Players[Player_num].callsign );
 
-	sprintf( title, "%s %d %s", TXT_TEAM_SELECT, MaxNumNetPlayers, TXT_TEAM_PRESS_ENTER );
+	sprintf( title, transl_fmt_string_i("TXT_TEAM_SELECT", MaxNumNetPlayers ));
 
 GetPlayersAgain:
    ExtGameStatus=GAMESTAT_NETGAME_PLAYER_SELECT;
@@ -3625,9 +3625,9 @@ abort:
 	
 	if ( N_players > Netgame.max_numplayers) {
 		#ifndef MACINTOSH
-		nm_messagebox( TXT_ERROR, 1, TXT_OK, "%s %d %s", TXT_SORRY_ONLY, MaxNumNetPlayers, TXT_NETPLAYERS_IN );
+		nm_messagebox( TXT_ERROR, 1, TXT_OK, transl_fmt_string_i("TXT_SORRY_ONLY", MaxNumNetPlayers) );
 		#else
-		nm_messagebox( TXT_ERROR, 1, TXT_OK, "%s %d netplayers for this game.", TXT_SORRY_ONLY, MaxNumNetPlayers );
+		nm_messagebox( TXT_ERROR, 1, TXT_OK, transl_fmt_string_i("TXT_SORRY_ONLY_MAC", MaxNumNetPlayers ));
 		#endif
 		N_players = save_nplayers;
 		goto GetPlayersAgain;
@@ -3644,7 +3644,7 @@ abort:
 #ifdef RELEASE
 	if ( (Netgame.gamemode == NETGAME_TEAM_ANARCHY ||
 		   Netgame.gamemode == NETGAME_CAPTURE_FLAG || Netgame.gamemode == NETGAME_TEAM_HOARD) && (N_players < 2) ) {
-		nm_messagebox(TXT_ERROR, 1, TXT_OK, "You must select at least two\nplayers to start a team game" );
+		nm_messagebox(TXT_ERROR, 1, TXT_OK, transl_get_string("TXT_TEAM_ATLEAST_TWO2"));
 		N_players = save_nplayers;
 		goto GetPlayersAgain;
 	}
@@ -3739,16 +3739,16 @@ network_start_game()
 		if (Appletalk_active <= 0) {
 			switch (Appletalk_active) {
 			case APPLETALK_NOT_OPEN:
-				sprintf(buf, "Appletalk is not currently active.\nPlease enable AppleTalk from the\nChooser and restart Descent.");
+				sprintf(buf, transl_get_string("MultiMacAppleTalkNotActive"));
 				break;
 			case APPLETALK_BAD_LISTENER:
-				sprintf(buf, "The Resource Fork of Descent appears damaged.\nPlease re-install Descent or contact\nMacPlay technical support.");
+				sprintf(buf, transl_get_string("MultiMacResourceForkCorrupt"));
 				break;
 			case APPLETALK_NO_LOCAL_ADDR:
-				sprintf(buf, "Wow! Strange!\n\nNo Local Address.");
+				sprintf(buf, transl_get_string("MultiMacNoLocalAddress"));
 				break;
 			case APPLETALK_NO_SOCKET:
-				sprintf(buf, "All AppleTalk sockets are in use.\nTry shutting down other network\napplications and restarting Descent.\n");
+				sprintf(buf, transl_get_string("MultiMacNoFreeSockets"));
 				break;
 			}
 			nm_messagebox(NULL, 1, TXT_OK, buf);
@@ -3794,7 +3794,7 @@ network_start_game()
 		fix t1;
 		int count = 0;
 		
-		show_boxed_message("Registering Netgame");
+		show_boxed_message(transl_get_string("MultiMacRegistering"));
 		do {
 			err = appletalk_register_netgame( game_name, TickCount() );
 			t1 = timer_get_fixed_seconds() + F1_0;
@@ -3803,7 +3803,7 @@ network_start_game()
 		} while ( (err == nbpDuplicate) && (count != MAX_REGISTER_TRIES) );
 		clear_boxed_message();
 		if ( (err == tooManyReqs) || (count == MAX_REGISTER_TRIES) ) {
-			nm_messagebox(NULL, 1, TXT_OK, "AppleTalk Network is too busy.\nPlease try again shortly.");
+			nm_messagebox(NULL, 1, TXT_OK, transl_get_string("MultiMacNetworkTooBusy"));
 			Game_mode = GM_GAME_OVER;
 			return;
 		}
@@ -3842,7 +3842,7 @@ void restart_net_searching(newmenu_item * m)
 	Network_games_changed = 1;      
 }
 
-char *ModeLetters[]={"ANRCHY","TEAM","ROBO","COOP","FLAG","HOARD","TMHOARD"};
+char *ModeLetters[]={"MultiShortModeAnarchy","MultiShortModeTeamAnarchy","MultiShortModeRoboAnarchy","MultiShortModeCooperative","MultiShortModeCaptureTheFlag","MultiShortModeHoard","MultiShortModeTeamHoard"};
 
 int NumActiveNetgames=0;
 
@@ -3875,7 +3875,7 @@ void network_join_poll( int nitems, newmenu_item * menus, int * key, int citem )
 			Network_socket  = IPX_DEFAULT_SOCKET;
 	
 		if (Network_socket != osocket )         {
-			sprintf( menus[0].text, "\t%s %+d (PgUp/PgDn to change)", TXT_CURRENT_IPX_SOCKET, Network_socket );
+			sprintf( menus[0].text, TXT_CURRENT_IPX_SOCKET, Network_socket );
 			menus[0].redraw = 1;
 			mprintf(( 0, "Changing to socket %d\n", Network_socket ));
 			network_listen();
@@ -3902,7 +3902,7 @@ void network_join_poll( int nitems, newmenu_item * menus, int * key, int citem )
 		hide_cursor();
 		t1 = timer_get_approx_seconds();
 		restart_net_searching(menus);
-		show_boxed_message("Requesting list of Netgames");
+		show_boxed_message(transl_get_string("MultiRequestingList"));
 		network_send_game_list_request();
 		clear_boxed_message();
 		show_cursor();
@@ -3981,8 +3981,8 @@ void network_join_poll( int nitems, newmenu_item * menus, int * key, int citem )
 		if (game_status == NETSTAT_STARTING) 
 		{
 	sprintf (menus[i+2].text,"%d.\t%s \t%s \t  %d/%d \t%s \t %s \t%s",
-		 i+1,GameName,ModeLetters[Active_games[i].gamemode],nplayers,
-		 Active_games[i].max_numplayers,MissName,levelname,"Forming");
+		 i+1,GameName,transl_get_string(ModeLetters[Active_games[i].gamemode]),nplayers,
+		 Active_games[i].max_numplayers,MissName,levelname,transl_get_string("MultiGameForming"));
 		}
 		else if (game_status == NETSTAT_PLAYING)
 		{
@@ -3991,26 +3991,26 @@ void network_join_poll( int nitems, newmenu_item * menus, int * key, int citem )
 		
 	if (join_status==1)
 	    sprintf (menus[i+2].text,"%d.\t%s \t%s \t  %d/%d \t%s \t %s \t%s",
-		     i+1,GameName,ModeLetters[Active_games[i].gamemode],nplayers,
-		     Active_games[i].max_numplayers,MissName,levelname,"Open");
+		     i+1,GameName, transl_get_string(ModeLetters[Active_games[i].gamemode]),nplayers,
+		     Active_games[i].max_numplayers,MissName,levelname,transl_get_string("MultiGameOpen"));
 			else if (join_status==2)
 	    sprintf (menus[i+2].text,"%d.\t%s \t%s \t  %d/%d \t%s \t %s \t%s",
-		     i+1,GameName,ModeLetters[Active_games[i].gamemode],nplayers,
-		     Active_games[i].max_numplayers,MissName,levelname,"Full");
+		     i+1,GameName, transl_get_string(ModeLetters[Active_games[i].gamemode]),nplayers,
+		     Active_games[i].max_numplayers,MissName,levelname,transl_get_string("MultiGameFull"));
 			else if (join_status==3)
 	    sprintf (menus[i+2].text,"%d.\t%s \t%s \t  %d/%d \t%s \t %s \t%s",
-		     i+1,GameName,ModeLetters[Active_games[i].gamemode],nplayers,
-		     Active_games[i].max_numplayers,MissName,levelname,"Restrict");
+		     i+1,GameName, transl_get_string(ModeLetters[Active_games[i].gamemode]),nplayers,
+		     Active_games[i].max_numplayers,MissName,levelname,transl_get_string("MultiGameRestrict"));
 			else
 	    sprintf (menus[i+2].text,"%d.\t%s \t%s \t  %d/%d \t%s \t %s \t%s",
-		     i+1,GameName,ModeLetters[Active_games[i].gamemode],nplayers,
-		     Active_games[i].max_numplayers,MissName,levelname,"Closed");
+		     i+1,GameName, transl_get_string(ModeLetters[Active_games[i].gamemode]),nplayers,
+		     Active_games[i].max_numplayers,MissName,levelname,transl_get_string("MultiGameClosed"));
 
 		}
 		else
 	 sprintf (menus[i+2].text,"%d.\t%s \t%s \t  %d/%d \t%s \t %s \t%s",
-		  i+1,GameName,ModeLetters[Active_games[i].gamemode],nplayers,
-		  Active_games[i].max_numplayers,MissName,levelname,"Between");
+		  i+1,GameName, transl_get_string(ModeLetters[Active_games[i].gamemode]),nplayers,
+		  Active_games[i].max_numplayers,MissName,levelname,transl_get_string("MultiGameBetween"));
 		 
 
       Assert(strlen(menus[i+2].text) < 100);
@@ -4041,7 +4041,7 @@ network_wait_for_sync(void)
 	if (i < 0)
 		return(-1);
 
-	sprintf( m[0].text, "%s\n'%s' %s", TXT_NET_WAITING, NetPlayers.players[i].callsign, TXT_NET_TO_ENTER );
+	sprintf( m[0].text, TXT_NET_WAITING, NetPlayers.players[i].callsign );
 
 menu:   
 	choice=newmenu_do( NULL, TXT_WAIT, 2, m, network_sync_poll );
@@ -4263,13 +4263,13 @@ void network_get_appletalk_zone()
 
 	Network_zone_name[0] = '\0';
 	
-	show_boxed_message("Looking for AppleTalk Zones");
+	show_boxed_message(transl_get_string("MultiMacLookingForZones"));
 	num_zones = appletalk_get_zone_names(&zone_list);
 	clear_boxed_message();
 
 	if (num_zones < 0)	{		// error in getting zone list...maybe no router available....
 		if ( (num_zones == tooManyReqs) || (num_zones == noDataArea) ){
-			nm_messagebox(NULL, 1, TXT_OK, "AppleTalk Network is too busy.\nPlease try again shortly.");
+			nm_messagebox(NULL, 1, TXT_OK, transl_get_string("MultiMacNetworkTooBusy"));
 			longjmp(LeaveGame,0);
 		}
 		num_zones = 0;
@@ -4307,7 +4307,7 @@ void network_get_appletalk_zone()
 	}
 
 rezone:		
-	item = newmenu_listbox1("AppleTalk Zones", num_zones, zone_list, 0, default_item, NULL);
+	item = newmenu_listbox1(transl_get_string("MultiMacZones"), num_zones, zone_list, 0, default_item, NULL);
 	
 	if (item == -1)
 		goto rezone;
@@ -4343,16 +4343,16 @@ void network_join_game()
 		
 		switch (Appletalk_active) {
 			case APPLETALK_NOT_OPEN:
-				sprintf(buf, "Appletalk is not currently active.\nPlease enable AppleTalk from the\nChooser and restart Descent.");
+				sprintf(buf, transl_get_string("MultiMacAppleTalkNotActive"));
 				break;
 			case APPLETALK_BAD_LISTENER:
-				sprintf(buf, "The Resource Fork of Descent appears damaged.\nPlease re-install Descent or contact\nMacPlay technical support.");
+				sprintf(buf, transl_get_string("MultiMacResourceForkCorrupt"));
 				break;
 			case APPLETALK_NO_LOCAL_ADDR:
-				sprintf(buf, "Wow! Strange!\n\nNo Local Address.");
+				sprintf(buf, transl_get_string("MultiMacNoLocalAddress"));
 				break;
 			case APPLETALK_NO_SOCKET:
-				sprintf(buf, "All AppleTalk sockets are in use.\nTry shutting down other network\napplications and restarting Descent.\n");
+				sprintf(buf, transl_get_string("MultiMacNoFreeSockets"));
 				break;
 		}
 		nm_messagebox(NULL, 1, TXT_OK, buf);
@@ -4397,21 +4397,21 @@ void network_join_game()
 	m[0].type = NM_TYPE_TEXT;
 	if (Network_game_type == IPX_GAME) {
 		if (Network_allow_socket_changes)
-			sprintf( m[0].text, "\tCurrent IPX Socket is default %+d (PgUp/PgDn to change)", Network_socket );
+			sprintf( m[0].text, TXT_CURRENT_IPX_SOCKET, Network_socket );
 		else
 			sprintf( m[0].text, "" );
 	#ifdef MACINTOSH
 	} else {
 		p2cstr(Network_zone_name);
 		if (strcmp(Network_zone_name, "*"))		// only print if there is a zone name
-			sprintf(m[0].text, "\tCurrent Zone is %s", Network_zone_name);		// is Network_zone_name a pascal string????
+			sprintf(m[0].text, transl_get_string("MultiMacCurrentZone"), Network_zone_name);		// is Network_zone_name a pascal string????
 		c2pstr(Network_zone_name);
 	#endif
 	}
 
 	m[1].text=menu_text[1];
 	m[1].type=NM_TYPE_TEXT;
-	sprintf (m[1].text,"\tGAME \tMODE \t#PLYRS \tMISSION \tLEV \tSTATUS");
+	sprintf (m[1].text,transl_get_string("MultiTableHeader"));
 
 	for (i = 0; i < MAX_ACTIVE_NETGAMES; i++) {
 		m[i+2].text = menu_text[i+2];
@@ -4426,7 +4426,7 @@ remenu:
 	nm_draw_background1(Menu_pcx_name);             //load this here so if we abort after loading level, we restore the palette
 	gr_palette_load(gr_palette);
    ExtGameStatus=GAMESTAT_JOIN_NETGAME;
-	choice=newmenu_dotiny("NETGAMES", NULL,MAX_ACTIVE_NETGAMES+2, m, network_join_poll);
+	choice=newmenu_dotiny(transl_get_string("MultiNetgamesTitle"), NULL,MAX_ACTIVE_NETGAMES+2, m, network_join_poll);
 	SurfingNet=0;
 
 	if (choice==-1) {
@@ -4452,12 +4452,12 @@ remenu:
 	{
 		if (Active_games[choice].protocol_version == 3) {
 			#ifndef SHAREWARE
-				nm_messagebox(TXT_SORRY, 1, TXT_OK, "Your version of Descent 2\nis incompatible with the\nDemo version");
+				nm_messagebox(TXT_SORRY, 1, TXT_OK, transl_get_string("MultiDemoNotCompatibleWithFull"));
 			#endif
 		}
 		else if (Active_games[choice].protocol_version == 4) {
 			#ifdef SHAREWARE
-				nm_messagebox(TXT_SORRY, 1, TXT_OK, "This Demo version of\nDescent 2 is incompatible\nwith the full commercial version");
+				nm_messagebox(TXT_SORRY, 1, TXT_OK, transl_get_string("MultiFullNotCompatibleWithDemo"));
 			#endif
 		}
 		else
@@ -4482,7 +4482,7 @@ remenu:
 	{
 		if (Active_games[choice].levelnum>8)
 		 {
-				nm_messagebox(NULL, 1, TXT_OK, "This OEM version only supports\nthe first 8 levels!");
+				nm_messagebox(NULL, 1, TXT_OK, transl_get_string("MultiOemNotCompatible"));
 				goto remenu;
 		 }
 	}
@@ -4490,7 +4490,7 @@ remenu:
 
      if (!network_wait_for_all_info (choice))
 		{
-		  nm_messagebox (TXT_SORRY,1,TXT_OK,"There was a join error!");
+		  nm_messagebox (TXT_SORRY,1,TXT_OK,transl_get_string("MultiJoinError"));
 		  Network_status = NETSTAT_BROWSING; // We are looking at a game menu
 		  goto remenu;
 		}       
@@ -4525,7 +4525,7 @@ remenu:
 		int count = 0;
 		fix t1;
 		
-		show_boxed_message("Registering Netgame");
+		show_boxed_message(transl_get_string("MultiMacRegistering"));
 		do {
 			err = appletalk_register_netgame( Active_games[choice].game_name, TickCount() );
 			t1 = timer_get_fixed_seconds() + F1_0;
@@ -4534,7 +4534,7 @@ remenu:
 		} while ( (err == nbpDuplicate) && (count != MAX_REGISTER_TRIES) );
 		clear_boxed_message();
 		if ( (err == tooManyReqs) || (count == MAX_REGISTER_TRIES) ) {
-			nm_messagebox(NULL, 1, TXT_OK, "AppleTalk Network is too busy.\nPlease try again shortly.");
+			nm_messagebox(NULL, 1, TXT_OK, transl_get_string("MultiMacNetworkTooBusy"));
 			goto remenu;
 		}
 	}
@@ -4589,7 +4589,7 @@ int network_wait_for_all_info (int choice)
   
   newmenu_item m[2];
 
-  m[0].type=NM_TYPE_TEXT; m[0].text = "Press Escape to cancel";
+  m[0].type=NM_TYPE_TEXT; m[0].text = transl_get_string("MultiEscToCancel");
 
   WaitAllChoice=choice;
   StartWaitAllTime=timer_get_approx_seconds();
@@ -4597,7 +4597,7 @@ int network_wait_for_all_info (int choice)
   NetSecurityFlag=0;
 
   GetMenu:
-  pick=newmenu_do( NULL, "Connecting...", 1, m, network_wait_all_poll );
+  pick=newmenu_do( NULL, transl_get_string("MultiConnecting"), 1, m, network_wait_all_poll );
 
   if (pick>-1 && SecurityCheck!=-1)
 	goto GetMenu;
@@ -4970,7 +4970,7 @@ void network_timeout_player(int playernum)
 
 	digi_play_sample(SOUND_HUD_MESSAGE, F1_0);
 
-	HUD_init_message("%s %s", Players[playernum].callsign, TXT_DISCONNECTING);
+	HUD_init_message(TXT_DISCONNECTING, Players[playernum].callsign);
 	for (i = 0; i < N_players; i++)
 		if (Players[i].connected) 
 			n++;
@@ -5239,7 +5239,7 @@ void network_consistency_error(void)
 	#ifndef MACINTOSH
 	nm_messagebox(NULL, 1, TXT_OK, TXT_CONSISTENCY_ERROR);
 	#else
-	nm_messagebox(NULL, 1, TXT_OK, "Failed to join the netgame.\nYou are missing packets.  Check\nyour network connection and\ntry again.");
+	nm_messagebox(NULL, 1, TXT_OK, transl_get_string("MultiNetworkErrorMac"));
 	#endif
 	Function_mode = FMODE_GAME;
 	ConsistencyCount = 0;
@@ -5410,10 +5410,10 @@ void network_read_pdata_packet(frame_info *pd )
 		
 		ClipRank (&NetPlayers.players[TheirPlayernum].rank);
 
-		if (FindArg("-norankings"))      
-			HUD_init_message( "'%s' %s", Players[TheirPlayernum].callsign, TXT_REJOIN );
+		if (FindArg("-norankings"))
+			HUD_init_message(TXT_REJOIN, their->player.callsign);
 		else
-			HUD_init_message( "%s'%s' %s", RankStrings[NetPlayers.players[TheirPlayernum].rank],Players[TheirPlayernum].callsign, TXT_REJOIN );
+			HUD_init_message(transl_fmt_string_ts("TXT_REJOIN_RANK", RankStrings[their->player.rank], their->player.callsign));
 
 
 		multi_send_score();
@@ -5569,11 +5569,11 @@ void network_read_pdata_short_packet(short_frame_info *pd )
 
 		digi_play_sample( SOUND_HUD_MESSAGE, F1_0);
 		ClipRank (&NetPlayers.players[TheirPlayernum].rank);
-		
+
 		if (FindArg("-norankings"))
-			HUD_init_message( "'%s' %s", Players[TheirPlayernum].callsign, TXT_REJOIN );
+			HUD_init_message(TXT_REJOIN, their->player.callsign);
 		else
-			HUD_init_message( "%s'%s' %s", RankStrings[NetPlayers.players[TheirPlayernum].rank],Players[TheirPlayernum].callsign, TXT_REJOIN );
+			HUD_init_message(transl_fmt_string_ts("TXT_REJOIN_RANK", RankStrings[their->player.rank], their->player.callsign));
 
 
 		multi_send_score();
@@ -5595,38 +5595,38 @@ void network_set_power (void)
   newmenu_item m[40];
   
   opt_primary=opt;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Laser upgrade"; m[opt].value=Netgame.DoLaserUpgrade; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Super lasers"; m[opt].value=Netgame.DoSuperLaser; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Quad Lasers"; m[opt].value=Netgame.DoQuadLasers; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Vulcan cannon"; m[opt].value=Netgame.DoVulcan; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Spreadfire cannon"; m[opt].value=Netgame.DoSpread; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Plasma cannon"; m[opt].value=Netgame.DoPlasma; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Fusion cannon"; m[opt].value=Netgame.DoFusions; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Gauss cannon"; m[opt].value=Netgame.DoGauss; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Helix cannon"; m[opt].value=Netgame.DoHelix; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Phoenix cannon"; m[opt].value=Netgame.DoPhoenix; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Omega cannon"; m[opt].value=Netgame.DoOmega; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowLaser"); m[opt].value=Netgame.DoLaserUpgrade; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowSLaser"); m[opt].value=Netgame.DoSuperLaser; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowQuads"); m[opt].value=Netgame.DoQuadLasers; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowVulcan"); m[opt].value=Netgame.DoVulcan; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowSpread"); m[opt].value=Netgame.DoSpread; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowPlasma"); m[opt].value=Netgame.DoPlasma; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowFusion"); m[opt].value=Netgame.DoFusions; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowSVulcan"); m[opt].value=Netgame.DoGauss; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowSSpread"); m[opt].value=Netgame.DoHelix; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowSPlasma"); m[opt].value=Netgame.DoPhoenix; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowSFusion"); m[opt].value=Netgame.DoOmega; opt++;
   
   opt_second=opt;   
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Homing Missiles"; m[opt].value=Netgame.DoHoming; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Proximity Bombs"; m[opt].value=Netgame.DoProximity; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Smart Missiles"; m[opt].value=Netgame.DoSmarts; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Mega Missiles"; m[opt].value=Netgame.DoMegas; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Flash Missiles"; m[opt].value=Netgame.DoFlash; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Guided Missiles"; m[opt].value=Netgame.DoGuided; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Smart Mines"; m[opt].value=Netgame.DoSmartMine; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Mercury Missiles"; m[opt].value=Netgame.DoMercury; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "EarthShaker Missiles"; m[opt].value=Netgame.DoEarthShaker; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowHoming"); m[opt].value=Netgame.DoHoming; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowProx"); m[opt].value=Netgame.DoProximity; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowSmart"); m[opt].value=Netgame.DoSmarts; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowMega"); m[opt].value=Netgame.DoMegas; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowSMissile1"); m[opt].value=Netgame.DoFlash; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowSMissile2"); m[opt].value=Netgame.DoGuided; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowSMissile3"); m[opt].value=Netgame.DoSmartMine; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowSMissile4"); m[opt].value=Netgame.DoMercury; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowSMissile5"); m[opt].value=Netgame.DoEarthShaker; opt++;
 
   opt_power=opt;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Invulnerability"; m[opt].value=Netgame.DoInvulnerability; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Cloaking"; m[opt].value=Netgame.DoCloak; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Afterburners"; m[opt].value=Netgame.DoAfterburner; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Ammo rack"; m[opt].value=Netgame.DoAmmoRack; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Energy Converter"; m[opt].value=Netgame.DoConverter; opt++;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Headlight"; m[opt].value=Netgame.DoHeadlight; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowInvul"); m[opt].value=Netgame.DoInvulnerability; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowCloak"); m[opt].value=Netgame.DoCloak; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowAfterburner"); m[opt].value=Netgame.DoAfterburner; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowAmmoRack"); m[opt].value=Netgame.DoAmmoRack; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowConverter"); m[opt].value=Netgame.DoConverter; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiAllowHeadlight"); m[opt].value=Netgame.DoHeadlight; opt++;
   
-  choice = newmenu_do(NULL, "Objects to allow", opt, m, NULL);
+  choice = newmenu_do(NULL, transl_get_string("MultiObjectsToAllow"), opt, m, NULL);
 
   Netgame.DoLaserUpgrade=m[opt_primary].value; 
   Netgame.DoSuperLaser=m[opt_primary+1].value;
@@ -5692,54 +5692,54 @@ void network_more_game_options ()
   char PlayText[80],KillText[80],srinvul[50],socket_string[5],packstring[5];
   newmenu_item m[21];
 
-  sprintf (socket_string,"%d",Network_socket);
-  sprintf (packstring,"%d",Netgame.PacketsPerSec);
+  sprintf (socket_string,transl_fmt_string_i("MultiOptionsSocketFormat", Network_socket));
+  sprintf (packstring, transl_fmt_string_i("MultiOptionsPacketFormat", Netgame.PacketsPerSec));
 
   opt_difficulty = opt;
   m[opt].type = NM_TYPE_SLIDER; m[opt].value=netgame_difficulty; m[opt].text=TXT_DIFFICULTY; m[opt].min_value=0; m[opt].max_value=(NDL-1); opt++;
 
   opt_cinvul = opt;
-  sprintf( srinvul, "%s: %d %s", TXT_REACTOR_LIFE, control_invul_time*5, TXT_MINUTES_ABBREV );
+  sprintf( srinvul, transl_fmt_string_i("TXT_REACTOR_LIFE", control_invul_time*5) );
   m[opt].type = NM_TYPE_SLIDER; m[opt].value=control_invul_time; m[opt].text= srinvul; m[opt].min_value=0; m[opt].max_value=10; opt++;
 
   opt_playtime=opt;
-  sprintf( PlayText, "Max time: %d %s", Netgame.PlayTimeAllowed*5, TXT_MINUTES_ABBREV );
+  sprintf( PlayText, transl_fmt_string_i("MultiOptionsMaxTime", Netgame.PlayTimeAllowed*5) );
   m[opt].type = NM_TYPE_SLIDER; m[opt].value=Netgame.PlayTimeAllowed; m[opt].text= PlayText; m[opt].min_value=0; m[opt].max_value=10; opt++;
 
   opt_killgoal=opt;
-  sprintf( KillText, "Kill Goal: %d kills", Netgame.KillGoal*5);
+  sprintf( KillText, transl_fmt_string_i("MultiOptionsKillGoal", Netgame.KillGoal*5));
   m[opt].type = NM_TYPE_SLIDER; m[opt].value=Netgame.KillGoal; m[opt].text= KillText; m[opt].min_value=0; m[opt].max_value=10; opt++;
 
   opt_start_invul=opt;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Invulnerable when reappearing"; m[opt].value=Netgame.invul; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiOptionsRespawnInvul"); m[opt].value=Netgame.invul; opt++;
 	
   opt_marker_view = opt;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Allow camera views from Markers"; m[opt].value=Netgame.Allow_marker_view; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiOptionsAllowMarkerCam"); m[opt].value=Netgame.Allow_marker_view; opt++;
   opt_light = opt;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Indestructible lights"; m[opt].value=Netgame.AlwaysLighting; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiOptionsAlwaysLighting"); m[opt].value=Netgame.AlwaysLighting; opt++;
 
   opt_bright = opt;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Bright player ships"; m[opt].value=Netgame.BrightPlayers; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiOptionsBrightPlayers"); m[opt].value=Netgame.BrightPlayers; opt++;
   
   opt_show_names=opt;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Show enemy names on HUD"; m[opt].value=Netgame.ShowAllNames; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiOptionsShowAllNames"); m[opt].value=Netgame.ShowAllNames; opt++;
 
   opt_show_on_map=opt;
   m[opt].type = NM_TYPE_CHECK; m[opt].text = TXT_SHOW_ON_MAP; m[opt].value=(Netgame.game_flags & NETGAME_FLAG_SHOW_MAP); opt_show_on_map=opt; opt++;
 
   opt_short_packets=opt;
-  m[opt].type = NM_TYPE_CHECK; m[opt].text = "Short packets"; m[opt].value=Netgame.ShortPackets; opt++;
+  m[opt].type = NM_TYPE_CHECK; m[opt].text = transl_get_string("MultiOptionsShortPackets"); m[opt].value=Netgame.ShortPackets; opt++;
 
   opt_setpower = opt;
-  m[opt].type = NM_TYPE_MENU;  m[opt].text = "Set Objects allowed..."; opt++;
+  m[opt].type = NM_TYPE_MENU;  m[opt].text = transl_get_string("MultiOptionsSetAllowedObj"); opt++;
 
   if (Network_game_type == IPX_GAME) {
-	  m[opt].type = NM_TYPE_TEXT; m[opt].text = "Network socket"; opt++;
+	  m[opt].type = NM_TYPE_TEXT; m[opt].text = transl_get_string("MultiOptionsIPXSocket"); opt++;
 	  opt_socket = opt;
 	  m[opt].type = NM_TYPE_INPUT; m[opt].text = socket_string; m[opt].text_len=4; opt++;
   }
 
-  m[opt].type = NM_TYPE_TEXT; m[opt].text = "Packets per second (2 - 20)"; opt++;
+  m[opt].type = NM_TYPE_TEXT; m[opt].text = transl_get_string("MultiOptionsPacketRate"); opt++;
   opt_packets=opt;
   m[opt].type = NM_TYPE_INPUT; m[opt].text=packstring; m[opt].text_len=2; opt++;
 
@@ -5749,7 +5749,7 @@ void network_more_game_options ()
   menu:
 
   ExtGameStatus=GAMESTAT_MORE_NETGAME_OPTIONS; 
-  i = newmenu_do1( NULL, "Additional netgame options", opt, m, network_more_options_poll, 0 );
+  i = newmenu_do1( NULL, transl_get_string("MultiOptionsExtra"), opt, m, network_more_options_poll, 0 );
 
    //control_invul_time = atoi( srinvul )*60*F1_0;
     control_invul_time = m[opt_cinvul].value;
@@ -5766,11 +5766,11 @@ void network_more_game_options ()
   if (Netgame.PacketsPerSec>20)
 	{
 	 Netgame.PacketsPerSec=20;
-	 nm_messagebox(TXT_ERROR, 1, TXT_OK, "Packet value out of range\nSetting value to 20");
+	 nm_messagebox(TXT_ERROR, 1, TXT_OK, transl_get_string("MultiOptionsPacketsToomany"));
 	}
   if (Netgame.PacketsPerSec<2)
 	{
-	  nm_messagebox(TXT_ERROR, 1, TXT_OK, "Packet value out of range\nSetting value to 2");
+	  nm_messagebox(TXT_ERROR, 1, TXT_OK, transl_get_string("MultiOptionsPacketsToofew"));
 	  Netgame.PacketsPerSec=2;      
 	}
 
@@ -5806,7 +5806,7 @@ void network_more_options_poll( int nitems, newmenu_item * menus, int * key, int
    key = key;
 
    if ( last_cinvul != menus[opt_cinvul].value )   {
-	sprintf( menus[opt_cinvul].text, "%s: %d %s", TXT_REACTOR_LIFE, menus[opt_cinvul].value*5, TXT_MINUTES_ABBREV );
+	sprintf( menus[opt_cinvul].text, transl_fmt_string_i("TXT_REACTOR_LIFE", menus[opt_cinvul].value*5) );
 	last_cinvul = menus[opt_cinvul].value;
 	menus[opt_cinvul].redraw = 1;
    }
@@ -5831,7 +5831,7 @@ void network_more_options_poll( int nitems, newmenu_item * menus, int * key, int
      }
 
     Netgame.PlayTimeAllowed=menus[opt_playtime].value;
-    sprintf( menus[opt_playtime].text, "Max Time: %d %s", Netgame.PlayTimeAllowed*5, TXT_MINUTES_ABBREV );
+    sprintf( menus[opt_playtime].text, transl_fmt_string_i("MultiOptionsMaxTime", Netgame.PlayTimeAllowed*5) );
     LastPTA=Netgame.PlayTimeAllowed;
     menus[opt_playtime].redraw=1;
    }
@@ -5857,7 +5857,7 @@ void network_more_options_poll( int nitems, newmenu_item * menus, int * key, int
 
     
     Netgame.KillGoal=menus[opt_killgoal].value;
-    sprintf( menus[opt_killgoal].text, "Kill Goal: %d kills", Netgame.KillGoal*5);
+    sprintf( menus[opt_killgoal].text, transl_fmt_string_i("MultiOptionsKillGoal", Netgame.KillGoal*5));
     LastKillGoal=Netgame.KillGoal;
     menus[opt_killgoal].redraw=1;
    }
@@ -5928,8 +5928,8 @@ void network_handle_ping_return (ubyte pnum)
   
   PingReturnTime=timer_get_fixed_seconds();
 
-  HUD_init_message ("Ping time for %s is %d ms!",Players[pnum].callsign,
-	f2i(fixmul(PingReturnTime-PingLaunchTime,i2f(1000))));
+  HUD_init_message (transl_fmt_string_si("MultiPlayerPingTime2",Players[pnum].callsign,
+	f2i(fixmul(PingReturnTime-PingLaunchTime,i2f(1000)))));
   PingLaunchTime=0;
  }
 	
@@ -5967,17 +5967,17 @@ void DoRefuseStuff (sequence_packet *their)
 	
 					
       if (!FindArg("-norankings"))
-	      HUD_init_message ("%s %s wants to join",RankStrings[their->player.rank],their->player.callsign);
+	      HUD_init_message (transl_fmt_string_ts("MultiRankPlayerWantsToJoin",RankStrings[their->player.rank],their->player.callsign));
      	#ifndef MACINTOSH
-		HUD_init_message ("%s joining. Alt-1 assigns to team %s. Alt-2 to team %s",their->player.callsign,Netgame.team_name[0],Netgame.team_name[1]);
+		HUD_init_message (transl_fmt_string_stt("MultiJoiningTeamAssign",their->player.callsign,Netgame.team_name[0],Netgame.team_name[1]));
 		#else
-		HUD_init_message ("%s joining. Opt-1 assigns to team %s. Opt-2 to team %s",their->player.callsign,Netgame.team_name[0],Netgame.team_name[1]);
+		HUD_init_message (transl_fmt_string_stt("MultiJoiningTeamAssignMac",their->player.callsign,Netgame.team_name[0],Netgame.team_name[1]));
 		#endif
 //                      HUD_init_message ("Alt-1 to place on team %s!",Netgame.team_name[0]);
 //                      HUD_init_message ("Alt-2 to place on team %s!",Netgame.team_name[1]);
 		 }               
 		else    
-		HUD_init_message ("%s wants to join...press F6 to connect",their->player.callsign);
+		HUD_init_message (transl_fmt_string_s("MultiPlayerWantsToJoin",their->player.callsign));
 
 	   strcpy (RefusePlayerName,their->player.callsign);
 	   RefuseTimeLimit=timer_get_approx_seconds();   
@@ -6196,12 +6196,12 @@ int network_choose_connect ()
 
 	if (Network_game_type == IPX_GAME) {  
 		#if 0
-	   m[opt].type = NM_TYPE_MENU;  m[opt].text = "Local Subnet"; opt++;
-	   m[opt].type = NM_TYPE_MENU;  m[opt].text = "14.4 modem over Internet"; opt++;
-	   m[opt].type = NM_TYPE_MENU;  m[opt].text = "28.8 modem over Internet"; opt++;
-	   m[opt].type = NM_TYPE_MENU;  m[opt].text = "ISDN or T1 over Internet"; opt++;
+	   m[opt].type = NM_TYPE_MENU;  m[opt].text = transl_get_string("NetworkLocalSubnet"); opt++;
+	   m[opt].type = NM_TYPE_MENU;  m[opt].text = transl_get_string("NetworkModem144"); opt++;
+	   m[opt].type = NM_TYPE_MENU;  m[opt].text = transl_get_string("NetworkModem288"); opt++;
+	   m[opt].type = NM_TYPE_MENU;  m[opt].text = transl_get_string("NetworkISDN"); opt++;
 
-	   choice = newmenu_do1( NULL, "Choose connection type", opt, m, NULL, 0 );
+	   choice = newmenu_do1( NULL, transl_get_string("NetworkConnType"), opt, m, NULL, 0 );
 
 		if (choice<0)
 		 return (NULL);
@@ -6214,11 +6214,11 @@ int network_choose_connect ()
 	   return (1);
 	#ifdef MACINTOSH
 	} else {
-	   m[opt].type = NM_TYPE_MENU;  m[opt].text = "EtherTalk"; opt++;
-	   m[opt].type = NM_TYPE_MENU;  m[opt].text = "LocalTalk"; opt++;
-	   m[opt].type = NM_TYPE_MENU;  m[opt].text = "Other"; opt++;
+	   m[opt].type = NM_TYPE_MENU;  m[opt].text = transl_get_string("NetworkMacEtherTalk"); opt++;
+	   m[opt].type = NM_TYPE_MENU;  m[opt].text = transl_get_string("NetworkMacLocalTalk"); opt++;
+	   m[opt].type = NM_TYPE_MENU;  m[opt].text = transl_get_string("NetworkMacOther"); opt++;
 	
-	   choice = newmenu_do1( NULL, "Choose connection type", opt, m, NULL, 0 );
+	   choice = newmenu_do1( NULL, transl_get_string("NetworkConnType"), opt, m, NULL, 0 );
 
 		if (choice<0)
 		 return (NULL);
@@ -6331,7 +6331,7 @@ void network_process_names_return (char *data)
 	 {
 		 SurfingNet=0;	
 		 NamesInfoSecurity=-1;
- 		 nm_messagebox(NULL, 1, "OK", "That game is refusing\nname requests.\n");
+ 		 nm_messagebox(NULL, 1, transl_get_string("TXT_OK"), transl_get_string("MultiGameNoNameReq"));
 		 SurfingNet=1;
 		 return;
 	 }
@@ -6357,12 +6357,12 @@ void network_process_names_return (char *data)
     {
        SurfingNet=0;
 		 NamesInfoSecurity=-1;
- 		 nm_messagebox(NULL, 1, "OK", "The game you have requested\nnames from is gone.\n");
+ 		 nm_messagebox(NULL, 1, transl_get_string("TXT_OK"), transl_get_string("MultiGameGoneReq"));
 		 SurfingNet=1;
 		 return;
 	 }
  
-   sprintf (mtext[num],"Players of game '%s':",Active_games[gnum].game_name); num++;
+   sprintf (mtext[num],transl_fmt_string_s("MultiPlayersListInGame",Active_games[gnum].game_name)); num++;
    for (i=0;i<numplayers;i++)
 	 {
 	  l=data[count++];
@@ -6374,7 +6374,7 @@ void network_process_names_return (char *data)
      if (FindArg("-norankings"))	
 	     sprintf (mtext[num],"%s",temp);
 	  else
-	     sprintf (mtext[num],"%s%s",RankStrings[l],temp);
+	     sprintf (mtext[num],transl_fmt_string_ts("MultiPlayerRank",RankStrings[l],temp));
 	
 	  num++;	
 	 }
@@ -6382,8 +6382,8 @@ void network_process_names_return (char *data)
 	if (data[count]==99)
 	{
 	 sprintf (mtext[num++]," ");
-	 sprintf (mtext[num++],"Short packets: %s",data[count+1]?"On":"Off");
-	 sprintf (mtext[num++],"Packets Per Second: %d",data[count+2]);
+	 sprintf (mtext[num++],transl_fmt_string_t("MultiInfoShortPackets", data[count+1]?"MultiInfoOn":"MultiInfoOff"));
+	 sprintf (mtext[num++],transl_fmt_string_i("MultiInfoPacketRate", data[count+2]));
    }
 
 	already_showing_info=1;	

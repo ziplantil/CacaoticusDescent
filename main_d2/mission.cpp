@@ -26,6 +26,7 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #include "platform/mono.h"
 #include "misc/error.h"
 #include "platform/findfile.h"
+#include "text.h"
 
 mle Mission_list[MAX_MISSIONS];
 
@@ -52,14 +53,14 @@ char Secret_level_names[MAX_SECRET_LEVELS_PER_MISSION][FILENAME_LEN];
 //
 
 #define SHAREWARE_MISSION_FILENAME	"d2demo"
-#define SHAREWARE_MISSION_NAME		"Descent 2 Demo"
+//#define SHAREWARE_MISSION_NAME		"Descent 2 Demo"
 
 int build_mission_list(int anarchy_mode)
 {
 	anarchy_mode++;		//kill warning
 
 	strcpy(Mission_list[0].filename,SHAREWARE_MISSION_FILENAME);
-	strcpy(Mission_list[0].mission_name,SHAREWARE_MISSION_NAME);
+	strcpy(Mission_list[0].mission_name,transl_get_string("SHAREWARE_MISSION_NAME"));
 	Mission_list[0].anarchy_only_flag = 0;
 
 	return load_mission(0);
@@ -107,14 +108,14 @@ int load_mission_by_name(char *mission_name)
 //
 
 #define OEM_MISSION_FILENAME	"d2"
-#define OEM_MISSION_NAME		"D2 Destination:Quartzon"
+//#define OEM_MISSION_NAME		"D2 Destination:Quartzon"
 
 int build_mission_list(int anarchy_mode)
 {
 	anarchy_mode++;		//kill warning
 
 	strcpy(Mission_list[0].filename,OEM_MISSION_FILENAME);
-	strcpy(Mission_list[0].mission_name,OEM_MISSION_NAME);
+	strcpy(Mission_list[0].mission_name,transl_get_string("OEM_MISSION_NAME"));
 	Mission_list[0].anarchy_only_flag = 0;
 
 	return load_mission(0);
@@ -315,6 +316,11 @@ int read_mission_file(char *filename,int count,int location)
 
 		cfclose(mfile);
 
+		if (!strcmp(filename, BUILTIN_MISSION))
+			strcpy(Mission_list[count].mission_name, transl_get_string("Descent2Mission"));
+		else if (!_strfcmp(filename, "D2X.MN2"))
+			strcpy(Mission_list[count].mission_name, transl_get_string("Descent2Vertigo"));
+
 		return 1;
 	}
 
@@ -403,6 +409,17 @@ int build_mission_list(int anarchy_mode)
 
 void init_extra_robot_movie(char *filename);
 
+void free_old_translated_level_names()
+{
+	int i;
+	for (i = 0; i < (sizeof(_TRANSLATED_LEVEL_NAMES) / sizeof(_TRANSLATED_LEVEL_NAMES[0])); ++i)
+		if (_TRANSLATED_LEVEL_NAMES[i])
+		{
+			free((void*)_TRANSLATED_LEVEL_NAMES[i]);
+			_TRANSLATED_LEVEL_NAMES[i] = NULL;
+		}
+}
+
 //values for built-in mission
 
 //loads the specfied mission from the mission list.  build_mission_list()
@@ -418,6 +435,8 @@ int load_mission(int mission_num)
 	Current_mission_num = mission_num;
 
 	mprintf(( 0, "Loading mission %d\n", mission_num ));
+
+	free_old_translated_level_names();
 
 	//read mission from file 
 
@@ -450,6 +469,31 @@ int load_mission(int mission_num)
 			return 0;
 		}
 		#endif
+	}
+	else
+	{
+		CFILE* lng = cfopen("D2LEVELS.LNG", "rb");
+		if (lng)
+		{
+			char inputline[LEVEL_NAME_LEN];
+			int i = 0, l;
+			while (cfgets(inputline, sizeof(inputline) - 1, lng) && i < (sizeof(_TRANSLATED_LEVEL_NAMES) / sizeof(_TRANSLATED_LEVEL_NAMES[0])))
+			{
+				char* p = strchr(inputline, '\n');
+				if (p) *p = '\0';
+				if (*inputline && *inputline != '#')
+				{
+					l = p - inputline + 1;
+					char* pp = (char*)malloc(l);
+					if (pp)
+					{
+						strcpy(pp, inputline);
+						_TRANSLATED_LEVEL_NAMES[++i] = pp;
+					}
+				}
+			}
+			cfclose(lng);
+		}
 	}
 
 	//init vars

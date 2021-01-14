@@ -1064,7 +1064,7 @@ int wall_hit_process(segment* seg, int side, fix damage, int playernum, object* 
 		if (!(Players[playernum].flags & PLAYER_FLAGS_BLUE_KEY)) {
 			if (playernum == Player_num)
 				if (show_message)
-					HUD_init_message("%s %s", TXT_BLUE, TXT_ACCESS_DENIED);
+					HUD_init_message(transl_fmt_string_t("AccessDenied", "ColorBlue"));
 			return WHP_NO_KEY;
 		}
 
@@ -1072,7 +1072,7 @@ int wall_hit_process(segment* seg, int side, fix damage, int playernum, object* 
 		if (!(Players[playernum].flags & PLAYER_FLAGS_RED_KEY)) {
 			if (playernum == Player_num)
 				if (show_message)
-					HUD_init_message("%s %s", TXT_RED, TXT_ACCESS_DENIED);
+					HUD_init_message(transl_fmt_string_t("AccessDenied", "ColorRed"));
 			return WHP_NO_KEY;
 		}
 
@@ -1080,7 +1080,7 @@ int wall_hit_process(segment* seg, int side, fix damage, int playernum, object* 
 		if (!(Players[playernum].flags & PLAYER_FLAGS_GOLD_KEY)) {
 			if (playernum == Player_num)
 				if (show_message)
-					HUD_init_message("%s %s", TXT_YELLOW, TXT_ACCESS_DENIED);
+					HUD_init_message(transl_fmt_string_t("AccessDenied", "ColorYellow"));
 			return WHP_NO_KEY;
 		}
 

@@ -631,7 +631,7 @@ do_menu_again:
 		return 0;		// They hit Esc in file selector
 	}
 
-	if (filename[0] == transl_get_string("TXT_CREATE_NEW")[0]) 
+	if (!strcmp(filename, transl_get_string("TXT_CREATE_NEW")))
 	{
 		// They selected 'create new pilot'
 		if (!MakeNewPlayerFile(allow_abort_flag))

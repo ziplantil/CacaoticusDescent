@@ -244,7 +244,7 @@ bkg movie_bg = { 0,0,0,0,NULL };
 
 #define BOX_BORDER (MenuHires?40:20)
 
-void show_pause_message(char* msg)
+void show_pause_message(const char* msg)
 {
 	int w, h, aw;
 	int x, y;
@@ -275,7 +275,7 @@ void show_pause_message(char* msg)
 
 	gr_set_fontcolor(255, -1);
 
-	gr_ustring(0x8000, y, msg);
+	gr_string(0x8000, y, msg);
 }
 
 void clear_pause_message()

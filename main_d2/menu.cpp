@@ -114,7 +114,7 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 //ADD_ITEM("Start netgame...", MENU_START_NETGAME, -1 );
 //ADD_ITEM("Send net message...", MENU_SEND_NET_MESSAGE, -1 );
 
-#define ADD_ITEM(t,value,key)  do { m[num_options].type=NM_TYPE_MENU; m[num_options].text=t; menu_choice[num_options]=value;num_options++; } while (0)
+#define ADD_ITEM(t,value,key)  do { m[num_options].type=NM_TYPE_MENU; nm_copy_text(&m[num_options], t); menu_choice[num_options]=value;num_options++; } while (0)
 
 extern int last_joy_time;               //last time the joystick was used
 #ifndef NDEBUG
@@ -266,12 +266,12 @@ void create_main_menu(newmenu_item * m, int* menu_choice, int* callers_num_optio
 #ifndef RELEASE
 	if (!(Game_mode & GM_MULTI))
 	{
-		ADD_ITEM(const_cast<char*>("  Load level..."), MENU_LOAD_LEVEL, KEY_N);
+		ADD_ITEM("  Load level...", MENU_LOAD_LEVEL, KEY_N);
 #ifdef EDITOR
-		ADD_ITEM(const_cast<char*>("  Editor"), MENU_EDITOR, KEY_E);
+		ADD_ITEM("  Editor", MENU_EDITOR, KEY_E);
 #endif
 	}
-	ADD_ITEM(const_cast<char*>("  Play song"), MENU_PLAY_SONG, -1 );
+	ADD_ITEM("  Play song", MENU_PLAY_SONG, -1 );
 #endif
 
 	* callers_num_options = num_options;
@@ -402,10 +402,11 @@ void do_option(int select)
 		char text[11] = "";
 		int new_level_num;
 
-		m.type = NM_TYPE_INPUT; m.text_len = 10; m.text = text;
+		m.type = NM_TYPE_INPUT; m.text_len = 10; nm_copy_text(&m, text);
 
 		newmenu_do(NULL, "Enter level to load", 1, &m, NULL);
 
+		strcpy(text, m.text);
 		new_level_num = atoi(m.text);
 
 		if (new_level_num != 0 && new_level_num >= Last_secret_level && new_level_num <= Last_level)
@@ -443,7 +444,7 @@ void do_option(int select)
 
 	case MENU_START_TCP_NETGAME:
 	case MENU_JOIN_TCP_NETGAME:
-		nm_messagebox(TXT_SORRY, 1, TXT_OK, "Not available in shareware version!");
+		nm_messagebox(TXT_SORRY, 1, TXT_OK, transl_get_string("NotInShareware"));
 		// DoNewIPAddress();
 		break;
 
@@ -474,11 +475,11 @@ int do_difficulty_menu()
 	int s;
 	newmenu_item m[5];
 
-	m[0].type = NM_TYPE_MENU; m[0].text = MENU_DIFFICULTY_TEXT(0);
-	m[1].type = NM_TYPE_MENU; m[1].text = MENU_DIFFICULTY_TEXT(1);
-	m[2].type = NM_TYPE_MENU; m[2].text = MENU_DIFFICULTY_TEXT(2);
-	m[3].type = NM_TYPE_MENU; m[3].text = MENU_DIFFICULTY_TEXT(3);
-	m[4].type = NM_TYPE_MENU; m[4].text = MENU_DIFFICULTY_TEXT(4);
+	m[0].type = NM_TYPE_MENU; nm_copy_text(&m[0], MENU_DIFFICULTY_TEXT(0));
+	m[1].type = NM_TYPE_MENU; nm_copy_text(&m[1], MENU_DIFFICULTY_TEXT(1));
+	m[2].type = NM_TYPE_MENU; nm_copy_text(&m[2], MENU_DIFFICULTY_TEXT(2));
+	m[3].type = NM_TYPE_MENU; nm_copy_text(&m[3], MENU_DIFFICULTY_TEXT(3));
+	m[4].type = NM_TYPE_MENU; nm_copy_text(&m[4], MENU_DIFFICULTY_TEXT(4));
 
 	s = newmenu_do1(NULL, TXT_DIFFICULTY_LEVEL, NDL, m, NULL, Difficulty_level);
 
@@ -569,13 +570,13 @@ void do_detail_level_menu(void)
 	int s;
 	newmenu_item m[7];
 
-	m[0].type = NM_TYPE_MENU; m[0].text = MENU_DETAIL_TEXT(0);
-	m[1].type = NM_TYPE_MENU; m[1].text = MENU_DETAIL_TEXT(1);
-	m[2].type = NM_TYPE_MENU; m[2].text = MENU_DETAIL_TEXT(2);
-	m[3].type = NM_TYPE_MENU; m[3].text = MENU_DETAIL_TEXT(3);
-	m[4].type = NM_TYPE_MENU; m[4].text = MENU_DETAIL_TEXT(4);
-	m[5].type = NM_TYPE_TEXT; m[5].text = const_cast<char*>("");
-	m[6].type = NM_TYPE_MENU; m[6].text = MENU_DETAIL_TEXT(5);
+	m[0].type = NM_TYPE_MENU; nm_copy_text(&m[0], MENU_DETAIL_TEXT(0));
+	m[1].type = NM_TYPE_MENU; nm_copy_text(&m[1], MENU_DETAIL_TEXT(1));
+	m[2].type = NM_TYPE_MENU; nm_copy_text(&m[2], MENU_DETAIL_TEXT(2));
+	m[3].type = NM_TYPE_MENU; nm_copy_text(&m[3], MENU_DETAIL_TEXT(3));
+	m[4].type = NM_TYPE_MENU; nm_copy_text(&m[4], MENU_DETAIL_TEXT(4));
+	m[5].type = NM_TYPE_TEXT; nm_copy_text(&m[5], const_cast<char*>(""));
+	m[6].type = NM_TYPE_MENU; nm_copy_text(&m[6], MENU_DETAIL_TEXT(5));
 
 	s = newmenu_do1(NULL, TXT_DETAIL_LEVEL, NDL + 2, m, NULL, Detail_level);
 
@@ -652,37 +653,37 @@ void do_detail_level_menu_custom(void)
 	{
 		count = 0;
 		m[count].type = NM_TYPE_SLIDER;
-		m[count].text = TXT_OBJ_COMPLEXITY;
+		nm_copy_text(&m[count], TXT_OBJ_COMPLEXITY);
 		m[count].value = Object_complexity;
 		m[count].min_value = 0;
 		m[count++].max_value = NDL - 1;
 
 		m[count].type = NM_TYPE_SLIDER;
-		m[count].text = TXT_OBJ_DETAIL;
+		nm_copy_text(&m[count], TXT_OBJ_DETAIL);
 		m[count].value = Object_detail;
 		m[count].min_value = 0;
 		m[count++].max_value = NDL - 1;
 
 		m[count].type = NM_TYPE_SLIDER;
-		m[count].text = TXT_WALL_DETAIL;
+		nm_copy_text(&m[count], TXT_WALL_DETAIL);
 		m[count].value = Wall_detail;
 		m[count].min_value = 0;
 		m[count++].max_value = NDL - 1;
 
 		m[count].type = NM_TYPE_SLIDER;
-		m[count].text = TXT_WALL_RENDER_DEPTH;
+		nm_copy_text(&m[count], TXT_WALL_RENDER_DEPTH);
 		m[count].value = Wall_render_depth;
 		m[count].min_value = 0;
 		m[count++].max_value = NDL - 1;
 
 		m[count].type = NM_TYPE_SLIDER;
-		m[count].text = TXT_DEBRIS_AMOUNT;
+		nm_copy_text(&m[count], TXT_DEBRIS_AMOUNT);
 		m[count].value = Debris_amount;
 		m[count].min_value = 0;
 		m[count++].max_value = NDL - 1;
 
 		m[count].type = NM_TYPE_SLIDER;
-		m[count].text = TXT_SOUND_CHANNELS;
+		nm_copy_text(&m[count], TXT_SOUND_CHANNELS);
 		m[count].value = SoundChannels;
 		m[count].min_value = 0;
 		m[count++].max_value = NDL - 1;
@@ -692,7 +693,7 @@ void do_detail_level_menu_custom(void)
 			)
 			filtering_id = count;
 			m[count].type = NM_TYPE_SLIDER;
-			m[count].text = "FILTERING";
+			m[count].text = transl_get_string("PolyAccFiltering");
 			m[count].value = pa_filter_mode;
 			m[count].min_value = 0;
 #ifdef MACINTOSH
@@ -705,7 +706,7 @@ void do_detail_level_menu_custom(void)
 #endif
 
 				m[count].type = NM_TYPE_TEXT;
-			m[count++].text = TXT_LO_HI;
+			nm_copy_text(&m[count++], TXT_LO_HI);
 
 			Assert(count < DL_MAX);
 
@@ -792,25 +793,24 @@ void do_screen_res_menu()
 
 	if ((Current_display_mode == -1) || (VR_render_mode != VR_NONE)) {				//special VR mode
 		nm_messagebox(TXT_SORRY, 1, TXT_OK,
-			"You may not change screen\n"
-			"resolution when VR modes enabled.");
+			transl_get_string("GFXResolutionNoChangeVR"));
 		return;
 	}
 
-	m[0].type = NM_TYPE_TEXT;	 m[0].value = 0;    			  m[0].text = const_cast<char*>("Modes w/ Cockpit:");
+	m[0].type = NM_TYPE_TEXT;	m[0].value = 0; nm_copy_text(&m[0], transl_get_string("GFXResolutionCockpit"));
 
-	m[1].type = NM_TYPE_RADIO; m[1].value = 0; m[1].group = 0; m[1].text = const_cast<char*>(" 320x200");
+	m[1].type = NM_TYPE_RADIO; m[1].value = 0; m[1].group = 0; nm_copy_text(&m[1], transl_get_string("GFXResolution320x200"));
 
-	m[2].type = NM_TYPE_RADIO; m[2].value = 0; m[2].group = 0; m[2].text = const_cast<char*>(" 640x480");
-	m[3].type = NM_TYPE_TEXT;	 m[3].value = 0;   				  m[3].text = const_cast<char*>("Modes w/o Cockpit:");
-	m[4].type = NM_TYPE_RADIO; m[4].value = 0; m[4].group = 0; m[4].text = const_cast<char*>(" 320x400");
-	m[5].type = NM_TYPE_RADIO; m[5].value = 0; m[5].group = 0; m[5].text = const_cast<char*>(" 640x480");
-	m[6].type = NM_TYPE_RADIO; m[6].value = 0; m[6].group = 0; m[6].text = const_cast<char*>(" 800x600");
+	m[2].type = NM_TYPE_RADIO; m[2].value = 0; m[2].group = 0; nm_copy_text(&m[2], transl_get_string("GFXResolution640x480"));
+	m[3].type = NM_TYPE_TEXT;	 m[3].value = 0;   	nm_copy_text(&m[3], transl_get_string("GFXResolutionNoCockpit"));
+	m[4].type = NM_TYPE_RADIO; m[4].value = 0; m[4].group = 0; nm_copy_text(&m[4], transl_get_string("GFXResolution320x400"));
+	m[5].type = NM_TYPE_RADIO; m[5].value = 0; m[5].group = 0; nm_copy_text(&m[5], transl_get_string("GFXResolution640x480"));
+	m[6].type = NM_TYPE_RADIO; m[6].value = 0; m[6].group = 0; nm_copy_text(&m[6], transl_get_string("GFXResolution800x600"));
 	n_items = 7;
 	if (FindArg("-superhires"))
 	{
-		m[7].type = NM_TYPE_RADIO; m[7].value = 0; m[7].group = 0; m[7].text = const_cast<char*>(" 1024x768");
-		m[8].type = NM_TYPE_RADIO; m[8].value = 0; m[8].group = 0; m[8].text = const_cast<char*>(" 1280x1024");
+		m[7].type = NM_TYPE_RADIO; m[7].value = 0; m[7].group = 0; nm_copy_text(&m[7], transl_get_string("GFXResolution1024x768"));
+		m[8].type = NM_TYPE_RADIO; m[8].value = 0; m[8].group = 0; nm_copy_text(&m[8], transl_get_string("GFXResolution1280x1024"));
 		n_items += 2;
 	}
 
@@ -824,7 +824,7 @@ void do_screen_res_menu()
 
 	m[citem].value = 1;
 
-	newmenu_do1(NULL, "Select screen mode", n_items, m, NULL, citem);
+	newmenu_do1(NULL, transl_get_string("GFXResolutionSelect"), n_items, m, NULL, citem);
 
 	for (i = 0; i < n_items; i++)
 		if (m[i].value)
@@ -839,16 +839,13 @@ void do_screen_res_menu()
 
 	if (((i != 0) && (i != 2) && !MenuHiresAvailable) || gr_check_mode(display_mode_info[i].VGA_mode)) {
 		nm_messagebox(TXT_SORRY, 1, TXT_OK,
-			"Cannot set requested\n"
-			"mode on this video card.");
+			transl_get_string("GFXCannotSetMode"));
 		return;
 	}
 #ifdef SHAREWARE
 	if (i != 0)
 		nm_messagebox(TXT_SORRY, 1, TXT_OK,
-			"High resolution modes are\n"
-			"only available in the\n"
-			"Commercial version of Descent 2.");
+			transl_get_string("GFXNotInShareware"));
 	return;
 #else
 	if (i != Current_display_mode)
@@ -878,7 +875,7 @@ void do_new_game_menu()
 				default_mission = i;
 		}
 
-		new_mission_num = newmenu_listbox1("New Game\n\nSelect mission", n_missions, m, 1, default_mission, NULL);
+		new_mission_num = newmenu_listbox1(transl_get_string("NewGameSelect"), n_missions, m, 1, default_mission, NULL);
 
 		if (new_mission_num == -1)
 			return;         //abort!
@@ -887,7 +884,7 @@ void do_new_game_menu()
 
 		if (!load_mission(new_mission_num))
 		{
-			nm_messagebox(NULL, 1, TXT_OK, "Error in Mission file");
+			nm_messagebox(NULL, 1, TXT_OK, transl_get_string("MissionError"));
 			return;
 		}
 	}
@@ -909,24 +906,26 @@ void do_new_game_menu()
 		int n_items;
 
 	try_again:
-		sprintf(info_text, "%s %d", TXT_START_ANY_LEVEL, player_highest_level);
-
-		m[0].type = NM_TYPE_TEXT; m[0].text = info_text;
-		m[1].type = NM_TYPE_INPUT; m[1].text_len = 10; m[1].text = num_text;
-		n_items = 2;
+		sprintf(info_text, transl_fmt_string_i("TXT_START_ANY_LEVEL", player_highest_level));
 
 		strcpy(num_text, "1");
+
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], info_text);
+		m[1].type = NM_TYPE_INPUT; m[1].text_len = 10; nm_copy_text(&m[1], num_text);
+		n_items = 2;
 
 		choice = newmenu_do(NULL, TXT_SELECT_START_LEV, n_items, m, NULL);
 
 		if (choice == -1 || m[1].text[0] == 0)
 			return;
 
+		strcpy(num_text, m[1].text);
+
 		new_level_num = atoi(m[1].text);
 
 		if (!(new_level_num > 0 && new_level_num <= player_highest_level))
 		{
-			m[0].text = TXT_ENTER_TO_CONT;
+			nm_copy_text(&m[0], TXT_ENTER_TO_CONT);
 			nm_messagebox(NULL, 1, TXT_OK, TXT_INVALID_LEVEL);
 			goto try_again;
 		}
@@ -965,34 +964,34 @@ void do_options_menu()
 	int i = 0;
 
 	do {
-		m[0].type = NM_TYPE_MENU;   m[0].text = const_cast<char*>("Sound effects & music...");
-		m[1].type = NM_TYPE_TEXT;   m[1].text = const_cast<char*>("");
-		m[2].type = NM_TYPE_MENU;   m[2].text = TXT_CONTROLS_;
-		m[3].type = NM_TYPE_MENU;   m[3].text = TXT_CAL_JOYSTICK;
-		m[4].type = NM_TYPE_TEXT;   m[4].text = const_cast<char*>("");
+		m[0].type = NM_TYPE_MENU;   nm_copy_text(&m[0], transl_get_string("MenuSFXMusic"));
+		m[1].type = NM_TYPE_TEXT;   nm_copy_text(&m[1], const_cast<char*>(""));
+		m[2].type = NM_TYPE_MENU;   nm_copy_text(&m[2], TXT_CONTROLS_);
+		m[3].type = NM_TYPE_MENU;   nm_copy_text(&m[3], TXT_CAL_JOYSTICK);
+		m[4].type = NM_TYPE_TEXT;   nm_copy_text(&m[4], const_cast<char*>(""));
 
 #if defined(POLY_ACC)
-		m[5].type = NM_TYPE_TEXT;   m[5].text = const_cast<char*>("");
+		m[5].type = NM_TYPE_TEXT;   nm_copy_text(&m[5], const_cast<char*>(""));
 #else
-		m[5].type = NM_TYPE_SLIDER; m[5].text = TXT_BRIGHTNESS; m[5].value = gr_palette_get_gamma(); m[5].min_value = 0; m[5].max_value = 8;
+		m[5].type = NM_TYPE_SLIDER; nm_copy_text(&m[5], TXT_BRIGHTNESS); m[5].value = gr_palette_get_gamma(); m[5].min_value = 0; m[5].max_value = 8;
 #endif
 
 
 #ifdef PA_3DFX_VOODOO
-		m[6].type = NM_TYPE_TEXT;   m[6].text = const_cast<char*>("");
+		m[6].type = NM_TYPE_TEXT;   nm_copy_text(&m[6], const_cast<char*>(""));
 #else
-		m[6].type = NM_TYPE_MENU;   m[6].text = TXT_DETAIL_LEVELS;
+		m[6].type = NM_TYPE_MENU;   nm_copy_text(&m[6], TXT_DETAIL_LEVELS);
 #endif
 
 #if defined(POLY_ACC)
-		m[7].type = NM_TYPE_TEXT;   m[7].text = const_cast<char*>("");
+		m[7].type = NM_TYPE_TEXT;   nm_copy_text(&m[7], const_cast<char*>(""));
 #else
-		m[7].type = NM_TYPE_MENU;   m[7].text = const_cast<char*>("Screen resolution...");
+		m[7].type = NM_TYPE_MENU;   nm_copy_text(&m[7], transl_get_string("MenuResolution"));
 #endif
-		m[8].type = NM_TYPE_TEXT;   m[8].text = const_cast<char*>("");
-		m[9].type = NM_TYPE_MENU;   m[9].text = const_cast<char*>("Primary autoselect ordering...");
-		m[10].type = NM_TYPE_MENU;   m[10].text = const_cast<char*>("Secondary autoselect ordering...");
-		m[11].type = NM_TYPE_MENU;   m[11].text = const_cast<char*>("Toggles...");
+		m[8].type = NM_TYPE_TEXT;   nm_copy_text(&m[8], const_cast<char*>(""));
+		m[9].type = NM_TYPE_MENU;   nm_copy_text(&m[9], transl_get_string("MenuAutoselectPrimary"));
+		m[10].type = NM_TYPE_MENU;   nm_copy_text(&m[10], transl_get_string("MenuAutoselectSecondary"));
+		m[11].type = NM_TYPE_MENU;   nm_copy_text(&m[11], transl_get_string("MenuToggles"));
 
 		i = newmenu_do1(NULL, TXT_OPTIONS, sizeof(m) / sizeof(*m), m, options_menuset, i);
 
@@ -1052,7 +1051,7 @@ void sound_menuset(int nitems, newmenu_item * items, int* last_key, int citem)
 
 		if (items[4].value && FindArg("-noredbook"))
 		{
-			nm_messagebox(TXT_SORRY, 1, TXT_OK, "Redbook audio has been disabled\non the command line");
+			nm_messagebox(TXT_SORRY, 1, TXT_OK, transl_get_string("RedbookDisabled"));
 			items[4].value = 0;
 			items[4].redraw = 1;
 		}
@@ -1071,7 +1070,7 @@ void sound_menuset(int nitems, newmenu_item * items, int* last_key, int citem)
 
 			if (items[4].value && !Redbook_playing)
 			{
-				nm_messagebox(TXT_SORRY, 1, TXT_OK, "Cannot start CD Music.  Insert\nyour Descent II CD and try again");
+				nm_messagebox(TXT_SORRY, 1, TXT_OK, transl_get_string("CannotStartCDMusic"));
 				items[4].value = 0;
 				items[4].redraw = 1;
 			}
@@ -1094,25 +1093,25 @@ void do_sound_menu()
 
 	do
 	{
-		m[0].type = NM_TYPE_SLIDER; m[0].text = TXT_FX_VOLUME; m[0].value = Config_digi_volume; m[0].min_value = 0; m[0].max_value = 8;
-		m[1].type = (Redbook_playing ? NM_TYPE_TEXT : NM_TYPE_SLIDER); m[1].text = const_cast<char*>("MIDI music volume"); m[1].value = Config_midi_volume; m[1].min_value = 0; m[1].max_value = 8;
+		m[0].type = NM_TYPE_SLIDER; nm_copy_text(&m[0], TXT_FX_VOLUME); m[0].value = Config_digi_volume; m[0].min_value = 0; m[0].max_value = 8;
+		m[1].type = (Redbook_playing ? NM_TYPE_TEXT : NM_TYPE_SLIDER); nm_copy_text(&m[1], transl_get_string("VolumeMusicMIDI")); m[1].value = Config_midi_volume; m[1].min_value = 0; m[1].max_value = 8;
 
 #ifdef SHAREWARE
-		m[2].type = NM_TYPE_TEXT; m[2].text = const_cast<char*>("");
-		m[3].type = NM_TYPE_TEXT; m[3].text = const_cast<char*>("");
-		m[4].type = NM_TYPE_TEXT; m[4].text = const_cast<char*>("");
+		m[2].type = NM_TYPE_TEXT; nm_copy_text(&m[2], const_cast<char*>(""));
+		m[3].type = NM_TYPE_TEXT; nm_copy_text(&m[3], const_cast<char*>(""));
+		m[4].type = NM_TYPE_TEXT; nm_copy_text(&m[4], const_cast<char*>(""));
 
 #else		// ifdef SHAREWARE
-		m[2].type = (Redbook_playing ? NM_TYPE_SLIDER : NM_TYPE_TEXT); m[2].text = const_cast<char*>("CD music volume"); m[2].value = Config_redbook_volume; m[2].min_value = 0; m[2].max_value = 8;
+		m[2].type = (Redbook_playing ? NM_TYPE_SLIDER : NM_TYPE_TEXT); nm_copy_text(&m[2], transl_get_string("VolumeMusicCD")); m[2].value = Config_redbook_volume; m[2].min_value = 0; m[2].max_value = 8;
 
-		m[3].type = NM_TYPE_TEXT; m[3].text = const_cast<char*>("");
+		m[3].type = NM_TYPE_TEXT; nm_copy_text(&m[3], const_cast<char*>(""));
 
-		m[4].type = NM_TYPE_CHECK;  m[4].text = const_cast<char*>("CD Music (Redbook) enabled"); m[4].value = (Redbook_playing != 0);
+		m[4].type = NM_TYPE_CHECK;  nm_copy_text(&m[4], transl_get_string("RedbookEnabled")); m[4].value = (Redbook_playing != 0);
 #endif
 
-		m[5].type = NM_TYPE_CHECK;  m[5].text = TXT_REVERSE_STEREO; m[5].value = Config_channels_reversed;
+		m[5].type = NM_TYPE_CHECK;  nm_copy_text(&m[5], TXT_REVERSE_STEREO); m[5].value = Config_channels_reversed;
 
-		i = newmenu_do1(NULL, "Sound Effects & Music", sizeof(m) / sizeof(*m), m, sound_menuset, i);
+		i = newmenu_do1(NULL, transl_get_string("MenuSFXMusicTitle"), sizeof(m) / sizeof(*m), m, sound_menuset, i);
 
 		Redbook_enabled = m[4].value;
 		Config_channels_reversed = m[5].value;
@@ -1129,7 +1128,7 @@ void do_sound_menu()
 
 extern int Automap_always_hires;
 
-#define ADD_CHECK(n,txt,v)  do { m[n].type=NM_TYPE_CHECK; m[n].text=txt; m[n].value=v;} while (0)
+#define ADD_CHECK(n,txt,v)  do { m[n].type=NM_TYPE_CHECK; nm_copy_text(&m[n], txt); m[n].value=v;} while (0)
 
 void do_toggles_menu()
 {
@@ -1144,17 +1143,17 @@ void do_toggles_menu()
 
 	do
 	{
-		ADD_CHECK(0, const_cast<char*>("Ship auto-leveling"), Auto_leveling_on);
-		ADD_CHECK(1, const_cast<char*>("Show reticle"), Reticle_on);
-		ADD_CHECK(2, const_cast<char*>("Missile view"), Missile_view_enabled);
-		ADD_CHECK(3, const_cast<char*>("Headlight on when picked up"), Headlight_active_default);
-		ADD_CHECK(4, const_cast<char*>("Show guided missile in main display"), Guided_in_big_window);
-		ADD_CHECK(5, const_cast<char*>("Escort robot hot keys"), EscortHotKeys);
+		ADD_CHECK(0, transl_get_string("Autolevel"), Auto_leveling_on);
+		ADD_CHECK(1, transl_get_string("ShowReticle"), Reticle_on);
+		ADD_CHECK(2, transl_get_string("MissileView"), Missile_view_enabled);
+		ADD_CHECK(3, transl_get_string("HeadlightOnPickup"), Headlight_active_default);
+		ADD_CHECK(4, transl_get_string("GuidedOnMainDisplay"), Guided_in_big_window);
+		ADD_CHECK(5, transl_get_string("EscortRobotHotkeys"), EscortHotKeys);
 #if !defined(POLY_ACC)
-		ADD_CHECK(6, const_cast<char*>("Always show HighRes Automap"), std::min(MenuHiresAvailable, Automap_always_hires));
+		ADD_CHECK(6, transl_get_string("UseHiresAutomap"), std::min(MenuHiresAvailable, Automap_always_hires));
 #endif
 		//when adding more options, change N_TOGGLE_ITEMS above
-		i = newmenu_do1(NULL, "Toggles", N_TOGGLE_ITEMS, m, NULL, i);
+		i = newmenu_do1(NULL, transl_get_string("MenuTogglesTitle"), N_TOGGLE_ITEMS, m, NULL, i);
 
 		Auto_leveling_on = m[0].value;
 		Reticle_on = m[1].value;
@@ -1168,7 +1167,7 @@ void do_toggles_menu()
 		if (MenuHiresAvailable)
 			Automap_always_hires = m[6].value;
 		else if (m[6].value)
-			nm_messagebox(TXT_SORRY, 1, "OK", "High Resolution modes are\nnot available on this video card");
+			nm_messagebox(TXT_SORRY, 1, transl_get_string("MenuOK"), transl_get_string("MenuHiresNotAvailable"));
 #endif
 
 	} while (i > -1);
@@ -1213,14 +1212,15 @@ void DoNewIPAddress()
 	char IPText[30];
 	int choice;
 
-	m[0].type = NM_TYPE_TEXT; m[0].text = const_cast<char*>("Enter an address or hostname:");
-	m[1].type = NM_TYPE_INPUT; m[1].text_len = 50; m[1].text = IPText;
+	m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], transl_get_string("EnterAddressOrHostname"));
+	m[1].type = NM_TYPE_INPUT; m[1].text_len = 50; nm_copy_text(&m[1], IPText);
 	IPText[0] = 0;
 
-	choice = newmenu_do(NULL, "Join a TCPIP game", 2, m, NULL);
+	choice = newmenu_do(NULL, transl_get_string("JoinTCPIP"), 2, m, NULL);
 
 	if (choice == -1 || m[1].text[0] == 0)
 		return;
 
-	nm_messagebox(TXT_SORRY, 1, TXT_OK, "That address is not valid!");
+	strcpy(IPText, m[1].text);
+	nm_messagebox(TXT_SORRY, 1, TXT_OK, transl_get_string("InvalidAddress"));
 }

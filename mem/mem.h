@@ -39,3 +39,5 @@ void mem_validate_heap();
 #define MALLOC( var, type, count )   (var=(type *)malloc((count)*sizeof(type)))
 
 #endif
+
+void* memswp(void* destination, void* source, size_t num);

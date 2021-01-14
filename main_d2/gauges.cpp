@@ -929,7 +929,7 @@ void get_hostage_window_coords(int* x, int* y, int* w, int* h)
 #define cv_w  cv_bitmap.bm_w
 #define cv_h  cv_bitmap.bm_h
 
-#define HUD_MESSAGE_LENGTH 150
+#define HUD_MESSAGE_LENGTH 251
 #define HUD_MAX_NUM 4
 extern int HUD_nmessages, hud_first; // From hud.c
 extern char HUD_messages[HUD_MAX_NUM][HUD_MESSAGE_LENGTH + 5];
@@ -944,15 +944,15 @@ void hud_show_score()
 	if ((HUD_nmessages > 0) && (strlen(HUD_messages[hud_first]) > 38))
 		return;
 
-	gr_set_curfont(GAME_FONT);
+	gr_set_curfont(HUD_FONT);
 
 	if (((Game_mode & GM_MULTI) && !(Game_mode & GM_MULTI_COOP)))
 	{
-		sprintf(score_str, "%s: %5d", TXT_KILLS, Players[Player_num].net_kills_total);
+		sprintf(score_str, transl_fmt_string_i("GaugeKills", Players[Player_num].net_kills_total));
 	}
 	else
 	{
-		sprintf(score_str, "%s: %5d", TXT_SCORE, Players[Player_num].score);
+		sprintf(score_str, transl_fmt_string_i("GaugeScore", Players[Player_num].score));
 	}
 
 	gr_get_string_size(score_str, &w, &h, &aw);
@@ -980,7 +980,7 @@ void hud_show_timer_count()
 		i = f2i(timevar - ThisLevelTime);
 		i++;
 
-		sprintf(score_str, "T - %5d", i);
+		sprintf(score_str, transl_fmt_string_i("CountdownMultiGameTime", i));
 
 		gr_get_string_size(score_str, &w, &h, &aw);
 
@@ -1010,7 +1010,7 @@ void hud_show_score_added()
 	if (score_display[0] == 0)
 		return;
 
-	gr_set_curfont(GAME_FONT);
+	gr_set_curfont(HUD_FONT);
 
 	score_time -= FrameTime;
 	if (score_time > 0)
@@ -1025,7 +1025,7 @@ void hud_show_score_added()
 		if (Cheats_enabled)
 			sprintf(score_str, "%s", TXT_CHEATER);
 		else
-			sprintf(score_str, "%5d", score_display[0]);
+			sprintf(score_str, transl_fmt_string_i("ScoreDisplay", score_display[0]));
 
 		gr_get_string_size(score_str, &w, &h, &aw);
 		gr_set_fontcolor(gr_getcolor(0, color, 0), -1);
@@ -1045,6 +1045,7 @@ void sb_show_score()
 	int	w, h, aw;
 	static int last_x[4] = { SB_SCORE_RIGHT_L,SB_SCORE_RIGHT_L,SB_SCORE_RIGHT_H,SB_SCORE_RIGHT_H };
 	int redraw_score;
+	int syo = HUD_FONT->deffont->ft_yoffset;
 
 	WIN(DDGRLOCK(dd_grd_curcanv));
 	if ((Game_mode & GM_MULTI) && !(Game_mode & GM_MULTI_COOP))
@@ -1054,7 +1055,7 @@ void sb_show_score()
 
 	if (old_score[VR_current_page] == redraw_score)
 	{
-		gr_set_curfont(GAME_FONT);
+		gr_set_curfont(HUD_FONT);
 		gr_set_fontcolor(gr_getcolor(0, 20, 0), -1);
 
 		if ((Game_mode & GM_MULTI) && !(Game_mode & GM_MULTI_COOP))
@@ -1062,22 +1063,22 @@ void sb_show_score()
 			//PA_DFX(pa_set_frontbuffer_current()); 
 		 //PA_DFX(gr_printf(SB_SCORE_LABEL_X,SB_SCORE_Y,"%s:", TXT_KILLS)); 
 		 //PA_DFX(pa_set_backbuffer_current()); 
-			gr_printf(SB_SCORE_LABEL_X, SB_SCORE_Y, "%s:", TXT_KILLS);
+			gr_printf(SB_SCORE_LABEL_X, SB_SCORE_Y - syo, transl_get_string("GaugeKillsSB"));
 		}
 		else
 		{
 			//PA_DFX (pa_set_frontbuffer_current() );
 			 //PA_DFX (gr_printf(SB_SCORE_LABEL_X,SB_SCORE_Y,"%s:", TXT_SCORE) );
 		  //PA_DFX(pa_set_backbuffer_current()); 
-			gr_printf(SB_SCORE_LABEL_X, SB_SCORE_Y, "%s:", TXT_SCORE);
+			gr_printf(SB_SCORE_LABEL_X, SB_SCORE_Y - syo, transl_get_string("GaugeScoreSB"));
 		}
 	}
 
-	gr_set_curfont(GAME_FONT);
+	gr_set_curfont(HUD_FONT);
 	if ((Game_mode & GM_MULTI) && !(Game_mode & GM_MULTI_COOP))
-		sprintf(score_str, "%5d", Players[Player_num].net_kills_total);
+		sprintf(score_str, transl_fmt_string_i("ScoreDisplay", Players[Player_num].net_kills_total));
 	else
-		sprintf(score_str, "%5d", Players[Player_num].score);
+		sprintf(score_str, transl_fmt_string_i("ScoreDisplay", Players[Player_num].score));
 	gr_get_string_size(score_str, &w, &h, &aw);
 
 	x = SB_SCORE_RIGHT - w - LHX(2);
@@ -1098,7 +1099,7 @@ void sb_show_score()
 	//PA_DFX(pa_set_frontbuffer_current());
 	//PA_DFX(gr_printf(x, y, score_str));
 	//PA_DFX(pa_set_backbuffer_current());
-	gr_printf(x, y, score_str);
+	gr_printf(x, y - syo, score_str);
 
 	last_x[(Current_display_mode ? 2 : 0) + VR_current_page] = x;
 	WIN(DDGRUNLOCK(dd_grd_curcanv));
@@ -1114,6 +1115,7 @@ void sb_show_score_added()
 	static	int last_score_display[2] = { -1, -1 };
 	int frc = 0;
 	//PA_DFX(frc = 0);
+	int syo = HUD_FONT->deffont->ft_yoffset;
 
 	if ((Game_mode & GM_MULTI) && !(Game_mode & GM_MULTI_COOP))
 		return;
@@ -1122,7 +1124,7 @@ void sb_show_score_added()
 		return;
 
 	WIN(DDGRLOCK(dd_grd_curcanv));
-	gr_set_curfont(GAME_FONT);
+	gr_set_curfont(HUD_FONT);
 
 	score_time -= FrameTime;
 	if (score_time > 0) 
@@ -1146,7 +1148,7 @@ void sb_show_score_added()
 		if (Cheats_enabled)
 			sprintf(score_str, "%s", TXT_CHEATER);
 		else
-			sprintf(score_str, "%5d", score_display[VR_current_page]);
+			sprintf(score_str, transl_fmt_string_i("ScoreDisplay", score_display[VR_current_page]));
 
 		gr_get_string_size(score_str, &w, &h, &aw);
 
@@ -1157,7 +1159,7 @@ void sb_show_score_added()
 		//PA_DFX(pa_set_frontbuffer_current());
 		//PA_DFX(gr_printf(x, SB_SCORE_ADDED_Y, score_str));
 		//PA_DFX(pa_set_backbuffer_current());
-		gr_printf(x, SB_SCORE_ADDED_Y, score_str);
+		gr_printf(x, SB_SCORE_ADDED_Y - syo, score_str);
 
 
 		last_x[(Current_display_mode ? 2 : 0) + VR_current_page] = x;
@@ -1287,7 +1289,7 @@ void hud_show_homing_warning(void)
 				y = std::min(y, (wy - Line_spacing - Game_window_y));
 			}
 
-			gr_set_curfont(GAME_FONT);
+			gr_set_curfont(HUD_FONT);
 			gr_set_fontcolor(gr_getcolor(0, 31, 0), -1);
 			gr_printf(x, y, TXT_LOCK);
 		}
@@ -1297,7 +1299,7 @@ void hud_show_homing_warning(void)
 void hud_show_keys(void)
 {
 	int y = 3 * Line_spacing;
-	int dx = GAME_FONT->ft_w + GAME_FONT->ft_w / 2;
+	int dx = HUD_FONT->ft_w + HUD_FONT->ft_w / 2;
 
 	if (Players[Player_num].flags & PLAYER_FLAGS_BLUE_KEY) 
 	{
@@ -1333,17 +1335,17 @@ void hud_show_orbs(void)
 		if (Cockpit_mode == CM_FULL_COCKPIT) 
 		{
 			y = 2 * Line_spacing;
-			x = 4 * GAME_FONT->ft_w;
+			x = 4 * HUD_FONT->ft_w;
 		}
 		else if (Cockpit_mode == CM_STATUS_BAR) 
 		{
 			y = Line_spacing;
-			x = GAME_FONT->ft_w;
+			x = HUD_FONT->ft_w;
 		}
 		else if (Cockpit_mode == CM_FULL_SCREEN) 
 		{
 			y = 5 * Line_spacing;
-			x = GAME_FONT->ft_w;
+			x = HUD_FONT->ft_w;
 			if (FontHires)
 				y += Line_spacing;
 		}
@@ -1354,7 +1356,7 @@ void hud_show_orbs(void)
 		gr_ubitmapm(x, y, bm);
 
 		gr_set_fontcolor(gr_getcolor(0, 31, 0), -1);
-		gr_printf(x + bm->bm_w + bm->bm_w / 2, y + (FontHires ? 2 : 1), "x %d", Players[Player_num].secondary_ammo[PROXIMITY_INDEX]);
+		gr_printf(x + bm->bm_w + bm->bm_w / 2, y + (FontHires ? 2 : 1), transl_fmt_string_i("GaugeOrbs", Players[Player_num].secondary_ammo[PROXIMITY_INDEX]));
 	}
 #endif
 }
@@ -1401,9 +1403,9 @@ void hud_show_energy(void)
 	gr_set_curfont(GAME_FONT);
 	gr_set_fontcolor(gr_getcolor(0, 31, 0), -1);
 	if (Game_mode & GM_MULTI)
-		gr_printf(2, grd_curcanv->cv_h - 5 * Line_spacing, "%s: %i", TXT_ENERGY, f2ir(Players[Player_num].energy));
+		gr_printf(2, grd_curcanv->cv_h - 5 * Line_spacing, transl_fmt_string_i("GaugeEnergy", f2ir(Players[Player_num].energy)));
 	else
-		gr_printf(2, grd_curcanv->cv_h - Line_spacing, "%s: %i", TXT_ENERGY, f2ir(Players[Player_num].energy));
+		gr_printf(2, grd_curcanv->cv_h - Line_spacing, transl_fmt_string_i("GaugeEnergy", f2ir(Players[Player_num].energy)));
 
 	if (Newdemo_state == ND_STATE_RECORDING) 
 	{
@@ -1429,7 +1431,7 @@ void hud_show_afterburner(void)
 
 	y = (Game_mode & GM_MULTI) ? (-8 * Line_spacing) : (-3 * Line_spacing);
 
-	gr_printf(2, grd_curcanv->cv_h + y, "burn: %d%%", fixmul(Afterburner_charge, 100));
+	gr_printf(2, grd_curcanv->cv_h + y, transl_fmt_string_i("GaugeBurn", fixmul(Afterburner_charge, 100)));
 
 	if (Newdemo_state == ND_STATE_RECORDING) 
 	{
@@ -1440,12 +1442,6 @@ void hud_show_afterburner(void)
 		}
 	}
 }
-
-const char* d2_very_short_secondary_weapon_names[] = { "Flash","Guided","SmrtMine","Mercury","Shaker" };
-
-#define SECONDARY_WEAPON_NAMES_VERY_SHORT(weapon_num) 					\
-	((weapon_num <= MEGA_INDEX)?(*(&TXT_CONCUSSION + (weapon_num))):	\
-	const_cast<char*>(d2_very_short_secondary_weapon_names[weapon_num-SMISSILE1_INDEX]))
 
 //return which bomb will be dropped next time the bomb key is pressed
 extern int which_bomb();
@@ -1503,10 +1499,10 @@ void show_bomb_count(int x, int y, int bg_color, int always_show)
 	else
 		gr_set_fontcolor(bg_color, bg_color);	//erase by drawing in background color
 
-	sprintf(txt, "B:%02d", count);
+	sprintf(txt, transl_fmt_string_i("GaugeBombs", count));
 
 	while ((t = strchr(txt, '1')) != NULL)
-		* t = '\x84';	//convert to wide '1'
+		* t = '\x14';	//convert to wide '1'
 
 	//PA_DFX(pa_set_frontbuffer_current());
 	//PA_DFX(gr_string(x, y, txt));
@@ -1522,24 +1518,27 @@ void draw_ammo_info(int x, int y, int ammo_count, int primary);
 
 void draw_primary_ammo_info(int ammo_count)
 {
+	int yo = (HUD_FONT->ft_h - SMALL_FONT_HEIGHT);
+	if (yo < 0)
+		yo = 0;
 	if (Cockpit_mode == CM_STATUS_BAR)
-		draw_ammo_info(SB_PRIMARY_AMMO_X, SB_PRIMARY_AMMO_Y, ammo_count, 1);
+		draw_ammo_info(SB_PRIMARY_AMMO_X, SB_PRIMARY_AMMO_Y + yo, ammo_count, 1);
 	else
-		draw_ammo_info(PRIMARY_AMMO_X, PRIMARY_AMMO_Y, ammo_count, 1);
+		draw_ammo_info(PRIMARY_AMMO_X, PRIMARY_AMMO_Y + yo, ammo_count, 1);
 }
 
 //convert '1' characters to special wide ones
-#define convert_1s(s) do {char *p=s; while ((p=strchr(p,'1')) != NULL) *p=132;} while(0)
+#define convert_1s(s) do {char *p=s; while ((p=strchr(p,'1')) != NULL) *p=20;} while(0)
 
+char weapon_name[48];
 void hud_show_weapons(void)
 {
 	int	w, h, aw;
 	int	y;
-	char* weapon_name;
-	char	weapon_str[32];
+	char	weapon_str[32], temp_str[10];
 
 	//	gr_set_current_canvas(&VR_render_sub_buffer[0]);	//render off-screen
-	gr_set_curfont(GAME_FONT);
+	gr_set_curfont(HUD_FONT);
 	gr_set_fontcolor(gr_getcolor(0, 31, 0), -1);
 
 	y = grd_curcanv->cv_h;
@@ -1547,22 +1546,24 @@ void hud_show_weapons(void)
 	if (Game_mode & GM_MULTI)
 		y -= 4 * Line_spacing;
 
-	weapon_name = PRIMARY_WEAPON_NAMES_SHORT(Primary_weapon);
+	strcpy(weapon_name, PRIMARY_WEAPON_NAMES_SHORT(Primary_weapon));
 
 	switch (Primary_weapon) 
 	{
 	case LASER_INDEX:
 		if (Players[Player_num].flags & PLAYER_FLAGS_QUAD_LASERS)
-			sprintf(weapon_str, "%s %s %i", TXT_QUAD, weapon_name, Players[Player_num].laser_level + 1);
+			sprintf(weapon_str, transl_fmt_string_i("WeaponDisplayLaserQuad", Players[Player_num].laser_level + 1));
 		else
-			sprintf(weapon_str, "%s %i", weapon_name, Players[Player_num].laser_level + 1);
+			sprintf(weapon_str, transl_fmt_string_i("WeaponDisplayLaser", Players[Player_num].laser_level + 1));
 		break;
 
 	case SUPER_LASER_INDEX:	Int3(); break;	//no such thing as super laser
 
 	case VULCAN_INDEX:
 	case GAUSS_INDEX:
-		sprintf(weapon_str, "%s: %i", weapon_name, f2i((unsigned)Players[Player_num].primary_ammo[VULCAN_INDEX] * (unsigned)VULCAN_AMMO_SCALE));
+		sprintf(weapon_str, transl_fmt_string_ti("WeaponDisplayVulcan", 
+			Primary_weapon == GAUSS_INDEX ? "TXT_W_VSULCAN_S" : "TXT_W_VULCAN_S",
+			f2i((unsigned)Players[Player_num].primary_ammo[VULCAN_INDEX] * (unsigned)VULCAN_AMMO_SCALE)));
 		convert_1s(weapon_str);
 		break;
 
@@ -1574,7 +1575,7 @@ void hud_show_weapons(void)
 		strcpy(weapon_str, weapon_name);
 		break;
 	case OMEGA_INDEX:
-		sprintf(weapon_str, "%s: %03i", weapon_name, Omega_charge * 100 / MAX_OMEGA_CHARGE);
+		sprintf(weapon_str, transl_fmt_string_i("WeaponDisplayOmega", Omega_charge * 100 / MAX_OMEGA_CHARGE));
 		convert_1s(weapon_str);
 		break;
 
@@ -1604,9 +1605,9 @@ void hud_show_weapons(void)
 		}
 	}
 
-	weapon_name = SECONDARY_WEAPON_NAMES_VERY_SHORT(Secondary_weapon);
+	strcpy(weapon_name, _SECONDARY_WEAPON_NAMES_VERY_SHORT[Secondary_weapon]);
 
-	sprintf(weapon_str, "%s %d", weapon_name, Players[Player_num].secondary_ammo[Secondary_weapon]);
+	sprintf(weapon_str, transl_fmt_string_ti("WeaponDisplaySecondary", weapon_name, Players[Player_num].secondary_ammo[Secondary_weapon]));
 	gr_get_string_size(weapon_str, &w, &h, &aw);
 	gr_printf(grd_curcanv->cv_bitmap.bm_w - 5 - w, y - Line_spacing, weapon_str);
 
@@ -1661,16 +1662,16 @@ void hud_show_shield(void)
 	if (Players[Player_num].shields >= 0) 
 	{
 		if (Game_mode & GM_MULTI)
-			gr_printf(2, grd_curcanv->cv_h - 6 * Line_spacing, "%s: %i", TXT_SHIELD, f2ir(Players[Player_num].shields));
+			gr_printf(2, grd_curcanv->cv_h - 6 * Line_spacing, transl_fmt_string_i("GaugeShield", f2ir(Players[Player_num].shields)));
 		else
-			gr_printf(2, grd_curcanv->cv_h - 2 * Line_spacing, "%s: %i", TXT_SHIELD, f2ir(Players[Player_num].shields));
+			gr_printf(2, grd_curcanv->cv_h - 2 * Line_spacing, transl_fmt_string_i("GaugeShield", f2ir(Players[Player_num].shields)));
 	}
 	else 
 	{
 		if (Game_mode & GM_MULTI)
-			gr_printf(2, grd_curcanv->cv_h - 6 * Line_spacing, "%s: 0", TXT_SHIELD);
+			gr_printf(2, grd_curcanv->cv_h - 6 * Line_spacing, transl_fmt_string_i("GaugeShield", f2ir(Players[Player_num].shields)));
 		else
-			gr_printf(2, grd_curcanv->cv_h - 2 * Line_spacing, "%s: 0", TXT_SHIELD);
+			gr_printf(2, grd_curcanv->cv_h - 2 * Line_spacing, transl_fmt_string_i("GaugeShield", 0));
 	}
 
 	if (Newdemo_state == ND_STATE_RECORDING) 
@@ -1694,7 +1695,7 @@ void hud_show_lives()
 	{
 		gr_set_curfont(GAME_FONT);
 		gr_set_fontcolor(gr_getcolor(0, 31, 0), -1);
-		gr_printf(10, 3, "%s: %d", TXT_DEATHS, Players[Player_num].net_killed_total);
+		gr_printf(10, 3, transl_fmt_string_i("GaugeDeaths", Players[Player_num].net_killed_total));
 	}
 	else if (Players[Player_num].lives > 1) 
 	{
@@ -1704,7 +1705,7 @@ void hud_show_lives()
 		PAGE_IN_GAUGE(GAUGE_LIVES);
 		bm = &GameBitmaps[GET_GAUGE_INDEX(GAUGE_LIVES)];
 		gr_ubitmapm(10, 3, bm);
-		gr_printf(10 + bm->bm_w + bm->bm_w / 2, 4, "x %d", Players[Player_num].lives - 1);
+		gr_printf(10 + bm->bm_w + bm->bm_w / 2, 4, transl_fmt_string_i("GaugeLives", Players[Player_num].lives - 1));
 	}
 
 }
@@ -1712,6 +1713,7 @@ void hud_show_lives()
 void sb_show_lives()
 {
 	int x, y;
+	int syo = HUD_FONT->deffont->ft_yoffset;
 	grs_bitmap* bm = &GameBitmaps[GET_GAUGE_INDEX(GAUGE_LIVES)];
 	int frc = 0;
 	x = SB_LIVES_X;
@@ -1729,7 +1731,7 @@ void sb_show_lives()
 			//PA_DFX(pa_set_frontbuffer_current());
 			//PA_DFX(gr_printf(SB_LIVES_LABEL_X, SB_LIVES_LABEL_Y, "%s:", TXT_DEATHS));
 			//PA_DFX(pa_set_backbuffer_current());
-			gr_printf(SB_LIVES_LABEL_X, SB_LIVES_LABEL_Y, "%s:", TXT_DEATHS);
+			gr_printf(SB_LIVES_LABEL_X, SB_LIVES_LABEL_Y - syo, transl_get_string("GaugeDeathsSB"));
 
 		}
 		else
@@ -1737,7 +1739,7 @@ void sb_show_lives()
 			//PA_DFX(pa_set_frontbuffer_current());
 			//PA_DFX(gr_printf(SB_LIVES_LABEL_X, SB_LIVES_LABEL_Y, "%s:", TXT_LIVES));
 			//PA_DFX(pa_set_backbuffer_current());
-			gr_printf(SB_LIVES_LABEL_X, SB_LIVES_LABEL_Y, "%s:", TXT_LIVES);
+			gr_printf(SB_LIVES_LABEL_X, SB_LIVES_LABEL_Y - syo, transl_get_string("GaugeLivesSB"));
 		}
 
 	}
@@ -1754,7 +1756,7 @@ void sb_show_lives()
 		sprintf(killed_str, "%5d", Players[Player_num].net_killed_total);
 		gr_get_string_size(killed_str, &w, &h, &aw);
 		gr_setcolor(BM_XRGB(0, 0, 0));
-		gr_rect(last_x[(Current_display_mode ? 2 : 0) + VR_current_page], y + 1, SB_SCORE_RIGHT, y + GAME_FONT->ft_h);
+		gr_rect(last_x[(Current_display_mode ? 2 : 0) + VR_current_page], y + 1 - syo, SB_SCORE_RIGHT, y + GAME_FONT->ft_h);
 		gr_set_fontcolor(gr_getcolor(0, 20, 0), -1);
 		x = SB_SCORE_RIGHT - w - 2;
 		gr_printf(x, y + 1, killed_str);
@@ -1782,12 +1784,12 @@ void sb_show_lives()
 #ifdef PA_3DFX_VOODOO
 			PA_DFX(pa_set_frontbuffer_current());
 			gr_ubitmapm(x, y, bm);
-			gr_printf(x + bm->bm_w + GAME_FONT->ft_w, y, "x %d", Players[Player_num].lives - 1);
+			gr_printf(x + bm->bm_w + GAME_FONT->ft_w, y - syo, transl_fmt_string_i("GaugeLives", Players[Player_num].lives - 1));
 #endif
 
 			//PA_DFX(pa_set_backbuffer_current());
 			gr_ubitmapm(x, y, bm);
-			gr_printf(x + bm->bm_w + GAME_FONT->ft_w, y, "x %d", Players[Player_num].lives - 1);
+			gr_printf(x + bm->bm_w + GAME_FONT->ft_w, y - syo, transl_fmt_string_i("GaugeLives", Players[Player_num].lives - 1));
 
 			//			gr_printf(x+12, y, "x %d", Players[Player_num].lives-1);
 		}
@@ -1810,13 +1812,13 @@ void show_time()
 	int secs = f2i(Players[Player_num].time_level) % 60;
 	int mins = f2i(Players[Player_num].time_level) / 60;
 
-	gr_set_curfont(GAME_FONT);
+	gr_set_curfont(GAUGE_FONT);
 
 	if (Color_0_31_0 == -1)
 		Color_0_31_0 = gr_getcolor(0, 31, 0);
 	gr_set_fontcolor(Color_0_31_0, -1);
 
-	gr_printf(grd_curcanv->cv_w - 4 * GAME_FONT->ft_w, grd_curcanv->cv_h - 4 * Line_spacing, "%d:%02d", mins, secs);
+	gr_printf(grd_curcanv->cv_w - 4 * HUD_FONT->ft_w, grd_curcanv->cv_h - 4 * Line_spacing, "%d:%02d", mins, secs);
 }
 #endif
 
@@ -2312,7 +2314,7 @@ void draw_player_ship(int cloak_state, int old_cloak_state, int x, int y)
 void draw_numerical_display(int shield, int energy)
 {
 	gr_set_current_canvas(Canv_NumericalGauge);
-	gr_set_curfont(GAME_FONT);
+	gr_set_curfont(GAUGE_FONT);
 	PAGE_IN_GAUGE(GAUGE_NUMERICAL);
 	gr_ubitmap(0, 0, &GameBitmaps[GET_GAUGE_INDEX(GAUGE_NUMERICAL)]);
 
@@ -2385,10 +2387,11 @@ void draw_keys()
 }
 
 
-void draw_weapon_info_sub(int info_index, gauge_box* box, int pic_x, int pic_y, char* name, int text_x, int text_y)
+void draw_weapon_info_sub(int info_index, gauge_box* box, int pic_x, int pic_y, const char* name, int text_x, int text_y)
 {
 	grs_bitmap* bm;
-	char* p;
+	char nbuf[80], * p;
+	strcpyn(nbuf, name, sizeof(nbuf));
 
 	//clear the window
 	gr_setcolor(BM_XRGB(0, 0, 0));
@@ -2418,7 +2421,7 @@ void draw_weapon_info_sub(int info_index, gauge_box* box, int pic_x, int pic_y, 
 
 	gr_set_fontcolor(gr_getcolor(0, 20, 0), -1);
 
-	if ((p = strchr(name, '\n')) != NULL)
+	if ((p = strchr(nbuf, '\n')) != NULL)
 	{
 		*p = 0;
 #ifdef PA_3DFX_VOODOO
@@ -2427,7 +2430,7 @@ void draw_weapon_info_sub(int info_index, gauge_box* box, int pic_x, int pic_y, 
 	  //			gr_printf(text_x,text_y+grd_curcanv->cv_font->ft_h+1,p+1);
 #endif
 		//PA_DFX(pa_set_backbuffer_current());
-		gr_printf(text_x, text_y, name);
+		gr_printf(text_x, text_y, nbuf);
 		gr_printf(text_x, text_y + grd_curcanv->cv_font->ft_h + 1, p + 1);
 		*p = '\n';
 }
@@ -2441,7 +2444,7 @@ void draw_weapon_info_sub(int info_index, gauge_box* box, int pic_x, int pic_y, 
 
 	//	For laser, show level and quadness
 	if (info_index == LASER_ID || info_index == SUPER_LASER_ID)
-	{
+	{/*
 		char	temp_str[7];
 
 		sprintf(temp_str, "%s: 0", TXT_LVL);
@@ -2464,6 +2467,10 @@ void draw_weapon_info_sub(int info_index, gauge_box* box, int pic_x, int pic_y, 
 			//PA_DFX(pa_set_backbuffer_current());
 			gr_printf(text_x, text_y + 2 * Line_spacing, temp_str);
 		}
+		*/
+		gr_printf(text_x, text_y + Line_spacing, transl_fmt_string_i("SmallLaserDisplay", Players[Player_num].laser_level + 1));
+		if (Players[Player_num].flags & PLAYER_FLAGS_QUAD_LASERS)
+			gr_printf(text_x, text_y + 2 * Line_spacing, transl_get_string("SmallLaserDisplayQuad"));
 	}
 }
 
@@ -2543,10 +2550,13 @@ void draw_ammo_info(int x, int y, int ammo_count, int primary)
 
 void draw_secondary_ammo_info(int ammo_count)
 {
+	int yo = (HUD_FONT->ft_h - SMALL_FONT_HEIGHT);
+	if (yo < 0)
+		yo = 0;
 	if (Cockpit_mode == CM_STATUS_BAR)
-		draw_ammo_info(SB_SECONDARY_AMMO_X, SB_SECONDARY_AMMO_Y, ammo_count, 0);
+		draw_ammo_info(SB_SECONDARY_AMMO_X, SB_SECONDARY_AMMO_Y + yo, ammo_count, 0);
 	else
-		draw_ammo_info(SECONDARY_AMMO_X, SECONDARY_AMMO_Y, ammo_count, 0);
+		draw_ammo_info(SECONDARY_AMMO_X, SECONDARY_AMMO_Y + yo, ammo_count, 0);
 }
 
 //returns true if drew picture
@@ -2799,12 +2809,13 @@ void sb_draw_energy_bar(int energy)
 
 	//draw numbers
 	sprintf(energy_str, "%d", energy);
+	gr_set_curfont(GAUGE_FONT);
 	gr_get_string_size(energy_str, &w, &h, &aw);
 	gr_set_fontcolor(gr_getcolor(25, 18, 6), -1);
 	//PA_DFX(pa_set_frontbuffer_current());
 	//PA_DFX(gr_printf(SB_ENERGY_GAUGE_X + ((SB_ENERGY_GAUGE_W - w) / 2), SB_ENERGY_GAUGE_Y + SB_ENERGY_GAUGE_H - GAME_FONT->ft_h - (GAME_FONT->ft_h / 4), "%d", energy));
 	//PA_DFX(pa_set_backbuffer_current());
-	gr_printf(SB_ENERGY_GAUGE_X + ((SB_ENERGY_GAUGE_W - w) / 2), SB_ENERGY_GAUGE_Y + SB_ENERGY_GAUGE_H - GAME_FONT->ft_h - (GAME_FONT->ft_h / 4), "%d", energy);
+	gr_printf(SB_ENERGY_GAUGE_X + ((SB_ENERGY_GAUGE_W - w) / 2), SB_ENERGY_GAUGE_Y + SB_ENERGY_GAUGE_H - GAUGE_FONT->ft_h - (GAUGE_FONT->ft_h / 4), "%d", energy);
 	WIN(DDGRUNLOCK(dd_grd_curcanv));
 }
 
@@ -2835,6 +2846,7 @@ void sb_draw_afterburner()
 	//PA_DFX(pa_set_backbuffer_current());
 	//PA_DFX(gr_ubitmapm(SB_AFTERBURNER_GAUGE_X, SB_AFTERBURNER_GAUGE_Y, &Canv_SBAfterburnerGauge->cv_bitmap));
 
+	gr_set_curfont(GAUGE_FONT);
 	//draw legend
 	if (Players[Player_num].flags & PLAYER_FLAGS_AFTERBURNER)
 		gr_set_fontcolor(gr_getcolor(45, 0, 0), -1);
@@ -2845,7 +2857,7 @@ void sb_draw_afterburner()
 	//PA_DFX(pa_set_frontbuffer_current());
 	//PA_DFX(gr_printf(SB_AFTERBURNER_GAUGE_X + ((SB_AFTERBURNER_GAUGE_W - w) / 2), SB_AFTERBURNER_GAUGE_Y + SB_AFTERBURNER_GAUGE_H - GAME_FONT->ft_h - (GAME_FONT->ft_h / 4), "AB"));
 	//PA_DFX(pa_set_backbuffer_current());
-	gr_printf(SB_AFTERBURNER_GAUGE_X + ((SB_AFTERBURNER_GAUGE_W - w) / 2), SB_AFTERBURNER_GAUGE_Y + SB_AFTERBURNER_GAUGE_H - GAME_FONT->ft_h - (GAME_FONT->ft_h / 4), "AB");
+	gr_printf(SB_AFTERBURNER_GAUGE_X + ((SB_AFTERBURNER_GAUGE_W - w) / 2), SB_AFTERBURNER_GAUGE_Y + SB_AFTERBURNER_GAUGE_H - GAUGE_FONT->ft_h - (GAUGE_FONT->ft_h / 4), "AB");
 
 	WIN(DDGRUNLOCK(dd_grd_curcanv));
 }
@@ -2854,7 +2866,7 @@ void sb_draw_shield_num(int shield)
 {
 	//draw numbers
 
-	gr_set_curfont(GAME_FONT);
+	gr_set_curfont(GAUGE_FONT);
 	gr_set_fontcolor(gr_getcolor(14, 14, 23), -1);
 
 	//erase old one
@@ -2867,7 +2879,7 @@ void sb_draw_shield_num(int shield)
 
 	//PA_DFX(pa_set_frontbuffer_current());
 
-	gr_rect(SB_SHIELD_NUM_X, SB_SHIELD_NUM_Y, SB_SHIELD_NUM_X + (Current_display_mode ? 27 : 13), SB_SHIELD_NUM_Y + GAME_FONT->ft_h);
+	gr_rect(SB_SHIELD_NUM_X, SB_SHIELD_NUM_Y, SB_SHIELD_NUM_X + (Current_display_mode ? 27 : 13), SB_SHIELD_NUM_Y + GAUGE_FONT->ft_h);
 	gr_printf((shield > 99) ? SB_SHIELD_NUM_X : ((shield > 9) ? SB_SHIELD_NUM_X + 2 : SB_SHIELD_NUM_X + 4), SB_SHIELD_NUM_Y, "%d", shield);
 
 	//PA_DFX(pa_set_backbuffer_current());
@@ -3443,9 +3455,9 @@ void draw_hud()
 		gr_set_curfont(GAME_FONT);
 		gr_set_fontcolor(gr_getcolor(0, 31, 0), -1);
 		if (Newdemo_state == ND_STATE_PLAYBACK)
-			gr_printf(0x8000, grd_curcanv->cv_h - 14, TXT_REAR_VIEW);
+			gr_printf(0x8000, grd_curcanv->cv_h - 14, transl_get_string("TXT_REAR_VIEW1"));
 		else
-			gr_printf(0x8000, grd_curcanv->cv_h - 10, TXT_REAR_VIEW);
+			gr_printf(0x8000, grd_curcanv->cv_h - 10, transl_get_string("TXT_REAR_VIEW1"));
 	}
 	WIN(DDGRUNLOCK(dd_grd_curcanv));
 }

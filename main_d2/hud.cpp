@@ -46,7 +46,7 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 int hud_first = 0;
 int hud_last = 0;
 
-#define HUD_MESSAGE_LENGTH	150
+#define HUD_MESSAGE_LENGTH	251
 #define HUD_MAX_NUM 4
 
 int 	HUD_nmessages = 0;
@@ -129,11 +129,11 @@ void HUD_clear_messages()
 extern int Guided_in_big_window;
 extern int max_window_h;
 
-extern grs_canvas* print_to_canvas(char* s, grs_font * font, int fc, int bc, int double_flag);
+extern grs_canvas* print_to_canvas(const char* s, grs_fontstyle* font, int fc, int bc, int double_flag);
 
 //	-----------------------------------------------------------------------------
 //	print to buffer, double heights, and blit bitmap to screen
-void modex_hud_message(int x, int y, char* s, grs_font * font, int color)
+void modex_hud_message(int x, int y, char* s, grs_fontstyle * font, int color)
 {
 	grs_canvas* temp_canv;
 
@@ -293,8 +293,8 @@ void HUD_render_message_frame()
 				n = (hud_first + i) % HUD_MAX_NUM;
 				if ((n < 0) || (n >= HUD_MAX_NUM))
 					Int3(); // Get Rob!!
-				if (!strcmp(HUD_messages[n], "This is a bug."))
-					Int3(); // Get Rob!!
+				/*if (!strcmp(HUD_messages[n], "This is a bug."))
+					Int3(); // Get Rob!! */
 				gr_get_string_size(&HUD_messages[n][0], &w, &h, &aw);
 				gr_set_fontcolor(HUD_color, -1);
 

@@ -50,6 +50,7 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #include "cntrlcen.h"
 #include "gameseg.h"
 #include "automap.h"
+#include "locale/transl.h"
 
 #define EXPLOSION_SCALE (F1_0*5/2)		//explosion is the obj size times this  
 
@@ -186,7 +187,7 @@ object *object_create_explosion_sub(object *objp, short segnum, vms_vector * pos
 										count = 1;
 									ouch_str[0] = 0;
 									for (i=0; i<count; i++)
-										strcat(ouch_str, "ouch! ");
+										strcat(ouch_str, transl_get_string("BuddyOuch"));
 
 									buddy_message(ouch_str);
 								}

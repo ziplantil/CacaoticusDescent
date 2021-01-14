@@ -163,7 +163,7 @@ void kmatrix_redraw()
 
 	gr_string(0x8000, 15, TXT_KILL_MATRIX_TITLE);
 
-	grd_curcanv->cv_font = Gamefonts[GFONT_SMALL];
+	grd_curcanv->cv_font = HUD_FONT;
 
 	multi_get_kill_list(sorted);
 

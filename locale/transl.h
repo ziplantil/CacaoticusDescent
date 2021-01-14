@@ -64,9 +64,20 @@ const char* transl_get_string(const char* key);
 const char* transl_fmt_string_t(const char* key, const char* t1);
 const char* transl_fmt_string_tt(const char* key, const char* t1, const char* t2);
 const char* transl_fmt_string_s(const char* key, const char* s1);
+const char* transl_fmt_string_ss(const char* key, const char* s1, const char* s2);
 const char* transl_fmt_string_i(const char* key, int i);
+const char* transl_fmt_string_ii(const char* key, int i1, int i2);
 const char* transl_fmt_string_is(const char* key, int i, const char* s1);
 const char* transl_fmt_string_si(const char* key, const char* s1, int i);
 const char* transl_fmt_string_ti(const char* key, const char* t1, int i);
+
+const char* transl_fmt_string_it(const char* key, int i, const char* t1);
+const char* transl_fmt_string_iii(const char* key, int i1, int i2, int i3);
+const char* transl_fmt_string_siss(const char* key, const char* s1, int i, const char* s2, const char* s3);
+const char* transl_fmt_string_ssii(const char* key, const char* s1, const char* s2, int i1, int i2);
+const char* transl_fmt_string_stss(const char* key, const char* s1, const char* t, const char* s2, const char* s3);
+const char* transl_fmt_string_ssss(const char* key, const char* s1, const char* s2, const char* s3, const char* s4);
+const char* transl_fmt_string_ts(const char* key, const char* t1, const char* s1);
+const char* transl_fmt_string_stt(const char* key, const char* s1, const char* t1, const char* t2);
 
 extern char LangHogfile_initialized;

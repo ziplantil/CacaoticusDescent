@@ -26,19 +26,26 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #define GFONT_MEDIUM_2	4
 #define GFONT_MEDIUM_3	6
 #define GFONT_SMALL		8
+#define GFONT_SMALL_X	10
+#define GFONT_SMALL_G	12
 
 #define SMALL_FONT		(Gamefonts[GFONT_SMALL+FontHires])
 #define MEDIUM1_FONT		(Gamefonts[GFONT_MEDIUM_1+FontHires])
 #define MEDIUM2_FONT		(Gamefonts[GFONT_MEDIUM_2+FontHires])
 #define MEDIUM3_FONT		(Gamefonts[GFONT_MEDIUM_3+FontHires])
 #define HUGE_FONT			(Gamefonts[GFONT_BIG_1+FontHires])
+#define HUD_FONT		(Gamefonts[GFONT_SMALL_X+FontHires])
+#define GAUGE_FONT		(Gamefonts[GFONT_SMALL_G+FontHires])
 
 #define GAME_FONT		SMALL_FONT
 
-#define MAX_FONTS 10
+#define MAX_FONTS 14
 
-extern grs_font *Gamefonts[MAX_FONTS];
+#define SMALL_FONT_HEIGHT (FontHires ? 10 : 5)
 
+extern grs_fontstyle* Gamefonts[MAX_FONTS];
+
+void gamefont_load_extrafonts(grs_fontstyle* style, int styleNum);
 void gamefont_init();
 void gamefont_close();
 

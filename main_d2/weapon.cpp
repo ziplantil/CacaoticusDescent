@@ -248,7 +248,7 @@ void CycleSecondary()
 //if message flag set, print message saying selected
 void select_weapon(int weapon_num, int secondary_flag, int print_message, int wait_for_rearm)
 {
-	char* weapon_name;
+	const char* weapon_name;
 
 	if (Newdemo_state == ND_STATE_RECORDING)
 		newdemo_record_player_weapon(secondary_flag, weapon_num);
@@ -280,7 +280,7 @@ void select_weapon(int weapon_num, int secondary_flag, int print_message, int wa
 					digi_play_sample_once(SOUND_BAD_SELECTION, F1_0);
 		}
 		Primary_weapon = weapon_num;
-		weapon_name = PRIMARY_WEAPON_NAMES(weapon_num);
+		weapon_name = _PRIMARY_WEAPON_NAMES[weapon_num];
 #if defined (TACTILE)
 		tactile_set_button_jolt();
 #endif
@@ -317,7 +317,7 @@ void select_weapon(int weapon_num, int secondary_flag, int print_message, int wa
 
 		}
 		Secondary_weapon = weapon_num;
-		weapon_name = SECONDARY_WEAPON_NAMES(weapon_num);
+		weapon_name = _SECONDARY_WEAPON_NAMES[weapon_num];
 
 		//save flag for whether was super version
 		Secondary_last_was_super[weapon_num % SUPER_WEAPON] = (weapon_num >= SUPER_WEAPON);
@@ -325,9 +325,11 @@ void select_weapon(int weapon_num, int secondary_flag, int print_message, int wa
 
 	if (print_message)
 		if (weapon_num == LASER_INDEX && !secondary_flag)
-			HUD_init_message("%s Level %d %s", weapon_name, Players[Player_num].laser_level + 1, TXT_SELECTED);
+			HUD_init_message(transl_fmt_string_ti("SelectedPrimaryLaser", weapon_name, Players[Player_num].laser_level + 1));
+		else if (secondary_flag)
+			HUD_init_message(transl_fmt_string_t("SelectedSecondary", weapon_name));
 		else
-			HUD_init_message("%s %s", weapon_name, TXT_SELECTED);
+			HUD_init_message(transl_fmt_string_t("SelectedPrimary", weapon_name));
 
 }
 
@@ -390,10 +392,10 @@ void do_weapon_select(int weapon_num, int secondary_flag)
 		{
 			if (weapon_num == SUPER_LASER_INDEX)
 				return; 		//no such thing as super laser, so no error
-			HUD_init_message("%s %s!", TXT_DONT_HAVE, PRIMARY_WEAPON_NAMES(weapon_num));
+			HUD_init_message(transl_fmt_string_t("NotHavePrimary", _PRIMARY_WEAPON_NAMES[weapon_num]));
 		}
 		else
-			HUD_init_message("%s %s%s", TXT_HAVE_NO, SECONDARY_WEAPON_NAMES(weapon_num), TXT_SX);
+			HUD_init_message(transl_fmt_string_t("NotHaveSecondary", _SECONDARY_WEAPON_NAMES[weapon_num]));
 		digi_play_sample(SOUND_BAD_SELECTION, F1_0);
 		return;
 	}
@@ -509,7 +511,7 @@ void auto_select_weapon(int weapon_type)
 					if (looped)
 					{
 						if (!Cycling)
-							HUD_init_message("No secondary weapons selected!");
+							HUD_init_message(transl_get_string("NoSecondaryWeaponsSelected"));
 						else
 							select_weapon(Secondary_weapon, 1, 0, 1);
 						try_again = 0;
@@ -525,7 +527,7 @@ void auto_select_weapon(int weapon_type)
 				if (SecondaryOrder[cur_weapon] == Secondary_weapon)
 				{
 					if (!Cycling)
-						HUD_init_message("No secondary weapons available!");
+						HUD_init_message(transl_get_string("NoSecondaryWeaponsAvailable"));
 					else
 						select_weapon(Secondary_weapon, 1, 0, 1);
 
@@ -592,7 +594,8 @@ int pick_up_secondary(int weapon_index, int count)
 
 	if (Players[Player_num].secondary_ammo[weapon_index] >= max)
 	{
-		HUD_init_message("%s %i %ss!", TXT_ALREADY_HAVE, Players[Player_num].secondary_ammo[weapon_index], SECONDARY_WEAPON_NAMES(weapon_index));
+		//HUD_init_message("%s %i %ss!", TXT_ALREADY_HAVE, Players[Player_num].secondary_ammo[weapon_index], SECONDARY_WEAPON_NAMES(weapon_index));
+		HUD_init_message(transl_fmt_string_ti(transl_get_plural_key("AlreadyHaveSecondary", Players[Player_num].secondary_ammo[weapon_index]), _SECONDARY_WEAPON_NAMES[weapon_index], Players[Player_num].secondary_ammo[weapon_index]));
 		return 0;
 	}
 
@@ -630,13 +633,14 @@ int pick_up_secondary(int weapon_index, int count)
 	if (count > 1)
 	{
 		PALETTE_FLASH_ADD(15, 15, 15);
-		HUD_init_message("%d %s%s", num_picked_up, SECONDARY_WEAPON_NAMES(weapon_index), TXT_SX);
+		//HUD_init_message("%d %s%s", num_picked_up, SECONDARY_WEAPON_NAMES(weapon_index), TXT_SX);
 	}
 	else
 	{
 		PALETTE_FLASH_ADD(10, 10, 10);
-		HUD_init_message("%s!", SECONDARY_WEAPON_NAMES(weapon_index));
+		//HUD_init_message("%s!", SECONDARY_WEAPON_NAMES(weapon_index));
 	}
+	HUD_init_message(transl_fmt_string_ti(transl_get_plural_key("PickedUpSecondary", num_picked_up), _SECONDARY_WEAPON_NAMES[weapon_index], num_picked_up));
 
 	return 1;
 }
@@ -650,13 +654,13 @@ void ReorderPrimary()
 	{
 		m[i].type = NM_TYPE_MENU;
 		if (PrimaryOrder[i] == 255)
-			m[i].text = const_cast<char*>("ˆˆˆˆˆˆˆ Never autoselect ˆˆˆˆˆˆˆ");
+			nm_copy_text(&m[i], transl_get_string("WeaponNeverAutoselect"));
 		else
-			m[i].text = (char*)PRIMARY_WEAPON_NAMES(PrimaryOrder[i]);
+			nm_copy_text(&m[i], PRIMARY_WEAPON_NAMES(PrimaryOrder[i]));
 		m[i].value = PrimaryOrder[i];
 	}
 	MenuReordering = 1;
-	i = newmenu_do("Reorder Primary", "Shift+Up/Down arrow to move item", i, m, NULL);
+	i = newmenu_do(transl_get_string("WeaponPrimaryReorder"), transl_get_string("WeaponReorderHelp"), i, m, NULL);
 	MenuReordering = 0;
 
 	for (i = 0; i < MAX_PRIMARY_WEAPONS + 1; i++)
@@ -672,13 +676,13 @@ void ReorderSecondary()
 	{
 		m[i].type = NM_TYPE_MENU;
 		if (SecondaryOrder[i] == 255)
-			m[i].text = const_cast<char*>("ˆˆˆˆˆˆˆ Never autoselect ˆˆˆˆˆˆˆ");
+			nm_copy_text(&m[i], transl_get_string("WeaponNeverAutoselect"));
 		else
-			m[i].text = (char*)SECONDARY_WEAPON_NAMES(SecondaryOrder[i]);
+			nm_copy_text(&m[i], SECONDARY_WEAPON_NAMES(SecondaryOrder[i]));
 		m[i].value = SecondaryOrder[i];
 	}
 	MenuReordering = 1;
-	i = newmenu_do("Reorder Secondary", "Shift+Up/Down arrow to move item", i, m, NULL);
+	i = newmenu_do(transl_get_string("WeaponSecondaryReorder"), transl_get_string("WeaponReorderHelp"), i, m, NULL);
 	MenuReordering = 0;
 	for (i = 0; i < MAX_SECONDARY_WEAPONS + 1; i++)
 		SecondaryOrder[i] = m[i].value;
@@ -725,7 +729,7 @@ int pick_up_primary(int weapon_index)
 
 	if (weapon_index != LASER_INDEX && Players[Player_num].primary_weapon_flags & flag) //already have
 	{
-		HUD_init_message("%s %s!", TXT_ALREADY_HAVE_THE, PRIMARY_WEAPON_NAMES(weapon_index));
+		HUD_init_message(transl_fmt_string_t("AlreadyHavePrimary", _PRIMARY_WEAPON_NAMES[weapon_index]));
 		return 0;
 	}
 
@@ -743,7 +747,7 @@ int pick_up_primary(int weapon_index)
 	mprintf((0, "Weapon index: %d\n", weapon_index));
 
 	if (weapon_index != LASER_INDEX)
-		HUD_init_message("%s!", PRIMARY_WEAPON_NAMES(weapon_index));
+		HUD_init_message(transl_fmt_string_t("PickedUpPrimary", _PRIMARY_WEAPON_NAMES[weapon_index]));
 
 	return 1;
 }
@@ -1165,11 +1169,11 @@ void DropCurrentWeapon()
 
 	if (Primary_weapon == 0)
 	{
-		HUD_init_message("You cannot drop your base weapon!");
+		HUD_init_message(transl_get_string("CannotDropBaseWeapon"));
 		return;
 	}
 
-	HUD_init_message("%s dropped!", PRIMARY_WEAPON_NAMES(Primary_weapon));
+	HUD_init_message(transl_fmt_string_t("DroppedPrimary", _PRIMARY_WEAPON_NAMES[Primary_weapon]));
 	digi_play_sample(SOUND_DROP_WEAPON, F1_0);
 
 	seed = P_Rand();
@@ -1219,7 +1223,7 @@ void DropSecondaryWeapon()
 
 	if (Players[Player_num].secondary_ammo[Secondary_weapon] == 0)
 	{
-		HUD_init_message("No secondary weapon to drop!");
+		HUD_init_message(transl_get_string("NoSecondaryToDrop"));
 		return;
 	}
 
@@ -1227,11 +1231,11 @@ void DropSecondaryWeapon()
 		Secondary_weapon_to_powerup[Secondary_weapon] == POW_SMART_MINE) &&
 		Players[Player_num].secondary_ammo[Secondary_weapon] < 4)
 	{
-		HUD_init_message("You need at least 4 to drop!");
+		HUD_init_message(transl_get_string("NeedAtLeast4ToDrop"));
 		return;
 	}
 
-	HUD_init_message("%s dropped!", SECONDARY_WEAPON_NAMES(Secondary_weapon));
+	HUD_init_message(transl_fmt_string_t("DroppedSecondary", _SECONDARY_WEAPON_NAMES[Primary_weapon]));
 	digi_play_sample(SOUND_DROP_WEAPON, F1_0);
 
 	seed = P_Rand();

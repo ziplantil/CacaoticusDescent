@@ -63,30 +63,30 @@ extern void multi_send_stolen_items();
 #endif
 
 const char *Escort_goal_text[MAX_ESCORT_GOALS] = {
-{	"BLUE KEY"},
-{	"YELLOW KEY"},
-{	"RED KEY"},
-{	"REACTOR"},
-{	"EXIT"},
-{	"ENERGY"},
-{	"ENERGYCEN"},
-{	"SHIELD"},
-{	"POWERUP"},
-{	"ROBOT"},
-{	"HOSTAGES"},
-{	"SPEW"},
-{	"SCRAM"},
-{	"EXIT"},
-{	"BOSS"},
-{	"MARKER 1"},
-{	"MARKER 2"},
-{	"MARKER 3"},
-{	"MARKER 4"},
-{	"MARKER 5"},
-{	"MARKER 6"},
-{	"MARKER 7"},
-{	"MARKER 8"},
-{	"MARKER 9"},
+{	"BUDDY_GOAL_BLUE_KEY"},
+{	"BUDDY_GOAL_YELLOW_KEY"},
+{	"BUDDY_GOAL_RED_KEY"},
+{	"BUDDY_GOAL_REACTOR"},
+{	"BUDDY_GOAL_EXIT"},
+{	"BUDDY_GOAL_ENERGY"},
+{	"BUDDY_GOAL_ENERGYCEN"},
+{	"BUDDY_GOAL_SHIELD"},
+{	"BUDDY_GOAL_POWERUP"},
+{	"BUDDY_GOAL_ROBOT"},
+{	"BUDDY_GOAL_HOSTAGES"},
+{	"BUDDY_GOAL_SPEW"},
+{	"BUDDY_GOAL_SCRAM"},
+{	"BUDDY_GOAL_EXIT"},
+{	"BUDDY_GOAL_BOSS"},
+{	"BUDDY_GOAL_MARKER_1"},
+{	"BUDDY_GOAL_MARKER_2"},
+{	"BUDDY_GOAL_MARKER_3"},
+{	"BUDDY_GOAL_MARKER_4"},
+{	"BUDDY_GOAL_MARKER_5"},
+{	"BUDDY_GOAL_MARKER_6"},
+{	"BUDDY_GOAL_MARKER_7"},
+{	"BUDDY_GOAL_MARKER_8"},
+{	"BUDDY_GOAL_MARKER_9"},
 // -- too much work -- 	"KAMIKAZE  "
 };
 
@@ -104,13 +104,16 @@ int	Last_buddy_key;
 fix	Last_buddy_message_time;
 
 //if change this length, change in playsave.c also
-#define GUIDEBOT_NAME_LEN 9
-char guidebot_name[GUIDEBOT_NAME_LEN+1] = "GUIDE-BOT";
-char real_guidebot_name[GUIDEBOT_NAME_LEN+1] = "GUIDE-BOT";
+#define GUIDEBOT_NAME_LEN 25
+char guidebot_name[GUIDEBOT_NAME_LEN+1] = "";
+char real_guidebot_name[GUIDEBOT_NAME_LEN+1] = "";
 
 void init_buddy_for_level(void)
 {
 	int	i;
+
+	if (!*guidebot_name) strcpy(guidebot_name, transl_get_string("BuddyName"));
+	if (!*real_guidebot_name) strcpy(real_guidebot_name, transl_get_string("BuddyName"));
 
 	Buddy_allowed_to_talk = 0;
 	Buddy_objnum = -1;
@@ -385,12 +388,12 @@ void change_guidebot_name()
 
 	strcpy(text,guidebot_name);
 
-	m.type=NM_TYPE_INPUT; m.text_len = GUIDEBOT_NAME_LEN; m.text = text;
-	item = newmenu_do( NULL, "Enter Guide-bot name:", 1, &m, NULL );
+	m.type=NM_TYPE_INPUT; m.text_len = GUIDEBOT_NAME_LEN; nm_copy_text(&m, text);
+	item = newmenu_do( NULL, transl_get_string("BuddyEnterName"), 1, &m, NULL );
 
 	if (item != -1) {
-		strcpy(guidebot_name,text);
-		strcpy(real_guidebot_name,text);
+		strcpy(guidebot_name,m.text);
+		strcpy(real_guidebot_name, m.text);
 		write_player_file();
 	}
 }
@@ -406,7 +409,8 @@ void buddy_message(const char * format, ... )
 
 	if ((Last_buddy_message_time + F1_0 < GameTime) || (Last_buddy_message_time > GameTime)) {
 		if (ok_for_buddy_to_talk()) {
-			char	gb_str[16], new_format[128];
+			/*
+			char	gb_str[GUIDEBOT_NAME_LEN+16], new_format[256];
 			va_list	args;
 			int t;
 
@@ -424,6 +428,21 @@ void buddy_message(const char * format, ... )
 			gb_str[t+3] = 0;
 
 			HUD_init_message("%s %s", gb_str, new_format);
+			*/
+			if (!*guidebot_name) strcpy(guidebot_name, transl_get_string("BuddyName"));
+			if (!*real_guidebot_name) strcpy(real_guidebot_name, transl_get_string("BuddyName"));
+
+			char new_format[256], cl1[3], cl2[3];
+			va_list	args;
+
+			va_start(args, format);
+			vsprintf(new_format, format, args);
+			va_end(args);
+
+			cl1[0] = 1; cl1[1] = BM_XRGB(28, 0, 0); cl1[2] = 0;
+			cl2[0] = 1; cl2[1] = BM_XRGB(0, 31, 0); cl2[2] = 0;
+
+			HUD_init_message("%s", transl_fmt_string_ssss("BuddyMessage", cl1, guidebot_name, cl2, new_format));
 
 			Last_buddy_message_time = GameTime;
 		}
@@ -434,8 +453,8 @@ void buddy_message(const char * format, ... )
 //	-----------------------------------------------------------------------------
 void thief_message(const char * format, ... )
 {
-
-	char	gb_str[16], new_format[128];
+	/*
+	char	gb_str[GUIDEBOT_NAME_LEN + 16], new_format[256];
 	va_list	args;
 
 	va_start(args, format );
@@ -450,7 +469,17 @@ void thief_message(const char * format, ... )
 	gb_str[10] = 0;
 
 	HUD_init_message("%s %s", gb_str, new_format);
+	*/
+	char new_format[256], cl1[3], cl2[3];
+	cl1[0] = 1; cl1[1] = BM_XRGB(28, 0, 0); cl1[2] = 0;
+	cl2[0] = 1; cl2[1] = BM_XRGB(0, 31, 0); cl2[2] = 0;
+	va_list	args;
 
+	va_start(args, format);
+	vsprintf(new_format, format, args);
+	va_end(args);
+
+	HUD_init_message("%s", transl_fmt_string_stss("BanditMessage", cl1, "BanditName", cl2, new_format));
 }
 
 //	-----------------------------------------------------------------------------
@@ -474,6 +503,9 @@ void set_escort_special_goal(int special_key)
 {
 	int marker_key;
 
+	if (!*guidebot_name) strcpy(guidebot_name, transl_get_string("BuddyName"));
+	if (!*real_guidebot_name) strcpy(real_guidebot_name, transl_get_string("BuddyName"));
+
 	Buddy_messages_suppressed = 0;
 
 	if (!Buddy_allowed_to_talk) {
@@ -483,11 +515,11 @@ void set_escort_special_goal(int special_key)
 
 			for (i=0; i<=Highest_object_index; i++)
 				if ((Objects[i].type == OBJ_ROBOT) && Robot_info[Objects[i].id].companion) {
-					HUD_init_message("%s has not been released.",guidebot_name);
+					HUD_init_message(transl_fmt_string_s("BuddyNotFree", guidebot_name));
 					break;
 				}
 			if (i == Highest_object_index+1)
-				HUD_init_message("No Guide-Bot in mine.");
+				HUD_init_message(transl_get_string("BuddyNotFound"));
 
 			return;
 		}
@@ -526,7 +558,7 @@ void set_escort_special_goal(int special_key)
 				Looking_for_marker = marker_key - KEY_1;
 			else {
 				Last_buddy_message_time = 0;	//	Force this message to get through.
-				buddy_message("Marker %i not placed.", marker_key - KEY_1 + 1);
+				buddy_message(transl_fmt_string_i("BuddyNoSuchMarker", marker_key - KEY_1 + 1));
 				Looking_for_marker = -1;
 			}
 		} else
@@ -733,20 +765,20 @@ void say_escort_goal(int goal_num)
 		return;
 
 	switch (goal_num) {
-		case ESCORT_GOAL_BLUE_KEY:		buddy_message("Finding BLUE KEY");			break;
-		case ESCORT_GOAL_GOLD_KEY:		buddy_message("Finding YELLOW KEY");		break;
-		case ESCORT_GOAL_RED_KEY:		buddy_message("Finding RED KEY");			break;
-		case ESCORT_GOAL_CONTROLCEN:	buddy_message("Finding REACTOR");			break;
-		case ESCORT_GOAL_EXIT:			buddy_message("Finding EXIT");				break;
-		case ESCORT_GOAL_ENERGY:		buddy_message("Finding ENERGY");				break;
-		case ESCORT_GOAL_ENERGYCEN:	buddy_message("Finding ENERGY CENTER");	break;
-		case ESCORT_GOAL_SHIELD:		buddy_message("Finding a SHIELD");			break;
-		case ESCORT_GOAL_POWERUP:		buddy_message("Finding a POWERUP");			break;
-		case ESCORT_GOAL_ROBOT:			buddy_message("Finding a ROBOT");			break;
-		case ESCORT_GOAL_HOSTAGE:		buddy_message("Finding a HOSTAGE");			break;
-		case ESCORT_GOAL_SCRAM:			buddy_message("Staying away...");			break;
-		case ESCORT_GOAL_BOSS:			buddy_message("Finding BOSS robot");		break;
-		case ESCORT_GOAL_PLAYER_SPEW:	buddy_message("Finding your powerups");	break;
+		case ESCORT_GOAL_BLUE_KEY:		buddy_message(transl_get_string("BuddyFindingBlueKey"));			break;
+		case ESCORT_GOAL_GOLD_KEY:		buddy_message(transl_get_string("BuddyFindingYellowKey"));		break;
+		case ESCORT_GOAL_RED_KEY:		buddy_message(transl_get_string("BuddyFindingRedKey"));			break;
+		case ESCORT_GOAL_CONTROLCEN:	buddy_message(transl_get_string("BuddyFindingReactor"));			break;
+		case ESCORT_GOAL_EXIT:			buddy_message(transl_get_string("BuddyFindingExit"));				break;
+		case ESCORT_GOAL_ENERGY:		buddy_message(transl_get_string("BuddyFindingEnergy"));				break;
+		case ESCORT_GOAL_ENERGYCEN:	buddy_message(transl_get_string("BuddyFindingFuelcen"));	break;
+		case ESCORT_GOAL_SHIELD:		buddy_message(transl_get_string("BuddyFindingShield"));			break;
+		case ESCORT_GOAL_POWERUP:		buddy_message(transl_get_string("BuddyFindingPowerup"));			break;
+		case ESCORT_GOAL_ROBOT:			buddy_message(transl_get_string("BuddyFindingRobot"));			break;
+		case ESCORT_GOAL_HOSTAGE:		buddy_message(transl_get_string("BuddyFindingHostage"));			break;
+		case ESCORT_GOAL_SCRAM:			buddy_message(transl_get_string("BuddyStayingAway"));			break;
+		case ESCORT_GOAL_BOSS:			buddy_message(transl_get_string("BuddyFindingBoss"));		break;
+		case ESCORT_GOAL_PLAYER_SPEW:	buddy_message(transl_get_string("BuddyFindingSpew"));	break;
 		case ESCORT_GOAL_MARKER1:
 		case ESCORT_GOAL_MARKER2:
 		case ESCORT_GOAL_MARKER3:
@@ -759,7 +791,7 @@ void say_escort_goal(int goal_num)
 			{ char marker_text[BUDDY_MARKER_TEXT_LEN];
 			strncpy(marker_text, MarkerMessage[goal_num-ESCORT_GOAL_MARKER1], BUDDY_MARKER_TEXT_LEN-1);
 			marker_text[BUDDY_MARKER_TEXT_LEN-1] = 0;
-			buddy_message("Finding marker %i: '%s'", goal_num-ESCORT_GOAL_MARKER1+1, marker_text);
+			buddy_message(transl_fmt_string_is("BuddyFindingMarker", goal_num-ESCORT_GOAL_MARKER1+1, marker_text));
 			break;
 			}
 	}
@@ -858,11 +890,11 @@ void escort_create_path_to_goal(object *objp)
 	if ((Escort_goal_index < 0) && (Escort_goal_index != -3)) {	//	I apologize for this statement -- MK, 09/22/95
 		if (Escort_goal_index == -1) {
 			Last_buddy_message_time = 0;	//	Force this message to get through.
-			buddy_message("No %s in mine.", Escort_goal_text[Escort_goal_object-1]);
+			buddy_message(transl_fmt_string_t("BuddyNoTargetInMine", Escort_goal_text[Escort_goal_object-1]));
 			Looking_for_marker = -1;
 		} else if (Escort_goal_index == -2) {
 			Last_buddy_message_time = 0;	//	Force this message to get through.
-			buddy_message("Can't reach %s.", Escort_goal_text[Escort_goal_object-1]);
+			buddy_message(transl_fmt_string_t("BuddyCannotReach", Escort_goal_text[Escort_goal_object-1]));
 			Looking_for_marker = -1;
 		} else
 			Int3();
@@ -880,7 +912,7 @@ void escort_create_path_to_goal(object *objp)
 			if ((aip->path_length > 0) && (Point_segs[aip->hide_index + aip->path_length - 1].segnum != goal_seg)) {
 				fix	dist_to_player;
 				Last_buddy_message_time = 0;	//	Force this message to get through.
-				buddy_message("Can't reach %s.", Escort_goal_text[Escort_goal_object-1]);
+				buddy_message(transl_fmt_string_t("BuddyCannotReach", Escort_goal_text[Escort_goal_object-1]));
 				Looking_for_marker = -1;
 				Escort_goal_object = ESCORT_GOAL_SCRAM;
 				dist_to_player = find_connected_distance(&objp->pos, objp->segnum, &Believed_player_pos, Believed_player_seg, 100, WID_FLY_FLAG);
@@ -989,7 +1021,7 @@ int maybe_buddy_fire_mega(int objnum)
 
 	mprintf((0, "Buddy firing mega in frame %i\n", FrameCount));
 
-	buddy_message("GAHOOGA!");
+	buddy_message(transl_get_string("BuddyGetsAngry"));
 
 	weapon_objnum = Laser_create_new_easy( &buddy_objp->orient.fvec, &buddy_objp->pos, objnum, MEGA_ID, 1);
 
@@ -1017,7 +1049,7 @@ int maybe_buddy_fire_smart(int objnum)
 
 	mprintf((0, "Buddy firing smart missile in frame %i\n", FrameCount));
 
-	buddy_message("WHAMMO!");
+	buddy_message(transl_get_string("BuddyGetsAngry2"));
 
 	weapon_objnum = Laser_create_new_easy( &buddy_objp->orient.fvec, &buddy_objp->pos, objnum, SMART_ID, 1);
 
@@ -1074,7 +1106,7 @@ void do_escort_frame(object *objp, fix dist_to_player, int player_visibility)
 			if (f2i(Players[Player_num].energy) < 40)
 				if ((f2i(Players[Player_num].energy)/2) & 2)
 					if (!Player_is_dead)
-						buddy_message("Hey, your headlight's on!");
+						buddy_message(transl_get_string("BuddyHeadlightOn"));
 
 	}
 
@@ -1084,7 +1116,7 @@ void do_escort_frame(object *objp, fix dist_to_player, int player_visibility)
 	if (Buddy_sorry_time + F1_0 > GameTime) {
 		Last_buddy_message_time = 0;	//	Force this message to get through.
 		if (Buddy_sorry_time < GameTime + F1_0*2)
-			buddy_message("Oops, sorry 'bout that...");
+			buddy_message(transl_get_string("BuddySorry"));
 		Buddy_sorry_time = -F1_0*2;
 	}
 
@@ -1132,7 +1164,7 @@ void do_escort_frame(object *objp, fix dist_to_player, int player_visibility)
 		ailp->mode = AIM_GOTO_PLAYER;
 		if (!player_visibility) {
 			if ((Last_come_back_message_time + F1_0 < GameTime) || (Last_come_back_message_time > GameTime)) {
-				buddy_message("Coming back to get you.");
+				buddy_message(transl_get_string("BuddyWhereAreYou"));
 				Last_come_back_message_time = GameTime;
 			}
 		}
@@ -1475,23 +1507,23 @@ int maybe_steal_flag_item(int player_num, int flagval)
 			switch (flagval) {
 				case PLAYER_FLAGS_INVULNERABLE:
 					powerup_index = POW_INVULNERABILITY;
-					thief_message("Invulnerability stolen!");
+					thief_message(transl_get_string("BanditInvulStolen"));
 					break;
 				case PLAYER_FLAGS_CLOAKED:
 					powerup_index = POW_CLOAK;
-					thief_message("Cloak stolen!");
+					thief_message(transl_get_string("BanditCloakStolen"));
 					break;
 				case PLAYER_FLAGS_MAP_ALL:
 					powerup_index = POW_FULL_MAP;
-					thief_message("Full map stolen!");
+					thief_message(transl_get_string("BanditFullMapStolen"));
 					break;
 				case PLAYER_FLAGS_QUAD_LASERS:
 					powerup_index = POW_QUAD_FIRE;
-					thief_message("Quad lasers stolen!");
+					thief_message(transl_get_string("BanditQuadsStolen"));
 					break;
 				case PLAYER_FLAGS_AFTERBURNER:
 					powerup_index = POW_AFTERBURNER;
-					thief_message("Afterburner stolen!");
+					thief_message(transl_get_string("BanditAfterburnerStolen"));
 					break;
 // --				case PLAYER_FLAGS_AMMO_RACK:
 // --					powerup_index = POW_AMMO_RACK;
@@ -1499,11 +1531,11 @@ int maybe_steal_flag_item(int player_num, int flagval)
 // --					break;
 				case PLAYER_FLAGS_CONVERTER:
 					powerup_index = POW_CONVERTER;
-					thief_message("Converter stolen!");
+					thief_message(transl_get_string("BanditConverterStolen"));
 					break;
 				case PLAYER_FLAGS_HEADLIGHT:
 					powerup_index = POW_HEADLIGHT;
-					thief_message("Headlight stolen!");
+					thief_message(transl_get_string("BanditHeadlightStolen"));
 				   Players[Player_num].flags &= ~PLAYER_FLAGS_HEADLIGHT_ON;
 					break;
 			}
@@ -1533,7 +1565,7 @@ int maybe_steal_secondary_weapon(int player_num, int weapon_num)
 				Stolen_items[Stolen_item_index] = Secondary_weapon_to_powerup[weapon_num];
 			}
 
-			thief_message("%s stolen!", Text_string[114+weapon_num]);		//	Danger! Danger! Use of literal!  Danger!
+			thief_message(transl_fmt_string_t("BanditSecondaryStolen", _SECONDARY_WEAPON_NAMES[weapon_num]));
 			if (Players[Player_num].secondary_ammo[weapon_num] == 0)
 				auto_select_weapon(1);
 
@@ -1557,7 +1589,7 @@ int maybe_steal_primary_weapon(int player_num, int weapon_num)
 					} else {
 						Stolen_items[Stolen_item_index] = Primary_weapon_to_powerup[weapon_num];
 					}
-					thief_message("%s level decreased!", Text_string[104+weapon_num]);		//	Danger! Danger! Use of literal!  Danger!
+					thief_message(transl_fmt_string_t("BanditPrimaryLevelStolen", _PRIMARY_WEAPON_NAMES[weapon_num]));
 					Players[player_num].laser_level--;
 					digi_play_sample_once(SOUND_WEAPON_STOLEN, F1_0);
 					return 1;
@@ -1566,7 +1598,7 @@ int maybe_steal_primary_weapon(int player_num, int weapon_num)
 				Players[player_num].primary_weapon_flags &= ~(1 << weapon_num);
 				Stolen_items[Stolen_item_index] = Primary_weapon_to_powerup[weapon_num];
 
-				thief_message("%s stolen!", Text_string[104+weapon_num]);		//	Danger! Danger! Use of literal!  Danger!
+				thief_message(transl_fmt_string_t("BanditPrimaryStolen", _PRIMARY_WEAPON_NAMES[weapon_num]));
 				auto_select_weapon(0);
 				digi_play_sample_once(SOUND_WEAPON_STOLEN, F1_0);
 				return 1;
@@ -1730,21 +1762,25 @@ void drop_stolen_items(object *objp)
 
 }
 
-void show_escort_menu(char* msg);
+void show_escort_menu(const char* msg);
 
 // --------------------------------------------------------------------------------------------------------------
 void do_escort_menu(void)
 {
 	int	i;
-	char	msg[300];
+	char	msg[900];
 	int	paused;
 	int	key;
 	int	next_goal;
-	char	goal_str[32], tstr[32];
+	char	goal_str[48];
+	int goal_noloc = 0;
+
+	if (!*guidebot_name) strcpy(guidebot_name, transl_get_string("BuddyName"));
+	if (!*real_guidebot_name) strcpy(real_guidebot_name, transl_get_string("BuddyName"));
 
 	if (Game_mode & GM_MULTI) 
 	{
-		HUD_init_message("No Guide-Bot in Multiplayer!");
+		HUD_init_message(transl_get_string("BuddyNotInMulti"));
 		return;
 	}
 
@@ -1757,7 +1793,7 @@ void do_escort_menu(void)
 
 	if (i > Highest_object_index) 
 	{
-		HUD_init_message("No Guide-Bot present in mine!");
+		HUD_init_message(transl_get_string("BuddyNotInMine"));
 
 		#ifndef NDEBUG
 		//	If no buddy bot, create one!
@@ -1772,7 +1808,7 @@ void do_escort_menu(void)
 
 	if (!Buddy_allowed_to_talk) 
 	{
-		HUD_init_message("%s has not been released",guidebot_name);
+		HUD_init_message(transl_fmt_string_s("BuddyNotFree2",guidebot_name));
 		return;
 	}
 
@@ -1814,22 +1850,22 @@ void do_escort_menu(void)
 	#endif
 			
 		case ESCORT_GOAL_BLUE_KEY:
-			sprintf(goal_str, "blue key");
+			sprintf(goal_str, "BuddyNextGoalBlueKey");
 			break;
 		case ESCORT_GOAL_GOLD_KEY:
-			sprintf(goal_str, "yellow key");
+			sprintf(goal_str, "BuddyNextGoalYellowKey");
 			break;
 		case ESCORT_GOAL_RED_KEY:
-			sprintf(goal_str, "red key");
+			sprintf(goal_str, "BuddyNextGoalRedKey");
 			break;
 		case ESCORT_GOAL_CONTROLCEN:
-			sprintf(goal_str, "reactor");
+			sprintf(goal_str, "BuddyNextGoalReactor");
 			break;
 		case ESCORT_GOAL_BOSS:
-			sprintf(goal_str, "boss");
+			sprintf(goal_str, "BuddyNextGoalBoss");
 			break;
 		case ESCORT_GOAL_EXIT:
-			sprintf(goal_str, "exit");
+			sprintf(goal_str, "BuddyNextGoalExit");
 			break;
 		case ESCORT_GOAL_MARKER1:
 		case ESCORT_GOAL_MARKER2:
@@ -1840,16 +1876,12 @@ void do_escort_menu(void)
 		case ESCORT_GOAL_MARKER7:
 		case ESCORT_GOAL_MARKER8:
 		case ESCORT_GOAL_MARKER9:
-			sprintf(goal_str, "marker %i", next_goal-ESCORT_GOAL_MARKER1+1);
+			goal_noloc = 1;
+			sprintf(goal_str, transl_fmt_string_i("BuddyNextGoalMarker", next_goal-ESCORT_GOAL_MARKER1+1));
 			break;
 
 	}
-			
-	if (!Buddy_messages_suppressed)
-		sprintf(tstr, "Suppress");
-	else
-		sprintf(tstr, "Enable");
-
+	/*
 	sprintf(msg,	"Select Guide-Bot Command:\n\n"
 						"0.  Next Goal: %s" CC_LSPACING_S "3\n"
 						"\x84.  Find Energy Powerup" CC_LSPACING_S "3\n"
@@ -1861,9 +1893,27 @@ void do_escort_menu(void)
 						"7.  Stay Away From Me" CC_LSPACING_S "3\n"
 						"8.  Find My Powerups" CC_LSPACING_S "3\n"
 						"9.  Find the exit\n\n"
-						"T.  %s Messages\n"
+						"T.  %s\n"
 						// -- "9.	Find the exit" CC_LSPACING_S "3\n"
-				, goal_str, tstr);
+				, goal_str, !Buddy_messages_suppressed ? "Suppress Messages" : "Enable Messages");
+	*/
+
+	{
+		char* tmp = msg;
+		tmp += sprintf(tmp, "%s\n\n", transl_get_string("BuddySelectCommand"));
+		tmp += sprintf(tmp, "%s" CC_LSPACING_S "3\n", 
+			goal_noloc ? transl_fmt_string_is("BuddyCommandFormatNext", 0, goal_str) : transl_fmt_string_it("BuddyCommandFormatNext", 0, goal_str));
+		tmp += sprintf(tmp, "%s" CC_LSPACING_S "3\n", transl_fmt_string_it("BuddyCommandFormat", 1, "BuddyCommandEnergy"));
+		tmp += sprintf(tmp, "%s" CC_LSPACING_S "3\n", transl_fmt_string_it("BuddyCommandFormat", 2, "BuddyCommandEnergyCenter"));
+		tmp += sprintf(tmp, "%s" CC_LSPACING_S "3\n", transl_fmt_string_it("BuddyCommandFormat", 3, "BuddyCommandShield"));
+		tmp += sprintf(tmp, "%s" CC_LSPACING_S "3\n", transl_fmt_string_it("BuddyCommandFormat", 4, "BuddyCommandPowerup"));
+		tmp += sprintf(tmp, "%s" CC_LSPACING_S "3\n", transl_fmt_string_it("BuddyCommandFormat", 5, "BuddyCommandRobot"));
+		tmp += sprintf(tmp, "%s" CC_LSPACING_S "3\n", transl_fmt_string_it("BuddyCommandFormat", 6, "BuddyCommandHostage"));
+		tmp += sprintf(tmp, "%s" CC_LSPACING_S "3\n", transl_fmt_string_it("BuddyCommandFormat", 7, "BuddyCommandStayAway"));
+		tmp += sprintf(tmp, "%s" CC_LSPACING_S "3\n", transl_fmt_string_it("BuddyCommandFormat", 8, "BuddyCommandSpew"));
+		tmp += sprintf(tmp, "%s\n\n", transl_fmt_string_it("BuddyCommandFormat", 9, "BuddyCommandExit"));
+		tmp += sprintf(tmp, "%s\n", transl_fmt_string_t("BuddyCommandFormatSuppress", !Buddy_messages_suppressed ? "BuddyCommandSuppress" : "BuddyCommandEnable"));
+	}
 
 	show_escort_menu(msg);		//TXT_PAUSE);
 	I_DrawCurrentCanvas(0);
@@ -1922,18 +1972,12 @@ void do_escort_menu(void)
 
 			case KEY_T: 
 			{
-				char msg[32];
 				int temp;
 
 				temp = !Buddy_messages_suppressed;
 
-				if (temp)
-					strcpy(msg, "suppressed");
-				else
-					strcpy(msg, "enabled");
-
 				Buddy_messages_suppressed = 1;
-				buddy_message("Messages %s.", msg);
+				buddy_message(transl_get_string(temp ? "BuddyMessagesSuppressed" : "BuddyMessagesEnabled"));
 
 				Buddy_messages_suppressed = temp;
 
@@ -1955,7 +1999,7 @@ void do_escort_menu(void)
 
 //	-------------------------------------------------------------------------------
 //	Show the Buddy menu!
-void show_escort_menu(char *msg)
+void show_escort_menu(const char *msg)
 {	
 	int	w,h,aw;
 	int	x,y;
@@ -1985,7 +2029,7 @@ WIN(DDGRLOCK(dd_grd_curcanv));\
 	//PA_DFX (pa_set_frontbuffer_current());
   	//PA_DFX (gr_ustring( x, y, msg ));
 	//PA_DFX (pa_set_backbuffer_current());
-  	gr_ustring( x, y, msg );
+  	gr_string( x, y, msg );
 WIN(DDGRUNLOCK(dd_grd_curcanv));
 
 	reset_cockpit();

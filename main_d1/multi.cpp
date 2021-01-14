@@ -960,16 +960,16 @@ multi_message_feedback(void)
 	if (!(((colon = strrchr(Network_message, ':')) == NULL) || (colon - Network_message < 1) || (colon - Network_message > CALLSIGN_LEN)))
 	{
 		int feedback_result_t_len = 0;
-		if ((Game_mode & GM_TEAM) && (atoi(Network_message) > 0) && (atoi(Network_message) < 3))
-		{
-			feedback_result_t_len += sprintf(feedback_result_t + feedback_result_t_len, "%s '%s'", TXT_TEAM, Netgame.team_name[atoi(Network_message) - 1]);
-			found = 1;
-		}
 		int had_players = 0, had_teams = 0;
 		const char* team_fmt = transl_get_string("MessageSentToTeam");
 		const char* player_fmt = transl_get_string("MessageSentToPlayer");
 		const char* teams_prefix = transl_get_string("MessageSentToTeams");
 		const char* players_prefix = transl_get_string("MessageSentToPlayers");
+		if ((Game_mode & GM_TEAM) && (atoi(Network_message) > 0) && (atoi(Network_message) < 3))
+		{
+			feedback_result_t_len += sprintf(feedback_result_t + feedback_result_t_len, team_fmt, Netgame.team_name[atoi(Network_message) - 1]);
+			found = 1;
+		}
 		if (Game_mode & GM_TEAM)
 		{
 			for (i = 0; i < N_players; i++)

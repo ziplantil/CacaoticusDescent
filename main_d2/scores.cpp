@@ -167,7 +167,7 @@ void scores_write()
 	fp = fopen(get_scores_filename(), "wb");
 	if (fp == NULL)
 	{
-		nm_messagebox(TXT_WARNING, 1, TXT_OK, "%s\n'%s'", TXT_UNABLE_TO_OPEN, get_scores_filename());
+		nm_messagebox(TXT_WARNING, 1, TXT_OK, TXT_UNABLE_TO_OPEN, get_scores_filename());
 		return;
 	}
 
@@ -271,15 +271,15 @@ void scores_maybe_add_player(int abort_flag)
 		if (position == 0)
 		{
 			strcpy(text1, "");
-			m[0].type = NM_TYPE_TEXT; m[0].text = TXT_COOL_SAYING;
-			m[1].type = NM_TYPE_INPUT; m[1].text = text1; m[1].text_len = COOL_MESSAGE_LEN - 5;
+			m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_COOL_SAYING);
+			m[1].type = NM_TYPE_INPUT; nm_copy_text(&m[1], text1); m[1].text_len = COOL_MESSAGE_LEN - 5;
 			newmenu_do(TXT_HIGH_SCORE, TXT_YOU_PLACED_1ST, 2, m, NULL);
-			strncpy(Scores.cool_saying, text1, COOL_MESSAGE_LEN);
+			strncpy(Scores.cool_saying, m[1].text, COOL_MESSAGE_LEN);
 			if (strlen(Scores.cool_saying) < 1)
-				sprintf(Scores.cool_saying, "No Comment");
+				sprintf(Scores.cool_saying, transl_get_string("NoComment"));
 		}
 		else {
-			nm_messagebox(TXT_HIGH_SCORE, 1, TXT_OK, "%s %s!", TXT_YOU_PLACED, *(&TXT_1ST + position));
+			nm_messagebox(TXT_HIGH_SCORE, 1, TXT_OK, transl_fmt_string_t("TXT_YOU_PLACED", _ORDINAL_TEXT[position]));
 		}
 
 		// move everyone down...
@@ -306,7 +306,7 @@ void scores_rprintf(int x, int y, const char* format, ...)
 
 	//replace the digit '1' with special wider 1
 	for (p = buffer; *p; p++)
-		if (*p == '1')* p = 132;
+		if (*p == '1')* p = 20;
 
 	gr_get_string_size(buffer, &w, &h, &aw);
 

@@ -73,18 +73,18 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #define SELECTED_FONT  	MEDIUM2_FONT		//highlighted item
 #define SUBTITLE_FONT	MEDIUM3_FONT
 
-#define NORMAL_CHECK_BOX	""
-#define CHECKED_CHECK_BOX       "‚"    
+#define NORMAL_CHECK_BOX	"\021"
+#define CHECKED_CHECK_BOX	"\022"
 
-#define NORMAL_RADIO_BOX	""
-#define CHECKED_RADIO_BOX	"€"
+#define NORMAL_RADIO_BOX	"\017"
+#define CHECKED_RADIO_BOX	"\020"
 #define CURSOR_STRING		"_"
-#define SLIDER_LEFT			"ƒ"		// 131
-#define SLIDER_RIGHT			"„"		// 132
-#define SLIDER_MIDDLE		"…"		// 133
-#define SLIDER_MARKER		"†"		// 134
-#define UP_ARROW_MARKER       "‡"    // 135
-#define DOWN_ARROW_MARKER       "ˆ"      // 136
+#define SLIDER_LEFT			"\023"
+#define SLIDER_RIGHT		"\024"
+#define SLIDER_MIDDLE		"\025"
+#define SLIDER_MARKER		"\026"
+#define UP_ARROW_MARKER       "\020"
+#define DOWN_ARROW_MARKER       "\021"
 
 int Newmenu_first_time = 1;
 //--unused-- int Newmenu_fade_in = 1;
@@ -287,6 +287,11 @@ void nm_restore_background(int x, int y, int w, int h)
 	WIN(DDGRLOCK(dd_grd_curcanv));
 	gr_bm_bitblt(w, h, x1, y1, x1, y1, &nm_background, &(grd_curcanv->cv_bitmap));
 	WIN(DDGRUNLOCK(dd_grd_curcanv));
+}
+
+void nm_copy_text(newmenu_item* item, const char* txt)
+{
+	strcpyn(item->text, txt, sizeof(item->text));
 }
 
 // Draw a left justfied string
@@ -584,7 +589,7 @@ void draw_item(bkg* b, newmenu_item* item, int is_current, int tiny)
 		if (item->value < item->min_value) item->value = item->min_value;
 		if (item->value > item->max_value) item->value = item->max_value;
 		nm_string(b, item->w, item->x, item->y, item->text);
-		sprintf(text, "%d", item->value);
+		sprintf(text, transl_fmt_string_i("MenuNumberFormat", item->value));
 		nm_rstring(b, item->right_offset, item->x, item->y, text);
 	}
 	break;
@@ -731,7 +736,7 @@ int newmenu_do4(const char* title, const char* subtitle, int nitems, newmenu_ite
 	int old_keyd_repeat, done;
 	int  choice, old_choice, i, j, x, y, w, h, aw, tw, th, twidth, fm, right_offset;
 	int k, nmenus, nothers, ScrollOffset = 0, LastScrollCheck = -1, MaxDisplayable, sx, sy;
-	grs_font* save_font;
+	grs_fontstyle* save_font;
 	int string_width, string_height, average_width;
 	int ty;
 	bkg bg;
@@ -882,10 +887,10 @@ RePaintNewmenu4:
 			int w1, h1, aw1;
 			char test_text[20];
 			nothers++;
-			sprintf(test_text, "%d", item[i].max_value);
+			sprintf(test_text, transl_fmt_string_i("MenuNumberFormat", item[i].max_value));
 			gr_get_string_size(test_text, &w1, &h1, &aw1);
 			item[i].right_offset = w1;
-			sprintf(test_text, "%d", item[i].min_value);
+			sprintf(test_text, transl_fmt_string_i("MenuNumberFormat", item[i].min_value));
 			gr_get_string_size(test_text, &w1, &h1, &aw1);
 			if (w1 > item[i].right_offset)
 				item[i].right_offset = w1;
@@ -1423,12 +1428,13 @@ RePaintNewmenu4:
 		case KEY_SHIFTED + KEY_UP:
 			if (MenuReordering && choice != TopChoice)
 			{
-				Temp = item[choice].text;
+				//Temp = item[choice].text;
 				TempVal = item[choice].value;
-				item[choice].text = item[choice - 1].text;
+				//item[choice].text = item[choice - 1].text;
 				item[choice].value = item[choice - 1].value;
-				item[choice - 1].text = Temp;
+				//item[choice - 1].text = Temp;
 				item[choice - 1].value = TempVal;
+				memswp(item[choice].text, item[choice - 1].text, NM_MAX_TEXT_LEN + 1);
 				item[choice].redraw = 1;
 				item[choice - 1].redraw = 1;
 				choice--;
@@ -1437,12 +1443,13 @@ RePaintNewmenu4:
 		case KEY_SHIFTED + KEY_DOWN:
 			if (MenuReordering && choice != (nitems - 1))
 			{
-				Temp = item[choice].text;
+				//Temp = item[choice].text;
 				TempVal = item[choice].value;
-				item[choice].text = item[choice + 1].text;
+				//item[choice].text = item[choice + 1].text;
 				item[choice].value = item[choice + 1].value;
-				item[choice + 1].text = Temp;
+				//item[choice + 1].text = Temp;
 				item[choice + 1].value = TempVal;
+				memswp(item[choice].text, item[choice + 1].text, NM_MAX_TEXT_LEN + 1);
 				item[choice].redraw = 1;
 				item[choice + 1].redraw = 1;
 				choice++;
@@ -1963,7 +1970,7 @@ int nm_messagebox1(const char* title, void (*subfunction)(int nitems, newmenu_it
 	for (i = 0; i < nchoices; i++)
 	{
 		s = va_arg(args, char*);
-		nm_message_items[i].type = NM_TYPE_MENU; nm_message_items[i].text = s;
+		nm_message_items[i].type = NM_TYPE_MENU; nm_copy_text(&nm_message_items[i], s);
 	}
 	format = va_arg(args, char*);
 	sprintf(nm_text, "");
@@ -1990,7 +1997,7 @@ int nm_messagebox(const char* title, int nchoices, ...)
 
 	for (i = 0; i < nchoices; i++) {
 		s = va_arg(args, char*);
-		nm_message_items[i].type = NM_TYPE_MENU; nm_message_items[i].text = s;
+		nm_message_items[i].type = NM_TYPE_MENU; nm_copy_text(&nm_message_items[i], s);
 	}
 	format = va_arg(args, char*);
 	sprintf(nm_text, "");
@@ -2002,10 +2009,13 @@ int nm_messagebox(const char* title, int nchoices, ...)
 	return newmenu_do(title, nm_text, nchoices, nm_message_items, NULL);
 }
 
+#define FILENAME_SIZE 14
+#define FILENAME_BUFSIZE 32
+
 void newmenu_file_sort(int n, char* list)
 {
 	int i, j, incr;
-	char t[14];
+	char t[FILENAME_BUFSIZE];
 
 	incr = n / 2;
 	while (incr > 0)
@@ -2015,11 +2025,11 @@ void newmenu_file_sort(int n, char* list)
 			j = i - incr;
 			while (j >= 0)
 			{
-				if (strncmp(&list[j * 14], &list[(j + incr) * 14], 12) > 0)
+				if (strncmp(&list[j * FILENAME_BUFSIZE], &list[(j + incr) * FILENAME_BUFSIZE], FILENAME_BUFSIZE - 2) > 0)
 				{
-					memcpy(t, &list[j * 14], FILENAME_LEN);
-					memcpy(&list[j * 14], &list[(j + incr) * 14], FILENAME_LEN);
-					memcpy(&list[(j + incr) * 14], t, FILENAME_LEN);
+					memcpy(t, &list[j * FILENAME_BUFSIZE], FILENAME_BUFSIZE - 1);
+					memcpy(&list[j * FILENAME_BUFSIZE], &list[(j + incr) * FILENAME_BUFSIZE], FILENAME_BUFSIZE - 1);
+					memcpy(&list[(j + incr) * FILENAME_BUFSIZE], t, FILENAME_BUFSIZE - 1);
 					j -= incr;
 				}
 				else
@@ -2072,7 +2082,7 @@ int newmenu_get_filename(const char* title, const char* filespec, char* filename
 #endif
 	WIN(int win_redraw = 0);
 
-	filenames = (char*)malloc(MAX_FILES * 14);
+	filenames = (char*)malloc(MAX_FILES * FILENAME_BUFSIZE);
 	if (filenames == NULL) return 0;
 
 	citem = 0;
@@ -2092,7 +2102,7 @@ ReadFileNames:
 #if !defined(APPLE_DEMO)		// no new pilots for special apple oem version
 	if (player_mode)
 	{
-		strncpy(&filenames[NumFiles * 14], TXT_CREATE_NEW, FILENAME_LEN);
+		strncpy(&filenames[NumFiles * FILENAME_BUFSIZE], TXT_CREATE_NEW, FILENAME_BUFSIZE - 1);
 		NumFiles++;
 	}
 #endif
@@ -2103,11 +2113,11 @@ ReadFileNames:
 		{
 			if (NumFiles < MAX_FILES)
 			{
-				strncpy(&filenames[NumFiles * 14], find.name, FILENAME_LEN);
+				strncpy(&filenames[NumFiles * FILENAME_BUFSIZE], find.name, FILENAME_LEN);
 				if (player_mode)
 				{
 					char* p;
-					p = strchr(&filenames[NumFiles * 14], '.');
+					p = strchr(&filenames[NumFiles * FILENAME_BUFSIZE], '.');
 					if (p)* p = '\0';
 				}
 				NumFiles++;
@@ -2127,7 +2137,7 @@ ReadFileNames:
 	}
 	if ((NumFiles < 1) && demo_mode)
 	{
-		nm_messagebox(NULL, 1, TXT_OK, "%s %s\n%s", TXT_NO_DEMO_FILES, TXT_USE_F5, TXT_TO_CREATE_ONE);
+		nm_messagebox(NULL, 1, TXT_OK, "%s", TXT_NO_DEMO_FILES);
 		exit_value = 0;
 		goto ExitFileMenu;
 	}
@@ -2144,7 +2154,7 @@ ReadFileNames:
 	if (NumFiles < 1)
 	{
 #ifndef APPLE_DEMO
-		nm_messagebox(NULL, 1, "Ok", "%s\n '%s' %s", TXT_NO_FILES_MATCHING, filespec, TXT_WERE_FOUND);
+		nm_messagebox(NULL, 1, TXT_OK, TXT_NO_FILES_MATCHING, filespec);
 #endif
 		exit_value = 0;
 		goto ExitFileMenu;
@@ -2175,7 +2185,7 @@ ReadFileNames:
 		for (i = 0; i < NumFiles; i++)
 		{
 			int w, h, aw;
-			gr_get_string_size(&filenames[i * 14], &w, &h, &aw);
+			gr_get_string_size(&filenames[i * FILENAME_BUFSIZE], &w, &h, &aw);
 			if (w > w_w)
 				w_w = w;
 		}
@@ -2258,10 +2268,10 @@ ReadFileNames:
 #if defined(MACINTOSH) && defined(APPLE_DEMO)
 		newmenu_file_sort(NumFiles, filenames);
 #else
-		newmenu_file_sort(NumFiles - 1, &filenames[14]);		// Don't sort first one!
+		newmenu_file_sort(NumFiles - 1, &filenames[FILENAME_BUFSIZE]);		// Don't sort first one!
 #endif
 		for (i = 0; i < NumFiles; i++) {
-			if (!_strfcmp(Players[Player_num].callsign, &filenames[i * 14])) {
+			if (!_strfcmp(Players[Player_num].callsign, &filenames[i * FILENAME_BUFSIZE])) {
 #if defined(WINDOWS) || defined(MACINTOSH) 
 				dblclick_flag = 1;
 #endif
@@ -2359,9 +2369,9 @@ ReadFileNames:
 				HideCursorW();
 #endif
 				if (player_mode)
-					x = nm_messagebox(NULL, 2, TXT_YES, TXT_NO, "%s %s?", TXT_DELETE_PILOT, &filenames[citem * 14] + ((player_mode && filenames[citem * 14] == '$') ? 1 : 0));
+					x = nm_messagebox(NULL, 2, TXT_YES, TXT_NO, TXT_DELETE_PILOT, &filenames[citem * FILENAME_BUFSIZE] + ((player_mode && filenames[citem * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 				else if (demo_mode)
-					x = nm_messagebox(NULL, 2, TXT_YES, TXT_NO, "%s %s?", TXT_DELETE_DEMO, &filenames[citem * 14] + ((demo_mode && filenames[citem * 14] == '$') ? 1 : 0));
+					x = nm_messagebox(NULL, 2, TXT_YES, TXT_NO, TXT_DELETE_DEMO, &filenames[citem * FILENAME_BUFSIZE] + ((demo_mode && filenames[citem * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 				MAC(show_cursor());
 #ifdef WINDOWS
 				mouse_set_mode(0);				//disenable centering mode
@@ -2372,13 +2382,13 @@ ReadFileNames:
 					int ret;
 					char name[_MAX_PATH], dir[_MAX_DIR];
 
-					p = &filenames[(citem * 14) + strlen(&filenames[citem * 14])];
+					p = &filenames[(citem * FILENAME_BUFSIZE) + strlen(&filenames[citem * FILENAME_BUFSIZE])];
 					if (player_mode)
 						* p = '.';
 
 					_splitpath(filespec, name, dir, NULL, NULL);
 					strcat(name, dir);
-					strcat(name, &filenames[citem * 14]);
+					strcat(name, &filenames[citem * FILENAME_BUFSIZE]);
 
 #ifdef MACINTOSH
 					{
@@ -2398,14 +2408,14 @@ ReadFileNames:
 						* p = 0;
 
 					if ((!ret) && player_mode) {
-						delete_player_saved_games(&filenames[citem * 14]);
+						delete_player_saved_games(&filenames[citem * FILENAME_BUFSIZE]);
 					}
 
 					if (ret) {
 						if (player_mode)
-							nm_messagebox(NULL, 1, TXT_OK, "%s %s %s", TXT_COULDNT, TXT_DELETE_PILOT, &filenames[citem * 14] + ((player_mode && filenames[citem * 14] == '$') ? 1 : 0));
+							nm_messagebox(NULL, 1, TXT_OK, transl_get_string("CouldNotDeletePilot"), &filenames[citem * FILENAME_BUFSIZE] + ((player_mode && filenames[citem * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 						else if (demo_mode)
-							nm_messagebox(NULL, 1, TXT_OK, "%s %s %s", TXT_COULDNT, TXT_DELETE_DEMO, &filenames[citem * 14] + ((demo_mode && filenames[citem * 14] == '$') ? 1 : 0));
+							nm_messagebox(NULL, 1, TXT_OK, transl_get_string("CouldNotDeleteDemo"), &filenames[citem * FILENAME_BUFSIZE] + ((demo_mode && filenames[citem * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 					}
 					else if (demo_mode)
 						demos_deleted = 1;
@@ -2475,7 +2485,7 @@ ReadFileNames:
 					if (cc >= NumFiles) cc = 0;
 					if (citem == cc) break;
 
-					if (toupper(filenames[cc * 14]) == toupper(ascii)) {
+					if (toupper(filenames[cc * FILENAME_BUFSIZE]) == toupper(ascii)) {
 						citem = cc;
 						break;
 					}
@@ -2530,7 +2540,7 @@ ReadFileNames:
 
 			mouse_get_pos(&mx, &my);
 			for (i = first_item; i < first_item + NumFiles_displayed; i++) {
-				gr_get_string_size(&filenames[i * 14], &w, &h, &aw);
+				gr_get_string_size(&filenames[i * FILENAME_BUFSIZE], &w, &h, &aw);
 				x1 = box_x;
 				x2 = box_x + box_w - 1;
 				y1 = (i - first_item) * (grd_curfont->ft_h + 2) + box_y;
@@ -2549,7 +2559,7 @@ ReadFileNames:
 		if (!mouse_state && omouse_state) {
 			int w, h, aw;
 
-			gr_get_string_size(&filenames[citem * 14], &w, &h, &aw);
+			gr_get_string_size(&filenames[citem * FILENAME_BUFSIZE], &w, &h, &aw);
 			mouse_get_pos(&mx, &my);
 			x1 = box_x;
 			x2 = box_x + box_w - 1;
@@ -2623,7 +2633,7 @@ ReadFileNames:
 						grd_curcanv->cv_font = SELECTED_FONT;
 					else
 						grd_curcanv->cv_font = NORMAL_FONT;
-					gr_get_string_size(&filenames[i * 14], &w, &h, &aw);
+					gr_get_string_size(&filenames[i * FILENAME_BUFSIZE], &w, &h, &aw);
 
 					gr_setcolor(BM_XRGB(5, 5, 5));
 					//	gr_rect( box_x, y + h + 2, box_x + box_w, y + h + 2);
@@ -2634,7 +2644,7 @@ ReadFileNames:
 					gr_setcolor(BM_XRGB(0, 0, 0));
 
 					gr_rect(box_x, y - 1, box_x + box_w - 1, y + h + 1);
-					gr_string(box_x + 5, y, (&filenames[i * 14]) + ((player_mode && filenames[i * 14] == '$') ? 1 : 0));
+					gr_string(box_x + 5, y, (&filenames[i * FILENAME_BUFSIZE]) + ((player_mode && filenames[i * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 				}
 			}
 			WIN(ShowCursorW());
@@ -2652,9 +2662,9 @@ ReadFileNames:
 					grd_curcanv->cv_font = SELECTED_FONT;
 				else
 					grd_curcanv->cv_font = NORMAL_FONT;
-				gr_get_string_size(&filenames[i * 14], &w, &h, &aw);
+				gr_get_string_size(&filenames[i * FILENAME_BUFSIZE], &w, &h, &aw);
 				gr_rect(box_x, y - 1, box_x + box_w - 1, y + h + 1);
-				gr_string(box_x + 5, y, (&filenames[i * 14]) + ((player_mode && filenames[i * 14] == '$') ? 1 : 0));
+				gr_string(box_x + 5, y, (&filenames[i * FILENAME_BUFSIZE]) + ((player_mode && filenames[i * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 			}
 			i = citem;
 			if ((i >= 0) && (i < NumFiles)) {
@@ -2663,9 +2673,9 @@ ReadFileNames:
 					grd_curcanv->cv_font = SELECTED_FONT;
 				else
 					grd_curcanv->cv_font = NORMAL_FONT;
-				gr_get_string_size(&filenames[i * 14], &w, &h, &aw);
+				gr_get_string_size(&filenames[i * FILENAME_BUFSIZE], &w, &h, &aw);
 				gr_rect(box_x, y - 1, box_x + box_x - 1, y + h + 1);
-				gr_string(box_x + 5, y, (&filenames[i * 14]) + ((player_mode && filenames[i * 14] == '$') ? 1 : 0));
+				gr_string(box_x + 5, y, (&filenames[i * FILENAME_BUFSIZE]) + ((player_mode && filenames[i * FILENAME_BUFSIZE] == '$') ? 1 : 0));
 			}
 			WIN(ShowCursorW());
 			MAC(show_cursor());
@@ -2703,7 +2713,7 @@ ReadFileNames:
 ExitFileMenuEarly:
 	MAC(hide_cursor());
 	if (citem > -1) {
-		strncpy(filename, (&filenames[citem * 14]) + ((player_mode && filenames[citem * 14] == '$') ? 1 : 0), FILENAME_LEN);
+		strncpy(filename, (&filenames[citem * FILENAME_BUFSIZE]) + ((player_mode && filenames[citem * FILENAME_BUFSIZE] == '$') ? 1 : 0), FILENAME_LEN);
 		exit_value = 1;
 	}
 	else {
@@ -3275,7 +3285,7 @@ int newmenu_filelist(char* title, char* filespec, char* filename)
 {
 	int i, NumFiles;
 	char* Filenames[MAX_FILES];
-	char FilenameText[MAX_FILES][14];
+	char FilenameText[MAX_FILES][FILENAME_BUFSIZE];
 	FILEFINDSTRUCT find;
 
 	NumFiles = 0;
@@ -3322,13 +3332,13 @@ void show_extra_netgame_info(int choice)
 		m[i].type = NM_TYPE_TEXT;
 	}
 
-	sprintf(mtext[num], "Game: %s", Active_games[choice].game_name); num++;
-	sprintf(mtext[num], "Mission: %s", Active_games[choice].mission_title); num++;
-	sprintf(mtext[num], "Current Level: %d", Active_games[choice].levelnum); num++;
-	sprintf(mtext[num], "Difficulty: %s", MENU_DIFFICULTY_TEXT(Active_games[choice].difficulty)); num++;
+	sprintf(mtext[num], transl_fmt_string_s("MultiShortInfoGame", Active_games[choice].game_name)); num++;
+	sprintf(mtext[num], transl_fmt_string_s("MultiShortInfoMission", Active_games[choice].mission_title)); num++;
+	sprintf(mtext[num], transl_fmt_string_i("MultiShortInfoLevel", Active_games[choice].levelnum)); num++;
+	sprintf(mtext[num], transl_fmt_string_t("MultiShortInfoDifficulty", _MENU_DIFFICULTY_TEXT[Active_games[choice].difficulty])); num++;
 
 	already_showing_info = 1;
-	newmenu_dotiny2(NULL, "Netgame Information", num, m, NULL);
+	newmenu_dotiny2(NULL, transl_get_string("MultiShortInfoTitle"), num, m, NULL);
 	already_showing_info = 0;
 #endif
 }

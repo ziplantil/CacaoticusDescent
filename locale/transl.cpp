@@ -15,8 +15,9 @@ as described in copying.txt
 #include "locale/transl.h"
 #include "cfile/cfile.h"
 #include "misc/error.h"
+#include <algorithm>
 
-#define STRING_CACHE_SIZE 32
+#define STRING_CACHE_SIZE 64
 #define STRING_TMP_DEFAULT 128
 
 transl_stringmap strings;
@@ -194,7 +195,7 @@ int transl_load_language(const char* hog)
     char buf[1024];
     if (!cfile_use_langfile(hog))
     {
-        Error("Cannot find specified language");
+        Error("Cannot find specified language '%s'", hog);
         return 0;
     }
 
@@ -209,7 +210,7 @@ int transl_load_language(const char* hog)
             return 1;
     }
 
-    Error("Invalid or missing STRINGS.LNG");
+    Error("Invalid or missing STRINGS.LNG in '%s'", hog);
     return 0;
 }
 
@@ -258,12 +259,17 @@ const std::string& transl_format(std::string& buf, transl_compiled_string& fmt, 
                         buf += std::to_string(entry.intval);
                     else
                     {
-                        bool fullwidth = false;
+                        bool fullwidth = false, alt1 = false;
                         std::string tmps, form = tok.var.form;
                         if (form.rfind("fw", 0) == 0)
                         {
                             fullwidth = true;
                             form = form.substr(2);
+                        }
+                        if (form.rfind("1", 0) == 0)
+                        {
+                            alt1 = true;
+                            form = form.substr(1);
                         }
                         if (!form.empty() && form[0] == '%')
                         {
@@ -273,6 +279,8 @@ const std::string& transl_format(std::string& buf, transl_compiled_string& fmt, 
                         }
                         else
                             tmps = std::to_string(entry.intval);
+                        if (alt1)
+                            std::replace(tmps.begin(), tmps.end(), '1', '\x14');
                         if (fullwidth) /* convert to fullwidth numerals */
                         {
                             std::string nums = tmps;
@@ -378,6 +386,7 @@ const char* transl_get_atom(const char* key, const char* form)
 
 const char* transl_get_string_int(const char* key, const std::vector<transl_param>& args)
 {
+    if (!key) return key; // stupid hack
     int j = tmpi; tmpi = (tmpi + 1) % STRING_CACHE_SIZE;
     auto it = strings.find(key);
     if (it == strings.end())
@@ -433,9 +442,19 @@ const char* transl_fmt_string_s(const char* key, const char* s1)
     return transl_get_string_int(key, { transl_param_text(s1) });
 }
 
+const char* transl_fmt_string_ss(const char* key, const char* s1, const char* s2)
+{
+    return transl_get_string_int(key, { transl_param_text(s1), transl_param_text(s2) });
+}
+
 const char* transl_fmt_string_i(const char* key, int i)
 {
     return transl_get_string_int(key, { transl_param_int(i) });
+}
+
+const char* transl_fmt_string_ii(const char* key, int i1, int i2)
+{
+    return transl_get_string_int(key, { transl_param_int(i1), transl_param_int(i2) });
 }
 
 const char* transl_fmt_string_is(const char* key, int i, const char* s1)
@@ -451,6 +470,46 @@ const char* transl_fmt_string_si(const char* key, const char* s1, int i)
 const char* transl_fmt_string_ti(const char* key, const char* t1, int i)
 {
     return transl_get_string_int(key, { transl_param_tkey(t1), transl_param_int(i) });
+}
+
+const char* transl_fmt_string_it(const char* key, int i, const char* t1)
+{
+    return transl_get_string_int(key, { transl_param_int(i), transl_param_tkey(t1) });
+}
+
+const char* transl_fmt_string_iii(const char* key, int i1, int i2, int i3)
+{
+    return transl_get_string_int(key, { transl_param_int(i1), transl_param_int(i2), transl_param_int(i3) });
+}
+
+const char* transl_fmt_string_siss(const char* key, const char* s1, int i, const char* s2, const char* s3)
+{
+    return transl_get_string_int(key, { transl_param_text(s1), transl_param_int(i), transl_param_text(s2), transl_param_text(s3) });
+}
+
+const char* transl_fmt_string_ssii(const char* key, const char* s1, const char* s2, int i1, int i2)
+{
+    return transl_get_string_int(key, { transl_param_text(s1), transl_param_text(s2), transl_param_int(i1), transl_param_int(i2) });
+}
+
+const char* transl_fmt_string_stss(const char* key, const char* s1, const char* t, const char* s2, const char* s3)
+{
+    return transl_get_string_int(key, { transl_param_text(s1), transl_param_tkey(t), transl_param_text(s2), transl_param_text(s3) });
+}
+
+const char* transl_fmt_string_ssss(const char* key, const char* s1, const char* s2, const char* s3, const char* s4)
+{
+    return transl_get_string_int(key, { transl_param_text(s1), transl_param_text(s2), transl_param_text(s3), transl_param_text(s4) });
+}
+
+const char* transl_fmt_string_ts(const char* key, const char* t1, const char* s1)
+{
+    return transl_get_string_int(key, { transl_param_tkey(t1), transl_param_text(s1) });
+}
+
+const char* transl_fmt_string_stt(const char* key, const char* s1, const char* t1, const char* t2)
+{
+    return transl_get_string_int(key, { transl_param_text(s1), transl_param_tkey(t1), transl_param_tkey(t2) });
 }
 
 const char* transl_pluralize(int n)

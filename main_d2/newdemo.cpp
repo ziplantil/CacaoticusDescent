@@ -1429,19 +1429,19 @@ int newdemo_read_demo_start(int rnd_demo)
 		newmenu_item m[1];
 
 		sprintf(text, "%s %s", TXT_CANT_PLAYBACK, TXT_DEMO_CORRUPT);
-		m[0].type = NM_TYPE_TEXT; m[0].text = text;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], text);
 		newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 		return 1;
 	}
 	nd_read_byte(&version);
 	nd_read_byte(&game_type);
-	if (game_type < DEMO_GAME_TYPE) 
+	if (game_type < DEMO_GAME_TYPE)
 	{
 		newmenu_item m[2];
 
 		sprintf(text, "%s %s", TXT_CANT_PLAYBACK, TXT_RECORDED);
-		m[0].type = NM_TYPE_TEXT; m[0].text = text;
-		m[1].type = NM_TYPE_TEXT; m[1].text = const_cast<char*>("    In Descent: First Strike");
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], text);
+		m[1].type = NM_TYPE_TEXT; nm_copy_text(&m[1], transl_get_string("DemoRecordedInD1"));
 
 		newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 		return 1;
@@ -1451,8 +1451,8 @@ int newdemo_read_demo_start(int rnd_demo)
 		newmenu_item m[2];
 
 		sprintf(text, "%s %s", TXT_CANT_PLAYBACK, TXT_RECORDED);
-		m[0].type = NM_TYPE_TEXT; m[0].text = text;
-		m[1].type = NM_TYPE_TEXT; m[1].text = const_cast<char*>("   In Unknown Descent version");
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], text);
+		m[1].type = NM_TYPE_TEXT; nm_copy_text(&m[1], transl_get_string("DemoRecordedInUnknown"));
 
 		newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 		return 1;
@@ -1463,7 +1463,7 @@ int newdemo_read_demo_start(int rnd_demo)
 		{
 			newmenu_item m[1];
 			sprintf(text, "%s %s", TXT_CANT_PLAYBACK, TXT_DEMO_OLD);
-			m[0].type = NM_TYPE_TEXT; m[0].text = text;
+			m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], text);
 			newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 		}
 		return 1;
@@ -1543,7 +1543,7 @@ int newdemo_read_demo_start(int rnd_demo)
 			newmenu_item m[1];
 
 			sprintf(text, TXT_NOMISSION4DEMO, current_mission);
-			m[0].type = NM_TYPE_TEXT; m[0].text = text;
+			m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], text);
 			newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 		}
 		return 1;
@@ -2479,9 +2479,9 @@ int newdemo_read_frame_information()
 			{
 				newmenu_item m[3];
 
-				m[0].type = NM_TYPE_TEXT; m[0].text = TXT_CANT_PLAYBACK;
-				m[1].type = NM_TYPE_TEXT; m[1].text = TXT_LEVEL_CANT_LOAD;
-				m[2].type = NM_TYPE_TEXT; m[2].text = TXT_DEMO_OLD_CORRUPT;
+				m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_CANT_PLAYBACK);
+				m[1].type = NM_TYPE_TEXT; nm_copy_text(&m[1], TXT_LEVEL_CANT_LOAD);
+				m[2].type = NM_TYPE_TEXT; nm_copy_text(&m[2], TXT_DEMO_OLD_CORRUPT);
 				newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 				return -1;
 			}
@@ -2535,8 +2535,8 @@ int newdemo_read_frame_information()
 	{
 		newmenu_item m[2];
 
-		m[0].type = NM_TYPE_TEXT; m[0].text = TXT_DEMO_ERR_READING;
-		m[1].type = NM_TYPE_TEXT; m[1].text = TXT_DEMO_OLD_CORRUPT;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_DEMO_ERR_READING);
+		m[1].type = NM_TYPE_TEXT; nm_copy_text(&m[1], TXT_DEMO_OLD_CORRUPT);
 		newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 	}
 
@@ -2573,9 +2573,9 @@ void newdemo_goto_end()
 	{
 		newmenu_item m[3];
 
-		m[0].type = NM_TYPE_TEXT; m[0].text = TXT_CANT_PLAYBACK;
-		m[1].type = NM_TYPE_TEXT; m[1].text = TXT_LEVEL_CANT_LOAD;
-		m[2].type = NM_TYPE_TEXT; m[2].text = TXT_DEMO_OLD_CORRUPT;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_CANT_PLAYBACK);
+		m[1].type = NM_TYPE_TEXT; nm_copy_text(&m[1], TXT_LEVEL_CANT_LOAD);
+		m[2].type = NM_TYPE_TEXT; nm_copy_text(&m[2], TXT_DEMO_OLD_CORRUPT);
 		newmenu_do(NULL, NULL, sizeof(m) / sizeof(*m), m, NULL);
 		newdemo_stop_playback();
 		return;
@@ -3019,7 +3019,7 @@ void newdemo_start_recording()
 #ifndef MACINTOSH
 			nm_messagebox(NULL, 1, TXT_OK, TXT_DEMO_NO_SPACE);
 #else
-			nm_messagebox(NULL, 1, TXT_OK, "Not enough space on current\ndrive to start demo recording.");
+			nm_messagebox(NULL, 1, TXT_OK, transl_get_string("NotEnoughDemoSpaceMac"));
 #endif
 			return;
 }
@@ -3038,7 +3038,7 @@ void newdemo_start_recording()
 
 	if (outfile == NULL)
 	{
-		nm_messagebox(NULL, 1, TXT_OK, "Cannot open demo temp file");
+		nm_messagebox(NULL, 1, TXT_OK, transl_get_string("CannotOpenDemoTemp"));
 		Newdemo_state = ND_STATE_NORMAL;
 	}
 	else
@@ -3157,22 +3157,25 @@ try_again:
 	;
 
 	Newmenu_allowed_chars = demoname_allowed_chars;
-	if (!Newdemo_no_space) 
+	if (!Newdemo_no_space)
 	{
-		m[0].type = NM_TYPE_INPUT; m[0].text_len = 8; m[0].text = filename;
+		m[0].type = NM_TYPE_INPUT; m[0].text_len = 8; nm_copy_text(&m[0], filename);
 		exit = newmenu_do(NULL, TXT_SAVE_DEMO_AS, 1, &(m[0]), NULL);
+		strcpy(filename, m[0].text);
 	}
 	else if (Newdemo_no_space == 1)
 	{
-		m[0].type = NM_TYPE_TEXT; m[0].text = TXT_DEMO_SAVE_BAD;
-		m[1].type = NM_TYPE_INPUT; m[1].text_len = 8; m[1].text = filename;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_DEMO_SAVE_BAD);
+		m[1].type = NM_TYPE_INPUT; m[1].text_len = 8; nm_copy_text(&m[1], filename);
 		exit = newmenu_do(NULL, NULL, 2, m, NULL);
+		strcpy(filename, m[1].text);
 	}
 	else if (Newdemo_no_space == 2)
 	{
-		m[0].type = NM_TYPE_TEXT; m[0].text = TXT_DEMO_SAVE_NOSPACE;
-		m[1].type = NM_TYPE_INPUT; m[1].text_len = 8; m[1].text = filename;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], TXT_DEMO_SAVE_NOSPACE);
+		m[1].type = NM_TYPE_INPUT; m[1].text_len = 8; nm_copy_text(&m[1], filename);
 		exit = newmenu_do(NULL, NULL, 2, m, NULL);
+		strcpy(filename, m[1].text);
 	}
 	Newmenu_allowed_chars = NULL;
 
@@ -3352,7 +3355,7 @@ void newdemo_strip_frames(char* outname, int bytes_to_strip)
 	{
 		newmenu_item m[1];
 
-		m[0].type = NM_TYPE_TEXT; m[0].text = const_cast<char*>("Can't open output file");
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], transl_get_string("DemoCannotOpenOutputFile"));
 		newmenu_do(NULL, NULL, 1, m, NULL);
 		newdemo_stop_playback();
 		return;
@@ -3362,7 +3365,7 @@ void newdemo_strip_frames(char* outname, int bytes_to_strip)
 	{
 		newmenu_item m[1];
 
-		m[0].type = NM_TYPE_TEXT; m[0].text = const_cast<char*>("Can't malloc output buffer");
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], transl_get_string("DemoCannotAllocOutputBuffer"));
 		newmenu_do(NULL, NULL, 1, m, NULL);
 		fclose(outfile);
 		newdemo_stop_playback();

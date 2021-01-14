@@ -50,13 +50,13 @@ grs_font* resolve_font(grs_fontstyle* style, uint32_t c, int *cout, int *infont)
 #if FAST_FONT_TABLE
 	int co;
 	grs_font* font, ** ftmp;
-	if (c <= 0x0f)
+	if (c <= 0x0d)
 	{
 		if (*infont)
 			*infont = 0;
 		return style->deffont;
 	}
-	if (c <= 0x17 && c >= 0x0f) // hack: remap special UI characters
+	if (c <= 0x17 && c >= 0x0e) // hack: remap special UI characters
 	{
 		font = style->deffont;
 		co = c + 0x70 - font->ft_minchar;
@@ -82,13 +82,13 @@ grs_font* resolve_font(grs_fontstyle* style, uint32_t c, int *cout, int *infont)
 	return font;
 #else
 	int inf = 1, co;
-	if (!c)
+	if (c <= 0x0d)
 	{
 		if (*infont)
 			*infont = 0;
 		return style->font;
 	}
-	if (c <= 0x17 && c >= 0x0f) // hack: remap special UI characters
+	if (c <= 0x17 && c >= 0x0e) // hack: remap special UI characters
 	{
 		style->font = style->deffont;
 		style->minchar = style->font->ft_minchar;
@@ -299,10 +299,10 @@ int gr_internal_string0(int x, int y, unsigned char* s)
 
 				if (u == '&')
 				{
-					if ((r == FBASELINE(fnt) + 2 + fnt->ft_yoffset) || (r == FBASELINE(fnt) + 3 + fnt->ft_yoffset))
-						underline = 1;
 					u = utf8_read(&text_ptr);
 					fnt = resolve_font(FONT, u, &letter, &inf);
+					if ((r == FBASELINE(fnt) + 2 + fnt->ft_yoffset) || (r == FBASELINE(fnt) + 3 + fnt->ft_yoffset))
+						underline = 1;
 				}
 
 				yo = fnt->ft_yoffset;
@@ -399,10 +399,10 @@ int gr_internal_string0m(int x, int y, unsigned char* s)
 
 				if (u == '&')
 				{
-					if ((r == FBASELINE(fnt) + 2 + fnt->ft_yoffset) || (r == FBASELINE(fnt) + 3 + fnt->ft_yoffset))
-						underline = 1;
 					u = utf8_read(&text_ptr);
 					fnt = resolve_font(FONT, u, &letter, &inf);
+					if ((r == FBASELINE(fnt) + 2 + fnt->ft_yoffset) || (r == FBASELINE(fnt) + 3 + fnt->ft_yoffset))
+						underline = 1;
 				}
 
 				yo = fnt->ft_yoffset;
@@ -832,7 +832,9 @@ void gr_register_font(grs_fontstyle* style, grs_font* font, uint32_t offset)
 		style->deffont = font;
 		style->flags = font->ft_flags;
 	}
+#if FAST_FONT_TABLE
 	font->ft_uoffset = offset;
+#endif
 }
 
 void gr_close_fontstyle(grs_fontstyle* style)
@@ -1118,10 +1120,10 @@ int gr_internal_string_clipped(int x, int y, const char* s)
 
 				if (u == '&')
 				{
-					if ((r == FBASELINE(fnt) + 2 + fnt->ft_yoffset) || (r == FBASELINE(fnt) + 3 + fnt->ft_yoffset))
-						underline = 1;
 					u = utf8_read(&text_ptr);
 					fnt = resolve_font(FONT, u, &letter, &inf);
+					if ((r == FBASELINE(fnt) + 2 + fnt->ft_yoffset) || (r == FBASELINE(fnt) + 3 + fnt->ft_yoffset))
+						underline = 1;
 				}
 
 				yo = fnt->ft_yoffset;
@@ -1218,10 +1220,10 @@ int gr_internal_string_clipped_m(int x, int y, const char* s)
 
 				if (u == '&')
 				{
-					if ((r == FBASELINE(fnt) + 2 + fnt->ft_yoffset) || (r == FBASELINE(fnt) + 3 + fnt->ft_yoffset))
-						underline = 1;
 					u = utf8_read(&text_ptr);
 					fnt = resolve_font(FONT, u, &letter, &inf);
+					if ((r == FBASELINE(fnt) + 2 + fnt->ft_yoffset) || (r == FBASELINE(fnt) + 3 + fnt->ft_yoffset))
+						underline = 1;
 				}
 
 				yo = fnt->ft_yoffset;

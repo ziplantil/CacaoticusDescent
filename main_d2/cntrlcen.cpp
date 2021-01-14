@@ -36,6 +36,8 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #include "fireball.h"
 #include "endlevel.h"
 #include "misc/rand.h"
+#include "gauges.h"
+#include "locale/transl.h"
 
 //@@vms_vector controlcen_gun_points[MAX_CONTROLCEN_GUNS];
 //@@vms_vector controlcen_gun_dirs[MAX_CONTROLCEN_GUNS];
@@ -179,12 +181,18 @@ void do_countdown_frame()
 
 	if ( (old_time > COUNTDOWN_VOICE_TIME ) && (Countdown_timer <= COUNTDOWN_VOICE_TIME) )	{
 		digi_play_sample( SOUND_COUNTDOWN_13_SECS, F3_0 );
+		const char* msg = transl_get_string("SelfDestructIn10Seconds");
+		if (msg && *msg) HUD_init_message(msg);
 	}
 	if ( f2i(old_time + F1_0*7/8) != Countdown_seconds_left )	{
 		if ( (Countdown_seconds_left>=0) && (Countdown_seconds_left<10) ) 
 			digi_play_sample( SOUND_COUNTDOWN_0_SECS+Countdown_seconds_left, F3_0 );
-		if ( Countdown_seconds_left==Total_countdown_time-1)
-			digi_play_sample( SOUND_COUNTDOWN_29_SECS, F3_0 );
+		if (Countdown_seconds_left == Total_countdown_time - 1)
+		{
+			digi_play_sample(SOUND_COUNTDOWN_29_SECS, F3_0);
+			const char* msg = transl_get_string("SelfDestructSequenceBegin");
+			if (msg && *msg) HUD_init_message(msg);
+		}
 	}						
 
 	if (Countdown_timer > 0) {

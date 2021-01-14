@@ -56,7 +56,7 @@ int low_yoffset = 0;
 int8_t fades[64] = { 1,1,1,2,2,3,4,4,5,6,8,9,10,12,13,15,16,17,19,20,22,23,24,26,27,28,28,29,30,30,31,31,31,31,31,30,30,29,28,28,27,26,24,23,22,20,19,17,16,15,13,12,10,9,8,6,5,4,4,3,2,2,1,1 };
 
 //char * invert_text[2] = { "N", "Y" };
-//char * joybutton_text[28] = { "BTN 1", "BTN 2", "BTN 3", "BTN 4", "", "TRIG", "LEFT", "HAT Å", "RIGHT", "", "", "HAT Ä", "MID", "", "", "HAT ", "", "", "", "HAT Ç", "TRIG", "LEFT", "RIGHT", "", "UP","DOWN","LEFT", "RIGHT" };
+//char * joybutton_text[28] = { "BTN 1", "BTN 2", "BTN 3", "BTN 4", "", "TRIG", "LEFT", "HAT ÔøΩ", "RIGHT", "", "", "HAT ÔøΩ", "MID", "", "", "HAT ", "", "", "", "HAT ÔøΩ", "TRIG", "LEFT", "RIGHT", "", "UP","DOWN","LEFT", "RIGHT" };
 //char * joyaxis_text[4] = { "X1", "Y1", "X2", "Y2" };
 //char * mouseaxis_text[2] = { "L/R", "F/B" };
 //char * mousebutton_text[3] = { "Left", "Right", "Mid" };
@@ -98,7 +98,7 @@ const char* mousebutton_text[3] = { TKEY_LEFT, TKEY_RIGHT, TKEY_MID };
 const char* key_text[256] = { \
 "","ESC","1","2","3","4","5","6","7","8","9","0","-", 			\
 "=","BSPC","TAB","Q","W","E","R","T","Y","U","I","O",				\
-"P","[","]","É","LCTRL","A","S","D","F",        \
+"P","[","]","\x13","LCTRL","A","S","D","F",        \
 "G","H","J","K","L",";","'","`",        \
 "LSHFT","\\","Z","X","C","V","B","N","M",",",      \
 ".","/","RSHFT","PAD*","LALT","SPC",      \

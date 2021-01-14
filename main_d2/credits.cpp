@@ -86,9 +86,9 @@ uint8_t fade_values_hires[480] = { 1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,
 
 extern uint8_t *gr_bitblt_fade_table;
 
-grs_font * header_font;
-grs_font * title_font;
-grs_font * names_font;
+grs_fontstyle* header_font;
+grs_fontstyle* title_font;
+grs_fontstyle* names_font;
 
 #ifdef SHAREWARE
 #define ALLOWED_CHAR 'S'
@@ -190,9 +190,12 @@ CreditsPaint:
 #if defined(POLY_ACC)
 	pa_update_clut(gr_palette, 0, 256, 0);
 #endif
-	header_font = gr_init_font( MenuHires?"font1-1h.fnt":"font1-1.fnt" );
-	title_font = gr_init_font( MenuHires?"font2-3h.fnt":"font2-3.fnt" );
-	names_font = gr_init_font( MenuHires?"font2-2h.fnt":"font2-2.fnt" );
+	header_font = gr_init_fontstyle(MenuHires ? "font1-1h.fnt" : "font1-1.fnt");
+	gamefont_load_extrafonts(header_font, GFONT_BIG_1);
+	title_font = gr_init_fontstyle(MenuHires ? "font2-3h.fnt" : "font2-3.fnt");
+	gamefont_load_extrafonts(title_font, GFONT_MEDIUM_3);
+	names_font = gr_init_fontstyle(MenuHires ? "font2-2h.fnt" : "font2-2.fnt");
+	gamefont_load_extrafonts(names_font, GFONT_MEDIUM_2);
 	backdrop.bm_data=NULL;
 
 //MWA  Made backdrop bitmap linear since it should always be.  the current canvas may not
@@ -491,9 +494,9 @@ get_line:;
 
 			if ((k>0)||(done>NUM_LINES))	
 			{
-					gr_close_font(header_font);
-					gr_close_font(title_font);
-					gr_close_font(names_font);
+					gr_close_fontstyle(header_font);
+					gr_close_fontstyle(title_font);
+					gr_close_fontstyle(names_font);
 					gr_palette_fade_out( gr_palette, 32, 0 );
 					gr_use_palette_table( DEFAULT_PALETTE );
 					free(backdrop.bm_data);

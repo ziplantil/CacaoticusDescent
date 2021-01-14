@@ -455,4 +455,18 @@ void mem_print_all()
 
 #endif
 
+void* memswp(void* destination, void* source, size_t num)
+{
+	unsigned char* src = (unsigned char*)source, * dst = (unsigned char*)destination, t;
+
+	while (num--)
+	{
+		t = *dst;
+		*dst++ = *src;
+		*src++ = t;
+	}
+
+	return dst;
+}
+
 

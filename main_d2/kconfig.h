@@ -140,7 +140,7 @@ typedef struct advanced_ext_control_info
 extern uint8_t ExtGameStatus;
 extern control_info Controls;
 extern void controls_read_all();
-extern void kconfig(int n, char * title );
+extern void kconfig(int n, const char * title );
 
 #define NUM_KEY_CONTROLS 57
 #define NUM_OTHER_CONTROLS 31
@@ -149,7 +149,7 @@ extern void kconfig(int n, char * title );
 extern uint8_t kconfig_settings[CONTROL_MAX_TYPES][MAX_CONTROLS];
 extern uint8_t default_kconfig_settings[CONTROL_MAX_TYPES][MAX_CONTROLS];
 
-extern const char *control_text[CONTROL_MAX_TYPES];
+extern const char *control_text_orig[CONTROL_MAX_TYPES];
 
 extern void kc_set_controls();
 

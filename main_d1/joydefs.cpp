@@ -64,7 +64,7 @@ extern int WriteConfigFile();
 
 void joydefs_calibrate()
 {
-	nm_messagebox(NULL, 1, TXT_OK, "Joystick calibration not\npossible in chocolate.");
+	nm_messagebox(NULL, 1, TXT_OK, transl_get_string("NoJoystickCalibrate"));
 	/*uint8_t masks;
 	int org_axis_min[4];
 	int org_axis_center[4];

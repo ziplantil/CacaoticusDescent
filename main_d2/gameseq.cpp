@@ -261,7 +261,7 @@ void gameseq_init_network_players()
 		for (i = 0; i < N_players; i++)
 			if (Players[i].connected && !(NetPlayers.players[i].version_minor & 0xF0))
 			{
-				nm_messagebox("Warning!", 1, TXT_OK, "This special version of Descent II\nwill disconnect after this level.\nPlease purchase the full version\nto experience all the levels!");
+				nm_messagebox(transl_get_string("TitleWarning"), 1, TXT_OK, transl_get_string("GameOEMWarning"));
 				return;
 			}
 	}
@@ -691,7 +691,7 @@ int MakeNewPlayerFile(int allow_abort)
 	strncpy(text, Players[Player_num].callsign, CALLSIGN_LEN);
 
 try_again:
-	m.type = NM_TYPE_INPUT; m.text_len = 8; m.text = text;
+	m.type = NM_TYPE_INPUT; m.text_len = 8; nm_copy_text(&m, text);
 
 	Newmenu_allowed_chars = playername_allowed_chars;
 	x = newmenu_do(NULL, TXT_ENTER_PILOT_NAME, 1, &m, NULL);
@@ -703,6 +703,7 @@ try_again:
 		goto try_again;
 	}
 
+	strcpy(text, m.text);
 	if (text[0] == 0)	//null string
 		goto try_again;
 
@@ -722,7 +723,7 @@ try_again:
 
 	if (fp)
 	{
-		nm_messagebox(NULL, 1, TXT_OK, "%s '%s' %s", TXT_PLAYER, text, TXT_ALREADY_EXISTS);
+		nm_messagebox(NULL, 1, TXT_OK, TXT_ALREADY_EXISTS, text);
 		fclose(fp);
 		goto try_again;
 	}
@@ -736,12 +737,6 @@ try_again:
 
 	return 1;
 }
-
-#ifdef WINDOWS
-#undef TXT_SELECT_PILOT
-#define TXT_SELECT_PILOT "Select pilot\n<Ctrl-D> or Right-click\nto delete"
-#endif
-
 //Inputs the player's name, without putting up the background screen
 int RegisterPlayer()
 {
@@ -772,6 +767,11 @@ int RegisterPlayer()
 do_menu_again:
 	;
 
+#ifdef WINDOWS
+	if (!newmenu_get_filename(transl_get_string("TXT_SELECT_PILOT_WIN"), "*.plr", filename, allow_abort_flag)) {
+		goto do_menu_again; //return 0;		// They hit Esc in file selector
+	}
+#else
 #ifndef MACINTOSH
 	if (!newmenu_get_filename(TXT_SELECT_PILOT, "*.plr", filename, allow_abort_flag)) {
 		goto do_menu_again; //return 0;		// They hit Esc in file selector
@@ -782,11 +782,12 @@ do_menu_again:
 		goto do_menu_again;		// They hit Esc in file selector
 	}
 #else
-	newmenu_get_filename("Select Pilot", ".\\Players\\*.plr", filename, 0);		// no abort allowed ever -- and change title of menubox
+	newmenu_get_filename(transl_get_string("TXT_SELECT_PILOT1"), ".\\Players\\*.plr", filename, 0);		// no abort allowed ever -- and change title of menubox
+#endif
 #endif
 #endif
 
-	if (filename[0] == '<')
+	if (!strcmp(filename, transl_get_string("TXT_CREATE_NEW")))
 	{
 		// They selected 'create new pilot'
 		if (!MakeNewPlayerFile(allow_abort_flag))
@@ -965,6 +966,14 @@ void LoadLevel(int level_num, int page_in_textures)
 
 	Current_level_num = level_num;
 
+	{
+		#define BIM_LAST_LEVEL 24
+		int j = Current_level_num;
+		if (j < 0) j = 24 - j;
+		if (_TRANSLATED_LEVEL_NAMES[j])
+			strcpy(Current_level_name, _TRANSLATED_LEVEL_NAMES[j]);
+	}
+
 	//	load_palette_pig(Current_level_palette);		//load just the pig
 
 	load_palette(Current_level_palette, 1, 1);		//don't change screen
@@ -1094,10 +1103,10 @@ void DoEndLevelScoreGlitz(int network)
 	int level_points, skill_points, energy_points, shield_points, hostage_points;
 	int	all_hostage_points;
 	int	endgame_points;
-	char	all_hostage_text[64];
-	char	endgame_text[64];
+	char	all_hostage_text[128];
+	char	endgame_text[128];
 #define N_GLITZITEMS 11
-	char				m_str[N_GLITZITEMS][30];
+	char				m_str[N_GLITZITEMS][90];
 	newmenu_item	m[N_GLITZITEMS + 1];
 	int				i, c;
 	char				title[128];
@@ -1151,7 +1160,7 @@ void DoEndLevelScoreGlitz(int network)
 	if (!Cheats_enabled && (Players[Player_num].hostages_on_board == Players[Player_num].hostages_level))
 	{
 		all_hostage_points = Players[Player_num].hostages_on_board * 1000 * (Difficulty_level + 1);
-		sprintf(all_hostage_text, "%s%i\n", TXT_FULL_RESCUE_BONUS, all_hostage_points);
+		sprintf(all_hostage_text, transl_fmt_string_si("ScoreFormatN", TXT_FULL_RESCUE_BONUS, all_hostage_points));
 	}
 	else
 		all_hostage_points = 0;
@@ -1159,7 +1168,7 @@ void DoEndLevelScoreGlitz(int network)
 	if (!Cheats_enabled && !(Game_mode & GM_MULTI) && (Players[Player_num].lives) && (Current_level_num == Last_level)) //player has finished the game!
 	{
 		endgame_points = Players[Player_num].lives * 10000;
-		sprintf(endgame_text, "%s%i\n", TXT_SHIP_BONUS, endgame_points);
+		sprintf(endgame_text, transl_fmt_string_si("ScoreFormatN", TXT_SHIP_BONUS, endgame_points));
 		is_last_level = 1;
 	}
 	else
@@ -1169,26 +1178,26 @@ void DoEndLevelScoreGlitz(int network)
 	add_bonus_points_to_score(skill_points + energy_points + shield_points + hostage_points + all_hostage_points + endgame_points);
 
 	c = 0;
-	sprintf(m_str[c++], "%s%i", TXT_SHIELD_BONUS, shield_points);		// Return at start to lower menu...
-	sprintf(m_str[c++], "%s%i", TXT_ENERGY_BONUS, energy_points);
-	sprintf(m_str[c++], "%s%i", TXT_HOSTAGE_BONUS, hostage_points);
-	sprintf(m_str[c++], "%s%i", TXT_SKILL_BONUS, skill_points);
+	sprintf(m_str[c++], transl_fmt_string_si("ScoreFormat", TXT_SHIELD_BONUS, shield_points));		// Return at start to lower menu...
+	sprintf(m_str[c++], transl_fmt_string_si("ScoreFormat", TXT_ENERGY_BONUS, energy_points));
+	sprintf(m_str[c++], transl_fmt_string_si("ScoreFormat", TXT_HOSTAGE_BONUS, hostage_points));
+	sprintf(m_str[c++], transl_fmt_string_si("ScoreFormat", TXT_SKILL_BONUS, skill_points));
 
 	sprintf(m_str[c++], "%s", all_hostage_text);
 	if (!(Game_mode & GM_MULTI) && (Players[Player_num].lives) && (Current_level_num == Last_level))
 		sprintf(m_str[c++], "%s", endgame_text);
 
-	sprintf(m_str[c++], "%s%i\n", TXT_TOTAL_BONUS, shield_points + energy_points + hostage_points + skill_points + all_hostage_points + endgame_points);
-	sprintf(m_str[c++], "%s%i", TXT_TOTAL_SCORE, Players[Player_num].score);
+	sprintf(m_str[c++], transl_fmt_string_si("ScoreFormatN", TXT_TOTAL_BONUS, shield_points + energy_points + hostage_points + skill_points + all_hostage_points + endgame_points));
+	sprintf(m_str[c++], transl_fmt_string_si("ScoreFormat", TXT_TOTAL_SCORE, Players[Player_num].score));
 
 #ifdef WINDOWS
 	sprintf(m_str[c++], "");
-	sprintf(m_str[c++], "         Done");
+	sprintf(m_str[c++], transl_get_string("ScoreFormatDone"));
 #endif
 
 	for (i = 0; i < c; i++) {
 		m[i].type = NM_TYPE_TEXT;
-		m[i].text = m_str[i];
+		nm_copy_text(&m[i], m_str[i]);
 	}
 
 #ifdef WINDOWS
@@ -1198,9 +1207,9 @@ void DoEndLevelScoreGlitz(int network)
 	// m[c].type = NM_TYPE_MENU;	m[c++].text = "Ok";
 
 	if (Current_level_num < 0)
-		sprintf(title, "%s%s %d %s\n %s %s", is_last_level ? "\n\n\n" : "\n", TXT_SECRET_LEVEL, -Current_level_num, TXT_COMPLETE, Current_level_name, TXT_DESTROYED);
+		sprintf(title, "%s%s", is_last_level ? "\n\n\n" : "\n", transl_fmt_string_is("SecretLevelDestroyed", -Current_level_num, Current_level_name));
 	else
-		sprintf(title, "%s%s %d %s\n%s %s", is_last_level ? "\n\n\n" : "\n", TXT_LEVEL, Current_level_num, TXT_COMPLETE, Current_level_name, TXT_DESTROYED);
+		sprintf(title, "%s%s", is_last_level ? "\n\n\n" : "\n", transl_fmt_string_is("LevelDestroyed", Current_level_num, Current_level_name));
 
 	Assert(c <= N_GLITZITEMS);
 
@@ -1284,7 +1293,7 @@ int p_secret_level_destroyed(void)
 void load_stars();
 
 //	-----------------------------------------------------------------------------------------------------
-void do_secret_message(char* msg)
+void do_secret_message(const char* msg)
 {
 	int	old_fmode;
 
@@ -1320,7 +1329,7 @@ void StartNewLevelSecret(int level_num, int page_in_textures)
 	ThisLevelTime = 0;
 
 	m[0].type = NM_TYPE_TEXT;
-	m[0].text = const_cast<char*>(" ");
+	nm_copy_text(&m[0], " ");
 
 	last_drawn_cockpit[0] = -1;
 	last_drawn_cockpit[1] = -1;
@@ -1356,7 +1365,7 @@ void StartNewLevelSecret(int level_num, int page_in_textures)
 			{
 				char	text_str[128];
 
-				sprintf(text_str, "Secret level already destroyed.\nAdvancing to level %i.", Current_level_num + 1);
+				sprintf(text_str, transl_fmt_string_i("SecretLevelAlreadyDestroyed", Current_level_num + 1));
 				do_secret_message(text_str);
 			}
 		}
@@ -1420,7 +1429,7 @@ void StartNewLevelSecret(int level_num, int page_in_textures)
 		{
 			char	text_str[128];
 
-			sprintf(text_str, "Secret level already destroyed.\nAdvancing to level %i.", Current_level_num + 1);
+			sprintf(text_str, transl_fmt_string_i("SecretLevelAlreadyDestroyed", Current_level_num + 1));
 			do_secret_message(text_str);
 			return;
 
@@ -1840,7 +1849,7 @@ void returning_to_level_message(void)
 
 	old_fmode = Function_mode;
 	Function_mode = FMODE_MENU;
-	sprintf(msg, "Returning to level %i", Entered_from_level);
+	sprintf(msg, transl_fmt_string_i("ReturningToLevel", Entered_from_level));
 	nm_messagebox(NULL, 1, TXT_OK, msg);
 	Function_mode = old_fmode;
 
@@ -1879,7 +1888,7 @@ void advancing_to_level_message(void)
 
 	old_fmode = Function_mode;
 	Function_mode = FMODE_MENU;
-	sprintf(msg, "Base level destroyed.\nAdvancing to level %i", Entered_from_level + 1);
+	sprintf(msg, transl_fmt_string_i("BaseLevelDestroyed", Entered_from_level + 1));
 	nm_messagebox(NULL, 1, TXT_OK, msg);
 	Function_mode = old_fmode;
 

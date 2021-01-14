@@ -1127,7 +1127,7 @@ void apply_damage_to_controlcen(object* controlcen, fix damage, short who)
 		if (Objects[who].id == Player_num) {
 			int secs = f2i(Netgame.control_invul_time - Players[Player_num].time_level) % 60;
 			int mins = f2i(Netgame.control_invul_time - Players[Player_num].time_level) / 60;
-			HUD_init_message("%s %d:%02d.", TXT_CNTRLCEN_INVUL, mins, secs);
+			HUD_init_message(transl_fmt_string_ii("TXT_CNTRLCEN_INVUL", mins, secs));
 		}
 		return;
 	}
@@ -1185,14 +1185,14 @@ void collide_player_and_marker(object* marker, object* playerobj, vms_vector* co
 
 		if (Game_mode & GM_MULTI)
 		{
-			drawn = HUD_init_message("MARKER %s: %s", Players[marker->id / 2].callsign, MarkerMessage[marker->id]);
+			drawn = HUD_init_message(transl_fmt_string_ss("MessageMarkerByPlayer", Players[marker->id / 2].callsign, MarkerMessage[marker->id]));
 		}
 		else
 		{
 			if (MarkerMessage[marker->id][0])
-				drawn = HUD_init_message("MARKER %d: %s", marker->id + 1, MarkerMessage[marker->id]);
+				drawn = HUD_init_message(transl_fmt_string_is("MessageMarker", marker->id + 1, MarkerMessage[marker->id]));
 			else
-				drawn = HUD_init_message("MARKER %d", marker->id + 1);
+				drawn = HUD_init_message(transl_fmt_string_i("MessageMarkerNoText", marker->id + 1));
 		}
 
 		if (drawn)
@@ -1345,7 +1345,7 @@ void do_final_boss_hacks(void)
 		Players[Player_num].flags |= PLAYER_FLAGS_INVULNERABLE;
 	}
 	if (!(Game_mode & GM_MULTI))
-		buddy_message("Nice job, %s!", Players[Player_num].callsign);
+		buddy_message(transl_fmt_string_s("BuddyFinalBossKill", Players[Player_num].callsign));
 
 	Final_boss_is_dead = 1;
 }
@@ -1543,12 +1543,12 @@ int do_boss_weapon_collision(object* robot, object* weapon, vms_vector* collisio
 					Last_time_buddy_gave_hint = GameTime;
 					sval = (P_Rand() * 4) >> 15;
 					switch (sval) {
-					case 0:	buddy_message("Hit him in the back!");	break;
-					case 1:	buddy_message("He's invulnerable there!");	break;
-					case 2:	buddy_message("Get behind him and fire!");	break;
+					case 0:	buddy_message(transl_get_string("BuddyFinalBossHint0"));	break;
+					case 1:	buddy_message(transl_get_string("BuddyFinalBossHint1"));	break;
+					case 2:	buddy_message(transl_get_string("BuddyFinalBossHint2"));	break;
 					case 3:
 					default:
-						buddy_message("Hit the glowing spot!");	break;
+						buddy_message(transl_get_string("BuddyFinalBossHint3"));	break;
 					}
 				}
 			}

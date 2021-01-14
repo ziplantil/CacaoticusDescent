@@ -337,7 +337,7 @@ int do_powerup(object* obj)
 		if (!(Players[Player_num].flags & PLAYER_FLAGS_QUAD_LASERS))
 		{
 			Players[Player_num].flags |= PLAYER_FLAGS_QUAD_LASERS;
-			powerup_basic(15, 15, 7, QUAD_FIRE_SCORE, "%s!", TXT_QUAD_LASERS);
+			powerup_basic(15, 15, 7, QUAD_FIRE_SCORE, transl_fmt_string_t("PickedUpPowerup", "TXT_QUAD_LASERS"));
 			update_laser_weapon_info();
 			used = 1;
 		}

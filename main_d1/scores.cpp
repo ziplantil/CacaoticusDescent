@@ -258,7 +258,7 @@ void scores_maybe_add_player(int abort_flag)
 		}
 		else 
 		{
-			nm_messagebox(TXT_HIGH_SCORE, 1, TXT_OK, TXT_YOU_PLACED, ORDINAL_TEXT(position));
+			nm_messagebox(TXT_HIGH_SCORE, 1, TXT_OK, transl_fmt_string_t("TXT_YOU_PLACED", _ORDINAL_TEXT[position]));
 		}
 
 		// move everyone down...

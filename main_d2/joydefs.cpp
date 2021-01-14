@@ -55,13 +55,13 @@ void joy_delay()
 }
 
 
-int joycal_message(char* title, char* text)
+int joycal_message(char* title, const char* text)
 {
 	int i;
 	newmenu_item	m[2];
 	MAC(joydefs_calibrating = 1;)
-		m[0].type = NM_TYPE_TEXT; m[0].text = text;
-	m[1].type = NM_TYPE_MENU; m[1].text = TXT_OK;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], text);
+	m[1].type = NM_TYPE_MENU; nm_copy_text(&m[1], TXT_OK);
 	i = newmenu_do(title, NULL, 2, m, NULL);
 	MAC(joydefs_calibrating = 0;)
 		if (i < 0)
@@ -75,7 +75,7 @@ void joydefs_calibrate2();
 
 void joydefs_calibrate(void)
 {
-	nm_messagebox(NULL, 1, TXT_OK, "Joystick calibration not\npossible in chocolate.");
+	nm_messagebox(NULL, 1, TXT_OK, transl_get_string("NoJoystickCalibrate"));
 	/*
 	if ((Config_control_type != CONTROL_JOYSTICK) && (Config_control_type != CONTROL_FLIGHTSTICK_PRO) && (Config_control_type != CONTROL_THRUSTMASTER_FCS))
 		return;
@@ -330,7 +330,8 @@ void joydefs_calibrate2()
 
 //char *control_text[CONTROL_MAX_TYPES] = { "Keyboard only", "Joystick", "Flightstick Pro", "Thrustmaster FCS", "Gravis Gamepad", "Mouse", "Cyberman" };
 
-const char* control_text[CONTROL_MAX_TYPES] = { "Keyboard only", "Joystick (1-2)", "Gamepad", "Joystick w/ throttle", "-", "Mouse", "-", "-" };
+//const char* control_text[CONTROL_MAX_TYPES] = { "Keyboard only", "Joystick (1-2)", "Gamepad", "Joystick w/ throttle", "-", "Mouse", "-", "-" };
+const char* control_text[CONTROL_MAX_TYPES] = { "ControlType0", "ControlType1", "ControlType2", "ControlType3", "ControlType4", "ControlType5", "ControlType6", "ControlType7" };
 int choco_menu_remap[CONTROL_MAX_TYPES] = { 0, 1, 2, 3, 5, 0, 0, 0 }; //Remaps the new options to the old input ID
 int choco_id_to_menu_remap[CONTROL_MAX_TYPES] = { 0, 1, 2, 3, 0, 4, 0, 0 }; //Remaps an old ID to the new menu option
 
@@ -387,19 +388,17 @@ void joydefs_config()
 	do 
 	{
 		nitems = 10;
-		//[ISB] TODO: These const_casts are disgusting, and are merely a way to work around compiler warnings in gcc. 
-		//It works for now since the code down the line is adjusted to expect const strings, but this should be improved.
-		m[0].type = NM_TYPE_RADIO; m[0].text = const_cast<char*>(control_text[0]); m[0].value = 0; m[0].group = 0;
-		m[1].type = NM_TYPE_RADIO; m[1].text = const_cast<char*>(control_text[1]); m[1].value = 0; m[1].group = 0;
-		m[2].type = NM_TYPE_RADIO; m[2].text = const_cast<char*>(control_text[2]); m[2].value = 0; m[2].group = 0;
-		m[3].type = NM_TYPE_RADIO; m[3].text = const_cast<char*>(control_text[3]); m[3].value = 0; m[3].group = 0;
-		m[4].type = NM_TYPE_RADIO; m[4].text = const_cast<char*>(control_text[5]); m[4].value = 0; m[4].group = 0;
+		m[0].type = NM_TYPE_RADIO; nm_copy_text(&m[0], transl_get_string(control_text[0])); m[0].value = 0; m[0].group = 0;
+		m[1].type = NM_TYPE_RADIO; nm_copy_text(&m[1], transl_get_string(control_text[1])); m[1].value = 0; m[1].group = 0;
+		m[2].type = NM_TYPE_RADIO; nm_copy_text(&m[2], transl_get_string(control_text[2])); m[2].value = 0; m[2].group = 0;
+		m[3].type = NM_TYPE_RADIO; nm_copy_text(&m[3], transl_get_string(control_text[3])); m[3].value = 0; m[3].group = 0;
+		m[4].type = NM_TYPE_RADIO; nm_copy_text(&m[4], transl_get_string(control_text[5])); m[4].value = 0; m[4].group = 0;
 
-		m[5].type = NM_TYPE_MENU;		m[5].text = TXT_CUST_ABOVE;
-		m[6].type = NM_TYPE_TEXT;		m[6].text = const_cast<char*>("");
-		m[7].type = NM_TYPE_SLIDER;		m[7].text = TXT_JOYS_SENSITIVITY; m[7].value = Config_joystick_sensitivity; m[7].min_value = 0; m[7].max_value = 8;
-		m[8].type = NM_TYPE_TEXT;		m[8].text = const_cast<char*>("");
-		m[9].type = NM_TYPE_MENU;		m[9].text = TXT_CUST_KEYBOARD;
+		m[5].type = NM_TYPE_MENU;		nm_copy_text(&m[5], TXT_CUST_ABOVE);
+		m[6].type = NM_TYPE_TEXT;		nm_copy_text(&m[6], const_cast<char*>(""));
+		m[7].type = NM_TYPE_SLIDER;		nm_copy_text(&m[7], TXT_JOYS_SENSITIVITY); m[7].value = Config_joystick_sensitivity; m[7].min_value = 0; m[7].max_value = 8;
+		m[8].type = NM_TYPE_TEXT;		nm_copy_text(&m[8], const_cast<char*>(""));
+		m[9].type = NM_TYPE_MENU;		nm_copy_text(&m[9], TXT_CUST_KEYBOARD);
 
 		m[choco_id_to_menu_remap[Config_control_type]].value = 1;
 
@@ -419,9 +418,9 @@ void joydefs_config()
 			if (Config_control_type == 0)
 				kconfig(0, TXT_KEYBOARD);
 			else if (Config_control_type < 5)
-				kconfig(1, const_cast<char*>(control_text[Config_control_type]));
+				kconfig(1, transl_get_string(control_text[Config_control_type]));
 			else
-				kconfig(2, const_cast<char*>(control_text[Config_control_type]));
+				kconfig(2, transl_get_string(control_text[Config_control_type]));
 
 			/*masks = 0;
 			for (i = 0; i < 4; i++)

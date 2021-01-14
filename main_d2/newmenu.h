@@ -25,7 +25,7 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 #define NM_TYPE_INPUT_MENU	6		// A inputbox that you hit Enter to edit, when done, hit enter and menu leaves.
 #define NM_TYPE_SLIDER	7		// A slider from min_value to max_value. Draws with text_len chars.
 
-#define NM_MAX_TEXT_LEN	50
+#define NM_MAX_TEXT_LEN	60
 
 typedef struct newmenu_item {
 	int 	type;				// What kind of item this is, see NM_TYPE_????? defines
@@ -33,7 +33,7 @@ typedef struct newmenu_item {
 	int 	min_value, max_value;	// For sliders and number bars.
 	int 	group;			// What group this belongs to for radio buttons.
 	int	text_len;		// The maximum length of characters that can be entered by this inputboxes
-	char	*text;			// The text associated with this item.
+	char text[NM_MAX_TEXT_LEN + 1];			// The text associated with this item.
 	// The rest of these are used internally by by the menu system, so don't set 'em!!
 	short	x, y;			
 	short w, h;
@@ -41,6 +41,8 @@ typedef struct newmenu_item {
 	uint8_t redraw;
 	char	saved_text[NM_MAX_TEXT_LEN+1];
 } newmenu_item;
+
+void nm_copy_text(newmenu_item* item, const char* txt);
 
 // Pass an array of newmenu_items and it processes the menu. It will
 // return a -1 if Esc is pressed, otherwise, it returns the index of 

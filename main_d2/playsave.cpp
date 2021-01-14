@@ -104,23 +104,23 @@ int new_player_config()
 	RetrySelection:
 #if !defined(MACINTOSH) && !defined(WINDOWS)
 		for (i = 0; i < mct; i++) {
-			m[i].type = NM_TYPE_MENU; m[i].text = CONTROL_TEXT(i);
+			m[i].type = NM_TYPE_MENU; nm_copy_text(&m[i], CONTROL_TEXT(i));
 		}
 #elif defined(WINDOWS)
-		m[0].type = NM_TYPE_MENU; m[0].text = CONTROL_TEXT(0);
-		m[1].type = NM_TYPE_MENU; m[1].text = CONTROL_TEXT(5);
-		m[2].type = NM_TYPE_MENU; m[2].text = CONTROL_TEXT(7);
+		m[0].type = NM_TYPE_MENU; nm_copy_text(&m[0], CONTROL_TEXT(0));
+		m[1].type = NM_TYPE_MENU; nm_copy_text(&m[1], CONTROL_TEXT(5));
+		m[2].type = NM_TYPE_MENU; nm_copy_text(&m[2], CONTROL_TEXT(7));
 		i = 3;
 #else
 		for (i = 0; i < 6; i++) {
-			m[i].type = NM_TYPE_MENU; m[i].text = CONTROL_TEXT(i);
+			m[i].type = NM_TYPE_MENU; nm_copy_text(&m[i], CONTROL_TEXT(i));
 		}
-		m[4].text = "Gravis Firebird/Mousetick II";
-		m[3].text = "Thrustmaster";
+		nm_copy_text(&m[4], transl_get_string("GravisFirebird"));
+		nm_copy_text(&m[3], transl_get_string("Thrustmaster"));
 #endif
 
 		nitems = i;
-		m[0].text = TXT_CONTROL_KEYBOARD;
+		nm_copy_text(&m[0], TXT_CONTROL_KEYBOARD);
 
 #ifdef WINDOWS
 		if (Config_control_type == CONTROL_NONE) control_choice = 0;
@@ -164,7 +164,7 @@ int new_player_config()
 #else
 #ifndef MACINTOSH
 	if (Config_control_type == CONTROL_THRUSTMASTER_FCS) {
-		i = nm_messagebox(TXT_IMPORTANT_NOTE, 2, "Choose another", TXT_OK, TXT_FCS);
+		i = nm_messagebox(TXT_IMPORTANT_NOTE, 2, transl_get_string("ChooseAnother"), TXT_OK, TXT_FCS);
 		if (i == 0) goto RetrySelection;
 	}
 
@@ -175,19 +175,19 @@ int new_player_config()
 	if (Config_control_type == CONTROL_THRUSTMASTER_FCS) {
 		extern char* tm_warning;
 
-		i = nm_messagebox(TXT_IMPORTANT_NOTE, 2, "Choose another", TXT_OK, tm_warning);
+		i = nm_messagebox(TXT_IMPORTANT_NOTE, 2, transl_get_string("ChooseAnother"), TXT_OK, tm_warning);
 		if (i == 0) goto RetrySelection;
 	}
 	else 	if (Config_control_type == CONTROL_FLIGHTSTICK_PRO) {
 		extern char* ch_warning;
 
-		i = nm_messagebox(TXT_IMPORTANT_NOTE, 2, "Choose another", TXT_OK, ch_warning);
+		i = nm_messagebox(TXT_IMPORTANT_NOTE, 2, transl_get_string("ChooseAnother"), TXT_OK, ch_warning);
 		if (i == 0) goto RetrySelection;
 	}
 	else 	if (Config_control_type == CONTROL_GRAVIS_GAMEPAD) {
 		extern char* ms_warning;
 
-		i = nm_messagebox(TXT_IMPORTANT_NOTE, 2, "Choose another", TXT_OK, ms_warning);
+		i = nm_messagebox(TXT_IMPORTANT_NOTE, 2, transl_get_string("ChooseAnother"), TXT_OK, ms_warning);
 		if (i == 0) goto RetrySelection;
 		// stupid me -- get real default setting for either mousestick or firebird
 		joydefs_set_type(Config_control_type);
@@ -218,10 +218,10 @@ int new_player_config()
 
 	// Default taunt macros
 #ifdef NETWORK
-	strcpy(Network_message_macro[0], "Why can't we all just get along?");
-	strcpy(Network_message_macro[1], "Hey, I got a present for ya");
-	strcpy(Network_message_macro[2], "I got a hankerin' for a spankerin'");
-	strcpy(Network_message_macro[3], "This one's headed for Uranus");
+	strcpy(Network_message_macro[0], transl_get_string("MuitiTauntDefault0"));
+	strcpy(Network_message_macro[1], transl_get_string("MuitiTauntDefault1"));
+	strcpy(Network_message_macro[2], transl_get_string("MuitiTauntDefault2"));
+	strcpy(Network_message_macro[3], transl_get_string("MuitiTauntDefault3"));
 	Netlife_kills = 0; Netlife_killed = 0;
 #endif
 
@@ -275,8 +275,6 @@ static void write_byte(int8_t i, FILE* file)
 
 extern int Guided_in_big_window, Automap_always_hires;
 
-//this length must match the value in escort.c
-#define GUIDEBOT_NAME_LEN 9
 extern char guidebot_name[];
 extern char real_guidebot_name[];
 
@@ -346,7 +344,7 @@ int read_player_file()
 
 	if (id != SAVE_FILE_ID)
 	{
-		nm_messagebox(TXT_ERROR, 1, TXT_OK, "Invalid player file");
+		nm_messagebox(TXT_ERROR, 1, TXT_OK, transl_get_string("InvalidPlayerFile"));
 		fclose(file);
 		return -1;
 	}
@@ -478,7 +476,7 @@ int read_player_file()
 		if (i != get_lifetime_checksum(Netlife_kills, Netlife_killed))
 		{
 			Netlife_kills = 0; Netlife_killed = 0;
-			nm_messagebox(NULL, 1, "Shame on me", "Trying to cheat eh?");
+			nm_messagebox(NULL, 1, transl_get_string("PlayerFileCheatTitle"), transl_get_string("PlayerFileCheatText"));
 			rewrite_it = 1;
 		}
 	}
@@ -487,7 +485,7 @@ int read_player_file()
 	if (player_file_version >= 18)
 		read_string(guidebot_name, file);
 	else
-		strcpy(guidebot_name, "GUIDE-BOT");
+		strcpy(guidebot_name, transl_get_string("BuddyName"));
 
 	strcpy(real_guidebot_name, guidebot_name);
 
@@ -499,7 +497,7 @@ int read_player_file()
 		if (player_file_version >= 24)
 			read_string(win95_current_joyname, file);
 		else
-			strcpy(win95_current_joyname, "Old Player File");
+			strcpy(win95_current_joyname, transl_get_string("PlayerOldPlayerFile"));
 
 		mprintf((0, "Detected joystick: %s\n", buf));
 		mprintf((0, "Player's joystick: %s\n", win95_current_joyname));
@@ -713,7 +711,7 @@ int write_player_file()
 #ifdef WINDOWS
 		joy95_get_name(JOYSTICKID1, buf, 127);
 #else
-		strcpy(buf, "DOS joystick");
+		strcpy(buf, transl_get_string("PlayerDOSJoystick"));
 #endif
 		write_string(buf, file);		// Write out current joystick for player.
 	}

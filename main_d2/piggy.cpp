@@ -909,7 +909,7 @@ int piggy_init(void)
 	WIN(DDGRLOCK(dd_grd_curcanv));
 	gr_set_curfont(SMALL_FONT);
 	gr_set_fontcolor(gr_find_closest_color_current(20, 20, 20), -1);
-	gr_printf(0x8000, grd_curcanv->cv_h - 20, "%s...", TXT_LOADING_DATA);
+	gr_printf(0x8000, grd_curcanv->cv_h - 20, "%s", TXT_LOADING_DATA);
 	WIN(DDGRUNLOCK(dd_grd_curcanv));
 
 #ifdef EDITOR
@@ -999,7 +999,7 @@ const char* crit_errors[13] = { "Write Protected", "Unknown Unit", "Drive Not Re
 void piggy_critical_error()
 {
 	grs_canvas* save_canv;
-	grs_font* save_font;
+	grs_fontstyle* save_font;
 	int i;
 	save_canv = grd_curcanv;
 	save_font = grd_curcanv->cv_font;

@@ -316,7 +316,7 @@ void DropBuddyMarker(object* objp)
 	if (marker_num > NUM_MARKERS - 1)
 		marker_num = NUM_MARKERS - 1;
 
-	sprintf(MarkerMessage[marker_num], "RIP: %s", guidebot_name);
+	sprintf(MarkerMessage[marker_num], transl_fmt_string_s("BuddyRIPMarker", guidebot_name));
 
 	MarkerPoint[marker_num] = objp->pos;
 
@@ -481,7 +481,7 @@ void draw_automap()
 		{
 			char msg[10 + MARKER_MESSAGE_LEN + 1];
 
-			sprintf(msg, "Marker %d: %s", HighlightMarker + 1, MarkerMessage[(Player_num * 2) + HighlightMarker]);
+			sprintf(msg, transl_fmt_string_is("AutomapMarkerFormat", HighlightMarker + 1, MarkerMessage[(Player_num * 2) + HighlightMarker]));
 
 			gr_setcolor(Red_48);
 
@@ -557,13 +557,13 @@ void draw_automap()
 
 
 //print to canvas & double height
-grs_canvas* print_to_canvas(char* s, grs_font* font, int fc, int bc, int double_flag)
+grs_canvas* print_to_canvas(const char* s, grs_fontstyle* font, int fc, int bc, int double_flag)
 {
 	int y;
 	uint8_t* data;
 	int rs;
 	grs_canvas* temp_canv;
-	grs_font* save_font;
+	grs_fontstyle* save_font;
 	int w, h, aw;
 
 	WINDOS(
@@ -612,7 +612,7 @@ grs_canvas* print_to_canvas(char* s, grs_font* font, int fc, int bc, int double_
 }
 
 //print to buffer, double heights, and blit bitmap to screen
-void modex_printf(int x, int y, char* s, grs_font* font, int color)
+void modex_printf(int x, int y, const char* s, grs_fontstyle* font, int color)
 {
 	grs_canvas* temp_canv;
 
@@ -625,24 +625,24 @@ void modex_printf(int x, int y, char* s, grs_font* font, int color)
 
 //name for each group.  maybe move somewhere else
 const char* system_name[] = {
-			"Zeta Aquilae",
-			"Quartzon System",
-			"Brimspark System",
-			"Limefrost Spiral",
-			"Baloris Prime",
-			"Omega System" };
+			"Descent2System1",
+			"Descent2System2",
+			"Descent2System3",
+			"Descent2System4",
+			"Descent2System5",
+			"Descent2System6" };
 
 void create_name_canv()
 {
 	char	name_level_left[128], name_level_right[128];
 
 	if (Current_level_num > 0)
-		sprintf(name_level_left, "%s %i", TXT_LEVEL, Current_level_num);
+		sprintf(name_level_left, transl_fmt_string_ti("AutoMapLevelFormatLeft", "TXT_LEVEL", Current_level_num));
 	else
-		sprintf(name_level_left, "Secret Level %i", -Current_level_num);
+		sprintf(name_level_left, transl_fmt_string_ti("AutoMapLevelFormatLeft", "TXT_SECRET_LEVEL", -Current_level_num));
 
 	if (Current_mission_num == 0 && Current_level_num > 0)		//built-in mission
-		sprintf(name_level_right, "%s %d: ", system_name[(Current_level_num - 1) / 4], ((Current_level_num - 1) % 4) + 1);
+		sprintf(name_level_right, transl_fmt_string_ti("AutoMapLevelFormatSystem", system_name[(Current_level_num - 1) / 4], ((Current_level_num - 1) % 4) + 1));
 	else
 		strcpy(name_level_right, " ");
 
@@ -765,10 +765,24 @@ void do_automap(int key_code)
 			{
 				gr_set_current_canvas(&Pages[i]);
 				gr_bitmap(0, 0, &Automap_background);
-				modex_printf(40, 22, TXT_AUTOMAP, HUGE_FONT, Font_color_20);
-				modex_printf(30, 353, TXT_TURN_SHIP, SMALL_FONT, Font_color_20);
-				modex_printf(30, 369, TXT_SLIDE_UPDOWN, SMALL_FONT, Font_color_20);
-				modex_printf(30, 385, TXT_VIEWING_DISTANCE, SMALL_FONT, Font_color_20);
+				if (Gamefonts[GFONT_SMALL]->ft_h <= SMALL_FONT_HEIGHT)
+				{
+					modex_printf(40, 22, transl_get_string("Automap"), HUGE_FONT, Font_color_20);
+					modex_printf(30, 353, TXT_TURN_SHIP, SMALL_FONT, Font_color_20);
+					modex_printf(30, 369, TXT_SLIDE_UPDOWN, SMALL_FONT, Font_color_20);
+					modex_printf(30, 385, TXT_VIEWING_DISTANCE, SMALL_FONT, Font_color_20);
+				}
+				else
+				{
+					modex_printf(40, 22 - (Gamefonts[GFONT_BIG_1]->ft_h - 22), transl_get_string("Automap"), HUGE_FONT, Font_color_20);
+					int fth = Gamefonts[GFONT_SMALL]->ft_h * 2 + 2;
+					int fac = 0;
+					const char* vd = TXT_VIEWING_DISTANCE;
+					if (vd && *vd)
+						modex_printf(30, 397 - fth * ++fac, vd, SMALL_FONT, Font_color_20);
+					modex_printf(30, 397 - fth * ++fac, TXT_SLIDE_UPDOWN, SMALL_FONT, Font_color_20);
+					modex_printf(30, 397 - fth * ++fac, TXT_TURN_SHIP, SMALL_FONT, Font_color_20);
+				}
 			}
 			if (Automap_background.bm_data)
 				free(Automap_background.bm_data);
@@ -811,7 +825,7 @@ void do_automap(int key_code)
 
 			gr_set_curfont(HUGE_FONT);
 			gr_set_fontcolor(BM_XRGB(20, 20, 20), -1);
-			gr_printf(80, 36, TXT_AUTOMAP, HUGE_FONT);
+			gr_printf(80, 36 - (Gamefonts[GFONT_BIG_1]->ft_h - 22), transl_get_string("Automap"), HUGE_FONT);
 			gr_set_curfont(SMALL_FONT);
 			gr_set_fontcolor(BM_XRGB(20, 20, 20), -1);
 			gr_printf(60, 426, TXT_TURN_SHIP);
@@ -966,7 +980,7 @@ void do_automap(int key_code)
 					{
 						gr_set_current_canvas(&Pages[current_page]);
 
-						if (nm_messagebox(NULL, 2, TXT_YES, TXT_NO, "Delete Marker?") == 0)
+						if (nm_messagebox(NULL, 2, TXT_YES, TXT_NO, transl_get_string("ConfirmDeleteMarker")) == 0)
 						{
 							obj_delete(MarkerObject[HighlightMarker]);
 							MarkerObject[HighlightMarker] = -1;
@@ -1629,7 +1643,7 @@ void InitMarkerInput()
 			i = !LastMarkerDropped;		//in multi, replace older of two
 		else 
 		{
-			HUD_init_message("No free marker slots");
+			HUD_init_message(transl_get_string("NoFreeMarkerSlots"));
 			return;
 		}
 

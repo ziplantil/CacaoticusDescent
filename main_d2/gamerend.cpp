@@ -129,7 +129,7 @@ void game_draw_marker_message()
 	{
 		gr_set_curfont(GAME_FONT);    //GAME_FONT 
 		gr_set_fontcolor(gr_getcolor(0, 63, 0), -1);
-		sprintf(temp_string, "Marker: %s_", Marker_input);
+		sprintf(temp_string, transl_fmt_string_s("MessageMarkerEntering", Marker_input));
 		draw_centered_text(grd_curcanv->cv_bitmap.bm_h / 2 - 16, temp_string);
 	}
 
@@ -143,7 +143,7 @@ void game_draw_multi_message()
 	if ((Game_mode & GM_MULTI) && (multi_sending_message)) {
 		gr_set_curfont(GAME_FONT);    //GAME_FONT );
 		gr_set_fontcolor(gr_getcolor(0, 63, 0), -1);
-		sprintf(temp_string, "%s: %s_", TXT_MESSAGE, Network_message);
+		sprintf(temp_string, transl_fmt_string_s("TXT_MESSAGE", Network_message));
 		draw_centered_text(grd_curcanv->cv_bitmap.bm_h / 2 - 16, temp_string);
 
 	}
@@ -151,7 +151,7 @@ void game_draw_multi_message()
 	if ((Game_mode & GM_MULTI) && (multi_defining_message)) {
 		gr_set_curfont(GAME_FONT);    //GAME_FONT );
 		gr_set_fontcolor(gr_getcolor(0, 63, 0), -1);
-		sprintf(temp_string, "%s #%d: %s_", TXT_MACRO, multi_defining_message, Network_message);
+		sprintf(temp_string, transl_fmt_string_s("TXT_MACRO", multi_defining_message, Network_message));
 		draw_centered_text(grd_curcanv->cv_bitmap.bm_h / 2 - 16, temp_string);
 	}
 #endif
@@ -174,7 +174,7 @@ void ftoa(char* string, fix f)
 	if (fractional < 0)
 		fractional *= -1;
 	if (fractional > 99) fractional = 99;
-	sprintf(string, "%d.%02d", decimal, fractional);
+	sprintf(string, transl_get_string("ftoa"), decimal, fractional);
 }
 
 void show_framerate()
@@ -285,9 +285,12 @@ void render_countdown_gauge()
 		if (Player_is_dead)
 			y += SMALL_FONT->ft_h * 2;
 
+		if (SMALL_FONT->ft_h > SMALL_FONT_HEIGHT)
+			y = 2 + 4 * Gamefonts[GFONT_SMALL]->ft_h;
+
 		//if (!((Cockpit_mode == CM_STATUS_BAR) && (Game_window_y >= 19)))
 		//	y += 5;
-		gr_printf(0x8000, y, "T-%d s", Countdown_seconds_left);
+		gr_printf(0x8000, y, transl_fmt_string_i("Countdown", Countdown_seconds_left));
 	}
 }
 
@@ -299,7 +302,7 @@ void game_draw_hud_stuff()
 	if (Debug_pause) {
 		gr_set_curfont(MEDIUM1_FONT);
 		gr_set_fontcolor(gr_getcolor(31, 31, 31), -1); // gr_getcolor(31,0,0));
-		gr_ustring(0x8000, 85 / 2, "Debug Pause - Press P to exit");
+		gr_string(0x8000, 85 / 2, "Debug Pause - Press P to exit");
 	}
 #endif
 
@@ -328,7 +331,7 @@ void game_draw_hud_stuff()
 		{
 			if (Newdemo_vcr_state != ND_STATE_PRINTSCREEN) 
 			{
-				sprintf(message, "%s (%d%%%% %s)", TXT_DEMO_PLAYBACK, newdemo_get_percent_done(), TXT_DONE);
+				sprintf(message, transl_fmt_string_i("TXT_DEMO_PLAYBACK", newdemo_get_percent_done()));
 			}
 			else 
 			{
@@ -389,7 +392,7 @@ void game_draw_hud_stuff()
 				x = 20 + 2;
 			}
 
-			gr_printf(x, y, "%s %2d%%", TXT_CRUISE, f2i(Cruise_speed));
+			gr_printf(x, y, transl_fmt_string_i("TXT_CRUISE", f2i(Cruise_speed)));
 		}
 	}
 
@@ -529,7 +532,7 @@ void game_render_frame_stereo()
 
 	if (Guided_missile[Player_num] && Guided_missile[Player_num]->type == OBJ_WEAPON && Guided_missile[Player_num]->id == GUIDEDMISS_ID && Guided_missile[Player_num]->signature == Guided_missile_sig[Player_num] && Guided_in_big_window)
 	{
-		const char* msg = "Guided Missile View";
+		const char* msg = transl_get_string("GuidedMissileView");
 		object* viewer_save = Viewer;
 		int w, h, aw;
 
@@ -767,7 +770,7 @@ extern object DemoRightExtra, DemoLeftExtra;
 
 char DemoWBUType[] = { 0,WBU_MISSILE,WBU_MISSILE,WBU_REAR,WBU_ESCORT,WBU_MARKER,WBU_MISSILE };
 char DemoRearCheck[] = { 0,0,0,1,0,0,0 };
-const char* DemoExtraMessage[] = { "PLAYER","GUIDED","MISSILE","REAR","GUIDE-BOT","MARKER","SHIP" };
+const char* DemoExtraMessage[] = { "CockpitWindowPlayer","CockpitWindowGuided","CockpitWindowMissile","CockpitWindowRear","CockpitWindowBuddy","CockpitWindowMarker","CockpitWindowShip" };
 
 extern char guidebot_name[];
 
@@ -784,9 +787,9 @@ void show_extra_views()
 			DemoDoingLeft = DemoDoLeft;
 
 			if (DemoDoLeft == 3)
-				do_cockpit_window_view(0, ConsoleObject, 1, WBU_REAR, "REAR");
+				do_cockpit_window_view(0, ConsoleObject, 1, WBU_REAR, transl_get_string("CockpitWindowRear"));
 			else
-				do_cockpit_window_view(0, &DemoLeftExtra, DemoRearCheck[DemoDoLeft], DemoWBUType[DemoDoLeft], DemoExtraMessage[DemoDoLeft]);
+				do_cockpit_window_view(0, &DemoLeftExtra, DemoRearCheck[DemoDoLeft], DemoWBUType[DemoDoLeft], transl_get_string(DemoExtraMessage[DemoDoLeft]));
 		}
 		else
 			do_cockpit_window_view(0, NULL, 0, WBU_WEAPON, NULL);
@@ -796,9 +799,9 @@ void show_extra_views()
 			DemoDoingRight = DemoDoRight;
 
 			if (DemoDoRight == 3)
-				do_cockpit_window_view(1, ConsoleObject, 1, WBU_REAR, "REAR");
+				do_cockpit_window_view(1, ConsoleObject, 1, WBU_REAR, transl_get_string("CockpitWindowRear"));
 			else
-				do_cockpit_window_view(1, &DemoRightExtra, DemoRearCheck[DemoDoRight], DemoWBUType[DemoDoRight], DemoExtraMessage[DemoDoRight]);
+				do_cockpit_window_view(1, &DemoRightExtra, DemoRearCheck[DemoDoRight], DemoWBUType[DemoDoRight], transl_get_string(DemoExtraMessage[DemoDoRight]));
 		}
 		else
 			do_cockpit_window_view(1, NULL, 0, WBU_WEAPON, NULL);
@@ -814,12 +817,12 @@ void show_extra_views()
 		if (Guided_in_big_window)
 		{
 			RenderingType = 6 + (1 << 4);
-			do_cockpit_window_view(1, Viewer, 0, WBU_MISSILE, "SHIP");
+			do_cockpit_window_view(1, Viewer, 0, WBU_MISSILE, transl_get_string("CockpitWindowShip"));
 		}
 		else
 		{
 			RenderingType = 1 + (1 << 4);
-			do_cockpit_window_view(1, Guided_missile[Player_num], 0, WBU_GUIDED, "GUIDED");
+			do_cockpit_window_view(1, Guided_missile[Player_num], 0, WBU_GUIDED, transl_get_string("CockpitWindowGuided"));
 		}
 
 		did_missile_view = 1;
@@ -840,7 +843,7 @@ void show_extra_views()
 				mv_sig = Missile_viewer->signature;
 			if (Missile_view_enabled && Missile_viewer->type != OBJ_NONE && Missile_viewer->signature == mv_sig) {
 				RenderingType = 2 + (1 << 4);
-				do_cockpit_window_view(1, Missile_viewer, 0, WBU_MISSILE, "MISSILE");
+				do_cockpit_window_view(1, Missile_viewer, 0, WBU_MISSILE, transl_get_string("CockpitWindowMissile"));
 				did_missile_view = 1;
 			}
 			else
@@ -870,12 +873,12 @@ void show_extra_views()
 			if (Rear_view) //if big window is rear view, show front here
 			{
 				RenderingType = 3 + (w << 4);
-				do_cockpit_window_view(w, ConsoleObject, 0, WBU_REAR, "FRONT");
+				do_cockpit_window_view(w, ConsoleObject, 0, WBU_REAR, transl_get_string("CockpitWindowFront"));
 			}
 			else //show normal rear view
 			{
 				RenderingType = 3 + (w << 4);
-				do_cockpit_window_view(w, ConsoleObject, 1, WBU_REAR, "REAR");
+				do_cockpit_window_view(w, ConsoleObject, 1, WBU_REAR, transl_get_string("CockpitWindowRear"));
 			}
 			break;
 		case CV_ESCORT:
@@ -920,7 +923,7 @@ void show_extra_views()
 				Cockpit_3d_view[w] = CV_NONE;
 				break;
 			}
-			sprintf(label, "Marker %d", Marker_viewer_num[w] + 1);
+			sprintf(label, transl_fmt_string_i("CockpitWindowMarkerNum", Marker_viewer_num[w] + 1));
 			do_cockpit_window_view(w, &Objects[MarkerObject[Marker_viewer_num[w]]], 0, WBU_MARKER, label);
 			break;
 		}
@@ -1048,7 +1051,7 @@ void game_render_frame_mono(void)
 
 	if (Guided_missile[Player_num] && Guided_missile[Player_num]->type == OBJ_WEAPON && Guided_missile[Player_num]->id == GUIDEDMISS_ID && Guided_missile[Player_num]->signature == Guided_missile_sig[Player_num] && Guided_in_big_window)
 	{
-		const char* msg = "Guided Missile View";
+		const char* msg = transl_get_string("GuidedMissileView");
 		object* viewer_save = Viewer;
 		int w, h, aw;
 
@@ -1221,7 +1224,7 @@ void grow_window()
 		Game_window_h = max_window_h;
 		Game_window_w = max_window_w;
 		toggle_cockpit();
-		HUD_init_message("Press F3 to return to Cockpit mode");
+		HUD_init_message(transl_get_string("CockpitReturnF3"));
 		return;
 	}
 
@@ -1359,7 +1362,7 @@ void shrink_window()
 		select_cockpit(CM_STATUS_BAR);
 		//		shrink_window();
 		//		shrink_window();
-		HUD_init_message("Press F3 to return to Cockpit mode");
+		HUD_init_message(transl_get_string("CockpitReturnF3"));
 		write_player_file();
 		return;
 	}
@@ -1534,7 +1537,7 @@ bkg bg = { 0,0,0,0,NULL };
 #define BOX_BORDER (MenuHires?60:30)
 
 //show a message in a nice little box
-void show_boxed_message(char* msg)
+void show_boxed_message(const char* msg)
 {
 	int w, h, aw;
 	int x, y;
@@ -1568,7 +1571,7 @@ void show_boxed_message(char* msg)
 
 	gr_set_fontcolor(gr_getcolor(31, 31, 31), -1);
 
-	gr_ustring(0x8000, y, msg);
+	gr_string(0x8000, y, msg);
 }
 
 void clear_boxed_message()

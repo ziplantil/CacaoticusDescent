@@ -233,9 +233,9 @@ void transfer_energy_to_shield(fix time)
 	if (e <= 0)
 	{
 		if (Players[Player_num].energy <= INITIAL_ENERGY)
-			HUD_init_message("Need more than %i energy to enable transfer", f2i(INITIAL_ENERGY));
+			HUD_init_message(transl_fmt_string_i("ConverterNotEnoughEnergy", f2i(INITIAL_ENERGY)));
 		else
-			HUD_init_message("No transfer: Shields already at max");
+			HUD_init_message(transl_get_string("ConverterShieldsFull"));
 		return;
 	}
 
@@ -366,7 +366,7 @@ void ReadControls()
 #ifdef NETWORK
 		if ((key & KEY_DEBUGGED) && (Game_mode & GM_MULTI)) {
 			Network_message_reciever = 100;		// Send to everyone...
-			sprintf(Network_message, "%s %s", TXT_I_AM_A, TXT_CHEATER);
+			sprintf(Network_message, transl_fmt_string("MultiIAmCheater"), TXT_I_AM_A, TXT_CHEATER);
 		}
 #endif
 #endif
@@ -526,7 +526,7 @@ void format_time(char* str, int secs_int)
 	s = secs_int % 3600;
 	m = s / 60;
 	s = s % 60;
-	sprintf(str, "%1d:%02d:%02d", h, m, s);
+	sprintf(str, transl_fmt_string_iii("GameTimeFormat", h, m, s));
 }
 
 extern int Redbook_playing;
@@ -557,7 +557,7 @@ int do_game_pause()
 	}
 	else if (Game_mode & GM_MULTI)
 	{
-		HUD_init_message("You cannot pause in a modem/serial game!");
+		HUD_init_message(transl_get_string("CannotPauseInModem"));
 		return (KEY_PAUSE);
 	}
 
@@ -592,9 +592,9 @@ int do_game_pause()
 	format_time(level_time, f2i(Players[Player_num].time_level) + Players[Player_num].hours_level * 3600);
 
 	if (Newdemo_state != ND_STATE_PLAYBACK)
-		sprintf(msg, "PAUSE\n\nSkill level:  %s\nHostages on board:  %d\nTime on level: %s\nTotal time in game: %s", (*(&TXT_DIFFICULTY_1 + (Difficulty_level))), Players[Player_num].hostages_on_board, level_time, total_time);
+		sprintf(msg, transl_fmt_string_siss("PauseScreen", MENU_DIFFICULTY_TEXT(Difficulty_level), Players[Player_num].hostages_on_board, level_time, total_time));
 	else
-		sprintf(msg, "PAUSE\n\nSkill level:  %s\nHostages on board:  %d\n", (*(&TXT_DIFFICULTY_1 + (Difficulty_level))), Players[Player_num].hostages_on_board);
+		sprintf(msg, transl_fmt_string_si("PauseScreenDemo", MENU_DIFFICULTY_TEXT(Difficulty_level), Players[Player_num].hostages_on_board));
 
 	show_boxed_message(Pause_msg = msg);		  //TXT_PAUSE);
 	I_DrawCurrentCanvas(0);
@@ -643,7 +643,7 @@ int do_game_pause()
 
 #ifdef WINDOWS
 		if (screen_changed == -1) {
-			nm_messagebox(NULL, 1, TXT_OK, "Unable to do this\noperation while paused under\n320x200 mode");
+			nm_messagebox(NULL, 1, TXT_OK, transl_get_string("CannotInWin320"));
 			goto SkipPauseStuff;
 		}
 #endif
@@ -685,11 +685,11 @@ int do_game_pause()
 		return key;
 }
 
-extern int newmenu_dotiny2(char* title, char* subtitle, int nitems, newmenu_item* item, void (*subfunction)(int nitems, newmenu_item* items, int* last_key, int citem));
+extern int newmenu_dotiny2(const char* title, const char* subtitle, int nitems, newmenu_item* item, void (*subfunction)(int nitems, newmenu_item* items, int* last_key, int citem));
 extern int network_who_is_master(), network_how_many_connected(), GetMyNetRanking();
 extern int TotalMissedPackets, TotalPacketsGot;
 extern char Pauseable_menu;
-const char* NetworkModeNames[] = { "Anarchy","Team Anarchy","Robo Anarchy","Cooperative","Capture the Flag","Hoard","Team Hoard","Unknown" };
+const char* NetworkModeNames[] = { "MultiModeAnarchy","MultiModeTeamAnarchy","MultiModeRoboAnarchy","MultiModeCooperative","MultiModeCaptureTheFlag","MultiModeHoard","MultiModeTeamHoard","MultiModeUnknown" };
 extern char* RankStrings[];
 extern int PhallicLimit, PhallicMan;
 
@@ -699,8 +699,8 @@ void do_show_netgame_help()
 	newmenu_item m[30];
 	char mtext[30][50];
 	int i, num = 0, pl, eff;
-	char* eff_strings[] = { "trashing","really hurting","seriously effecting","hurting",
-								"effecting","tarnishing" };
+	char* eff_strings[] = { "MultiInfoStatsBad0","MultiInfoStatsBad1","MultiInfoStatsBad2","MultiInfoStatsBad3",
+								"MultiInfoStatsBad4","MultiInfoStatsBad5" };
 
 	for (i = 0; i < 30; i++)
 	{
@@ -708,30 +708,30 @@ void do_show_netgame_help()
 		m[i].type = NM_TYPE_TEXT;
 	}
 
-	sprintf(mtext[num], "Game: %s", Netgame.game_name); num++;
-	sprintf(mtext[num], "Mission: %s", Netgame.mission_title); num++;
-	sprintf(mtext[num], "Current Level: %d", Netgame.levelnum); num++;
-	sprintf(mtext[num], "Difficulty: %s", MENU_DIFFICULTY_TEXT(Netgame.difficulty)); num++;
-	sprintf(mtext[num], "Game Mode: %s", NetworkModeNames[Netgame.gamemode]); num++;
-	sprintf(mtext[num], "Game Master: %s", Players[network_who_is_master()].callsign); num++;
-	sprintf(mtext[num], "Number of players: %d/%d", network_how_many_connected(), Netgame.max_numplayers); num++;
-	sprintf(mtext[num], "Packets per second: %d", Netgame.PacketsPerSec); num++;
-	sprintf(mtext[num], "Short Packets: %s", Netgame.ShortPackets ? "Yes" : "No"); num++;
+	sprintf(mtext[num], transl_fmt_string_s("MultiInfoGame", Netgame.game_name)); num++;
+	sprintf(mtext[num], transl_fmt_string_s("MultiInfoMission", Netgame.mission_title)); num++;
+	sprintf(mtext[num], transl_fmt_string_i("MultiInfoLevel", Netgame.levelnum)); num++;
+	sprintf(mtext[num], transl_fmt_string_s("MultiInfoDifficulty", MENU_DIFFICULTY_TEXT(Netgame.difficulty))); num++;
+	sprintf(mtext[num], transl_fmt_string_t("MultiInfoGameMode", NetworkModeNames[Netgame.gamemode])); num++;
+	sprintf(mtext[num], transl_fmt_string_s("MultiInfoGameMaster", Players[network_who_is_master()].callsign)); num++;
+	sprintf(mtext[num], transl_fmt_string_ii("MultiInfoNumPlayers", network_how_many_connected(), Netgame.max_numplayers)); num++;
+	sprintf(mtext[num], transl_fmt_string_i("MultiInfoPacketRate", Netgame.PacketsPerSec)); num++;
+	sprintf(mtext[num], transl_fmt_string_t("MultiInfoShortPackets", Netgame.ShortPackets ? "MultiInfoYes" : "MultiInfoNo")); num++;
 
 #ifndef RELEASE
 	pl = (int)(((float)TotalMissedPackets / (float)TotalPacketsGot) * 100.0);
 	if (pl < 0)
 		pl = 0;
-	sprintf(mtext[num], "Packets lost: %d (%d%%)", TotalMissedPackets, pl); num++;
+	sprintf(mtext[num], transl_fmt_string_ii("MultiInfoPacketsLost", TotalMissedPackets, pl)); num++;
 #endif
 
 	if (Netgame.KillGoal)
 	{
-		sprintf(mtext[num], "Kill goal: %d", Netgame.KillGoal * 5); num++;
+		sprintf(mtext[num], transl_fmt_string_i("MultiInfoKillGoal";  Netgame.KillGoal * 5)); num++;
 	}
 
 	sprintf(mtext[num], " "); num++;
-	sprintf(mtext[num], "Connected players:"); num++;
+	sprintf(mtext[num], transl_get_string("MultiInfoPlayerList")); num++;
 
 	NetPlayers.players[Player_num].rank = GetMyNetRanking();
 
@@ -741,10 +741,10 @@ void do_show_netgame_help()
 			if (!FindArg("-norankings"))
 			{
 				if (i == Player_num)
-					sprintf(mtext[num], "%s%s (%d/%d)", RankStrings[NetPlayers.players[i].rank], Players[i].callsign, Netlife_kills, Netlife_killed);
+					sprintf(mtext[num], transl_fmt_string_ssii("MultiInfoPlayerRankYou", RankStrings[NetPlayers.players[i].rank], Players[i].callsign, Netlife_kills, Netlife_killed));
 				else
-					sprintf(mtext[num], "%s%s %d/%d", RankStrings[NetPlayers.players[i].rank], Players[i].callsign, kill_matrix[Player_num][i],
-						kill_matrix[i][Player_num]);
+					sprintf(mtext[num], transl_fmt_string_ssii("MultiInfoPlayerRank", RankStrings[NetPlayers.players[i].rank], Players[i].callsign, kill_matrix[Player_num][i],
+						kill_matrix[i][Player_num]));
 				num++;
 			}
 			else
@@ -762,22 +762,28 @@ void do_show_netgame_help()
 	if (Game_mode & GM_HOARD)
 	{
 		if (PhallicMan == -1)
-			sprintf(mtext[num], "There is no record yet for this level.");
+			sprintf(mtext[num], transl_get_string("MultiInfoNoRecord"));
 		else
-			sprintf(mtext[num], "%s has the record at %d points.", Players[PhallicMan].callsign, PhallicLimit);
+			sprintf(mtext[num], transl_fmt_string_si("MultiInfoRecord", Players[PhallicMan].callsign, PhallicLimit));
 		num++;
 	}
 	else if (!FindArg("-norankings"))
 	{
+		const char* str, prev;
+		char strbuf[200];
 		if (eff < 60)
-		{
-			sprintf(mtext[num], "Your lifetime efficiency of %d%%", eff); num++;
-			sprintf(mtext[num], "is %s your ranking.", eff_strings[eff / 10]); num++;
-		}
+			str = eff_strings[eff / 10];
 		else
+			str = "MultiInfoStatsGood";
+		str = transl_fmt_string_i(str, eff);
+		strcpy(strbuf, str);
+
+		prev = strbuf;
+		while (strbuf = strchr(strbuf, '\n'))
 		{
-			sprintf(mtext[num], "Your lifetime efficiency of %d%%", eff); num++;
-			sprintf(mtext[num], "is serving you well."); num++;
+			*strbuf = '\0';
+			sprintf(mtext[num++], "%s", prev);
+			prev = ++strbuf;
 		}
 	}
 
@@ -785,7 +791,7 @@ void do_show_netgame_help()
 	full_palette_save();
 
 	Pauseable_menu = 1;
-	newmenu_dotiny2(NULL, "Netgame Information", num, m, NULL);
+	newmenu_dotiny2(NULL, transl_get_string("MultiInfoTitle"), num, m, NULL);
 
 	palette_restore();
 #endif
@@ -896,7 +902,7 @@ void HandleDemoKey(int key)
 #ifdef POLY_ACC
 		if (PAEnabled)
 		{
-			HUD_init_message("Cockpit not available while using QuickDraw 3D.");
+			HUD_init_message(transl_get_string("DemoNoCockpitQuickDraw3D"));
 			return;
 		}
 #endif
@@ -988,18 +994,20 @@ void HandleDemoKey(int key)
 		newmenu_item m[6];
 
 		filename[0] = '\0';
-		m[0].type = NM_TYPE_TEXT; m[0].text = const_cast<char*>("output file name");
-		m[1].type = NM_TYPE_INPUT; m[1].text_len = 8; m[1].text = filename;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], "output file name");
+		m[1].type = NM_TYPE_INPUT; m[1].text_len = 8; nm_copy_text(&m[1], filename);
 		c = newmenu_do(NULL, NULL, 2, m, NULL);
 		if (c == -2)
 			break;
+		strcpy(filename, m[1].text);
 		strcat(filename, ".dem");
 		num[0] = '\0';
-		m[0].type = NM_TYPE_TEXT; m[0].text = const_cast<char*>("strip how many bytes");
-		m[1].type = NM_TYPE_INPUT; m[1].text_len = 16; m[1].text = num;
+		m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], "strip how many bytes");
+		m[1].type = NM_TYPE_INPUT; m[1].text_len = 16; nm_copy_text(&m[1], num);
 		c = newmenu_do(NULL, NULL, 2, m, NULL);
 		if (c == -2)
 			break;
+		strcpy(num, m[1].text);
 		how_many = atoi(num);
 		if (how_many <= 0)
 			break;
@@ -1521,7 +1529,7 @@ void HandleGameKey(int key)
 			if (!(Game_mode & GM_MULTI))
 				set_escort_special_goal(key);
 			else
-				HUD_init_message("No Guide-Bot in Multiplayer!");
+				HUD_init_message(transl_get_string("BuddyNotInMulti"));
 		break;
 
 	MAC(case KEY_COMMAND + KEY_SHIFTED + KEY_5:)
@@ -1550,14 +1558,14 @@ void HandleGameKey(int key)
 		if (Netgame.RefusePlayers && WaitForRefuseAnswer && !(Game_mode & GM_TEAM))
 		{
 			RefuseThisPlayer = 1;
-			HUD_init_message("Player accepted!");
+			HUD_init_message(transl_get_string("MultiPlayerAccepted"));
 		}
 		break;
 	case KEY_ALTED + KEY_1:
 		if (Netgame.RefusePlayers && WaitForRefuseAnswer && (Game_mode & GM_TEAM))
 		{
 			RefuseThisPlayer = 1;
-			HUD_init_message("Player accepted!");
+			HUD_init_message(transl_get_string("MultiPlayerAccepted"));
 			RefuseTeam = 1;
 		}
 		break;
@@ -1565,7 +1573,7 @@ void HandleGameKey(int key)
 		if (Netgame.RefusePlayers && WaitForRefuseAnswer && (Game_mode & GM_TEAM))
 		{
 			RefuseThisPlayer = 1;
-			HUD_init_message("Player accepted!");
+			HUD_init_message(transl_get_string("MultiPlayerAccepted"));
 			RefuseTeam = 2;
 		}
 		break;
@@ -1607,11 +1615,11 @@ void kill_all_robots(void)
 				if (Robot_info[Objects[i].id].companion)
 				{
 					Objects[i].flags |= OF_EXPLODING | OF_SHOULD_BE_DEAD;
-					HUD_init_message("Toasted the Buddy! *sniff*");
+					HUD_init_message(transl_get_string("CheatToastedBuddy"));
 					dead_count++;
 				}
 
-	HUD_init_message("%i robots toasted!", dead_count);
+	HUD_init_message(transl_fmt_string_i("CheatToastedRobots", dead_count));
 }
 
 //	--------------------------------------------------------------------------
@@ -1624,7 +1632,7 @@ void kill_and_so_forth(void)
 {
 	int     i, j;
 
-	HUD_init_message("Killing, awarding, etc.!");
+	HUD_init_message(transl_get_string("CheatWarpLevelExit"));
 
 	for (i = 0; i <= Highest_object_index; i++)
 	{
@@ -1673,7 +1681,7 @@ void kill_all_snipers(void)
 				Objects[i].flags |= OF_EXPLODING | OF_SHOULD_BE_DEAD;
 			}
 
-	HUD_init_message("%i robots toasted!", dead_count);
+	HUD_init_message(transl_fmt_string_i("CheatToastedRobots", dead_count));
 }
 
 void kill_thief(void)
@@ -1686,7 +1694,7 @@ void kill_thief(void)
 			if (Robot_info[Objects[i].id].thief)
 			{
 				Objects[i].flags |= OF_EXPLODING | OF_SHOULD_BE_DEAD;
-				HUD_init_message("Thief toasted!");
+				HUD_init_message(transl_get_string("CheatToastedThief"));
 			}
 }
 
@@ -1700,7 +1708,7 @@ void kill_buddy(void)
 			if (Robot_info[Objects[i].id].companion)
 			{
 				Objects[i].flags |= OF_EXPLODING | OF_SHOULD_BE_DEAD;
-				HUD_init_message("Buddy toasted!");
+				HUD_init_message(transl_get_string("CheatToastedBuddy2"));
 			}
 }
 
@@ -1947,9 +1955,10 @@ void HandleTestKey(int key)
 		newmenu_item m;
 		char text[FILENAME_LEN] = "";
 		int item;
-		m.type = NM_TYPE_INPUT; m.text_len = FILENAME_LEN; m.text = text;
+		m.type = NM_TYPE_INPUT; m.text_len = FILENAME_LEN; nm_copy_text(&m, text);
 		item = newmenu_do(NULL, "Briefing to play?", 1, &m, NULL);
 		if (item != -1) {
+			strcpy(text, m.text);
 			do_briefing_screens(text, 1);
 			reset_cockpit();
 		}
@@ -2075,10 +2084,10 @@ void FinalCheats(int key)
 			if (Game_mode & GM_MULTI)
 			{
 				Network_message_reciever = 100;		// Send to everyone...
-				sprintf(Network_message, "%s is crippled...get him!", Players[Player_num].callsign);
+				sprintf(Network_message, transl_fmt_string("MultiPlayerTriedToCheat"), Players[Player_num].callsign);
 			}
 #endif
-			HUD_init_message("Take that...cheater!");
+			HUD_init_message(transl_get_string("TriedToCheat"));
 		}
 
 	if (!(strcmp(cryptstring, JohnHeadCheat)))
@@ -2123,11 +2132,11 @@ void FinalCheats(int key)
 			Players[Player_num].shields += boost;
 			if (Players[Player_num].shields > MAX_SHIELDS)
 				Players[Player_num].shields = MAX_SHIELDS;
-			powerup_basic(0, 0, 15, SHIELD_SCORE, "%s %s %d", TXT_SHIELD, TXT_BOOSTED_TO, f2ir(Players[Player_num].shields));
+			powerup_basic(0, 0, 15, SHIELD_SCORE, transl_fmt_string_i("ShieldIncreased", f2ir(Players[Player_num].shields)));
 			do_cheat_penalty();
 		}
 		else
-			HUD_init_message(TXT_MAXED_OUT, TXT_SHIELD);
+			HUD_init_message(transl_fmt_string_t("MaxedOut", "TXT_SHIELD"));
 	}
 
 	if (!(strcmp(cryptstring, BuddyLifeCheat)))
@@ -2175,7 +2184,7 @@ void FinalCheats(int key)
 		int new_level_num;
 		int item;
 		//digi_play_sample( SOUND_CHEATER, F1_0);
-		m.type = NM_TYPE_INPUT; m.text_len = 10; m.text = text;
+		m.type = NM_TYPE_INPUT; m.text_len = 10; nm_copy_text(&m, text);
 		item = newmenu_do(NULL, TXT_WARP_TO_LEVEL, 1, &m, NULL);
 		if (item != -1) {
 			new_level_num = atoi(m.text);
@@ -2330,19 +2339,20 @@ void do_cheat_menu()
 
 	sprintf(score_text, "%d", Players[Player_num].score);
 
-	mm[0].type = NM_TYPE_CHECK; mm[0].value = Players[Player_num].flags & PLAYER_FLAGS_INVULNERABLE; mm[0].text = const_cast<char*>("Invulnerability");
-	mm[1].type = NM_TYPE_CHECK; mm[1].value = Players[Player_num].flags & PLAYER_FLAGS_CLOAKED; mm[1].text = const_cast<char*>("Cloaked");
-	mm[2].type = NM_TYPE_CHECK; mm[2].value = 0; mm[2].text = const_cast<char*>("All keys");
-	mm[3].type = NM_TYPE_NUMBER; mm[3].value = f2i(Players[Player_num].energy); mm[3].text = const_cast<char*>("% Energy"); mm[3].min_value = 0; mm[3].max_value = 200;
-	mm[4].type = NM_TYPE_NUMBER; mm[4].value = f2i(Players[Player_num].shields); mm[4].text = const_cast<char*>("% Shields"); mm[4].min_value = 0; mm[4].max_value = 200;
-	mm[5].type = NM_TYPE_TEXT; mm[5].text = const_cast<char*>("Score:");
-	mm[6].type = NM_TYPE_INPUT; mm[6].text_len = 10; mm[6].text = score_text;
-	mm[7].type = NM_TYPE_NUMBER; mm[7].value = Players[Player_num].laser_level + 1; mm[7].text = const_cast<char*>("Laser Level"); mm[7].min_value = 0; mm[7].max_value = MAX_SUPER_LASER_LEVEL + 1;
-	mm[8].type = NM_TYPE_NUMBER; mm[8].value = Players[Player_num].secondary_ammo[CONCUSSION_INDEX]; mm[8].text = const_cast<char*>("Missiles"); mm[8].min_value = 0; mm[8].max_value = 200;
+	mm[0].type = NM_TYPE_CHECK; mm[0].value = Players[Player_num].flags & PLAYER_FLAGS_INVULNERABLE; nm_copy_text(&mm[0], "Invulnerability");
+	mm[1].type = NM_TYPE_CHECK; mm[1].value = Players[Player_num].flags & PLAYER_FLAGS_CLOAKED; nm_copy_text(&mm[1], "Cloaked");
+	mm[2].type = NM_TYPE_CHECK; mm[2].value = 0; nm_copy_text(&mm[2], "All keys");
+	mm[3].type = NM_TYPE_NUMBER; mm[3].value = f2i(Players[Player_num].energy); nm_copy_text(&mm[3], "% Energy"); mm[3].min_value = 0; mm[3].max_value = 200;
+	mm[4].type = NM_TYPE_NUMBER; mm[4].value = f2i(Players[Player_num].shields); nm_copy_text(&mm[4], "% Shields"); mm[4].min_value = 0; mm[4].max_value = 200;
+	mm[5].type = NM_TYPE_TEXT; nm_copy_text(&mm[5], "Score:");
+	mm[6].type = NM_TYPE_INPUT; mm[6].text_len = 10; nm_copy_text(&mm[6], score_text);
+	mm[7].type = NM_TYPE_NUMBER; mm[7].value = Players[Player_num].laser_level + 1; nm_copy_text(&mm[7], "Laser Level"); mm[7].min_value = 0; mm[7].max_value = MAX_SUPER_LASER_LEVEL + 1;
+	mm[8].type = NM_TYPE_NUMBER; mm[8].value = Players[Player_num].secondary_ammo[CONCUSSION_INDEX]; nm_copy_text(&mm[8], "Missiles"); mm[8].min_value = 0; mm[8].max_value = 200;
 
 	mmn = newmenu_do("Wimp Menu", NULL, 9, mm, NULL);
 
 	if (mmn > -1) {
+		strcpy(score_text, mm[6].text);
 		if (mm[0].value) {
 			Players[Player_num].flags |= PLAYER_FLAGS_INVULNERABLE;
 			Players[Player_num].invulnerable_time = GameTime + i2f(1000);
@@ -2410,7 +2420,7 @@ void speedtest_frame(void)
 	if (Speedtest_segnum > Highest_segment_index) {
 		char    msg[128];
 
-		sprintf(msg, "\nSpeedtest done:  %i frames, %7.3f seconds, %7.3f frames/second.\n",
+		sprintf(msg, transl_get_string("SpeedtestDone"),
 			FrameCount - Speedtest_frame_start,
 			f2fl(timer_get_fixed_seconds() - Speedtest_start_time),
 			(float)(FrameCount - Speedtest_frame_start) / f2fl(timer_get_fixed_seconds() - Speedtest_start_time));

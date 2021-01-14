@@ -280,6 +280,20 @@ void check_memory()
 		digi_sample_rate = SAMPLE_RATE_11K;
 }
 
+char lngbuf[9];
+
+const char* get_language()
+{
+	FILE* lngfile = fopen("LANGUAGE.CFG", "r");
+	if (lngfile)
+	{
+		fread(lngbuf, 1, 9, lngfile);
+		lngbuf[8] = '\0';
+		return lngbuf;
+	}
+	return "ENGLISH";
+}
+
 int Inferno_verbose = 0;
 
 extern int digi_timer_rate;
@@ -605,7 +619,7 @@ int D_DescentMain(int argc, const char** argv)
 
 	// Initialize DPMI before anything else!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// (To check memory size and availbabitliy and allocate some low DOS memory)
-	verbose("%s... ", TXT_INITIALIZING_DPMI);
+	//verbose("%s... ", TXT_INITIALIZING_DPMI);
 	verbose("\n");
 	//[ISB] kill DPMI
 
@@ -638,6 +652,11 @@ int D_DescentMain(int argc, const char** argv)
 #endif
 
 	load_text();
+	{
+		char langhog[16];
+		sprintf(langhog, "%s.LHG", get_language());
+		if (!transl_load_language(langhog)) return 1;
+	}
 
 	//print out the banner title
 	printf("\nDESCENT 2 %s v%d.%d", VERSION_TYPE, Version_major, Version_minor);

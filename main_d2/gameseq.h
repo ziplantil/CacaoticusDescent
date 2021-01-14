@@ -35,7 +35,7 @@ extern int Last_level,Last_secret_level;	//set by mission code
 
 extern int Secret_level_table[MAX_SECRET_LEVELS_PER_MISSION];
 
-#define LEVEL_NAME_LEN 36		//make sure this is multiple of 4!
+#define LEVEL_NAME_LEN 48		//make sure this is multiple of 4!
 
 //Current_level_num starts at 1 for the first level
 //-1,-2,-3 are secret levels

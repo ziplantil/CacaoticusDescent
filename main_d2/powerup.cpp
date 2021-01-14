@@ -149,7 +149,7 @@ void do_megawow_powerup(int quantity)
 {
 	int i;
 
-	powerup_basic(30, 0, 30, 1, "MEGA-WOWIE-ZOWIE!");
+	powerup_basic(30, 0, 30, 1, transl_get_string("CheatMegaWow"));
 	Players[Player_num].primary_weapon_flags = 0xffff ^ HAS_FLAG(SUPER_LASER_INDEX);		//no super laser
 	Players[Player_num].secondary_weapon_flags = 0xffff;
 
@@ -190,11 +190,11 @@ int pick_up_energy(void)
 		Players[Player_num].energy += boost;
 		if (Players[Player_num].energy > MAX_ENERGY)
 			Players[Player_num].energy = MAX_ENERGY;
-		powerup_basic(15, 15, 7, ENERGY_SCORE, "%s %s %d", TXT_ENERGY, TXT_BOOSTED_TO, f2ir(Players[Player_num].energy));
+		powerup_basic(15, 15, 7, ENERGY_SCORE, transl_fmt_string_i("EnergyIncreased", f2ir(Players[Player_num].energy)));
 		used = 1;
 	}
 	else
-		HUD_init_message(TXT_MAXED_OUT, TXT_ENERGY);
+		HUD_init_message(transl_fmt_string_t("MaxedOut", "TXT_ENERGY"));
 
 	return used;
 }
@@ -205,7 +205,7 @@ int pick_up_vulcan_ammo(void)
 
 	int	pwsave = Primary_weapon;		// Ugh, save selected primary weapon around the picking up of the ammo.  I apologize for this code.  Matthew A. Toschlog
 	if (pick_up_ammo(CLASS_PRIMARY, VULCAN_INDEX, VULCAN_AMMO_AMOUNT)) {
-		powerup_basic(7, 14, 21, VULCAN_AMMO_SCORE, "%s!", TXT_VULCAN_AMMO);
+		powerup_basic(7, 14, 21, VULCAN_AMMO_SCORE, transl_fmt_string_t("PickedUpVulcanAmmo", "TXT_VULCAN_AMMO"));
 		used = 1;
 	}
 	else 
@@ -213,7 +213,9 @@ int pick_up_vulcan_ammo(void)
 		max = Primary_ammo_max[VULCAN_INDEX];
 		if (Players[Player_num].flags & PLAYER_FLAGS_AMMO_RACK)
 			max *= 2;
-		HUD_init_message("%s %d %s!", TXT_ALREADY_HAVE, f2i((unsigned)VULCAN_AMMO_SCALE * (unsigned)max), TXT_VULCAN_ROUNDS);
+		//HUD_init_message("%s %d %s!", TXT_ALREADY_HAVE, f2i((unsigned)VULCAN_AMMO_SCALE * (unsigned)max), TXT_VULCAN_ROUNDS);
+		int n = f2i((unsigned)VULCAN_AMMO_SCALE * (unsigned)max);
+		HUD_init_message(transl_fmt_string_i(transl_get_plural_key("AlreadyHaveAmmo", n), n));
 		used = 0;
 	}
 	Primary_weapon = pwsave;
@@ -267,24 +269,24 @@ int do_powerup(object* obj)
 			Players[Player_num].shields += boost;
 			if (Players[Player_num].shields > MAX_SHIELDS)
 				Players[Player_num].shields = MAX_SHIELDS;
-			powerup_basic(0, 0, 15, SHIELD_SCORE, "%s %s %d", TXT_SHIELD, TXT_BOOSTED_TO, f2ir(Players[Player_num].shields));
+			powerup_basic(0, 0, 15, SHIELD_SCORE, transl_fmt_string_i("ShieldIncreased", f2ir(Players[Player_num].shields)));
 			used = 1;
 		}
 		else
-			HUD_init_message(TXT_MAXED_OUT, TXT_SHIELD);
+			HUD_init_message(transl_fmt_string_t("MaxedOut", "TXT_SHIELD"));
 		break;
 	case POW_LASER:
 		if (Players[Player_num].laser_level >= MAX_LASER_LEVEL) 
 		{
 			//Players[Player_num].laser_level = MAX_LASER_LEVEL;
-			HUD_init_message(TXT_MAXED_OUT, TXT_LASER);
+			HUD_init_message(transl_fmt_string_t("MaxedOut", "TXT_LASER"));
 		}
 		else 
 		{
 			if (Newdemo_state == ND_STATE_RECORDING)
 				newdemo_record_laser_level(Players[Player_num].laser_level, Players[Player_num].laser_level + 1);
 			Players[Player_num].laser_level++;
-			powerup_basic(10, 0, 10, LASER_SCORE, "%s %s %d", TXT_LASER, TXT_BOOSTED_TO, Players[Player_num].laser_level + 1);
+			powerup_basic(10, 0, 10, LASER_SCORE, transl_fmt_string_i("LaserUpgrade", Players[Player_num].laser_level + 1));
 			update_laser_weapon_info();
 			pick_up_primary(LASER_INDEX);
 			used = 1;
@@ -307,7 +309,7 @@ int do_powerup(object* obj)
 #endif
 		digi_play_sample(Powerup_info[obj->id].hit_sound, F1_0);
 		Players[Player_num].flags |= PLAYER_FLAGS_BLUE_KEY;
-		powerup_basic(0, 0, 15, KEY_SCORE, "%s %s", TXT_BLUE, TXT_ACCESS_GRANTED);
+		powerup_basic(0, 0, 15, KEY_SCORE, transl_fmt_string_t("AccessGranted", "ColorBlue"));
 		if (Game_mode & GM_MULTI)
 			used = 0;
 		else
@@ -322,7 +324,7 @@ int do_powerup(object* obj)
 #endif
 		digi_play_sample(Powerup_info[obj->id].hit_sound, F1_0);
 		Players[Player_num].flags |= PLAYER_FLAGS_RED_KEY;
-		powerup_basic(15, 0, 0, KEY_SCORE, "%s %s", TXT_RED, TXT_ACCESS_GRANTED);
+		powerup_basic(15, 0, 0, KEY_SCORE, transl_fmt_string_t("AccessGranted", "ColorRed"));
 		if (Game_mode & GM_MULTI)
 			used = 0;
 		else
@@ -337,7 +339,7 @@ int do_powerup(object* obj)
 #endif
 		digi_play_sample(Powerup_info[obj->id].hit_sound, F1_0);
 		Players[Player_num].flags |= PLAYER_FLAGS_GOLD_KEY;
-		powerup_basic(15, 15, 7, KEY_SCORE, "%s %s", TXT_YELLOW, TXT_ACCESS_GRANTED);
+		powerup_basic(15, 15, 7, KEY_SCORE, transl_fmt_string_t("AccessGranted", "ColorYellow"));
 		if (Game_mode & GM_MULTI)
 			used = 0;
 		else
@@ -348,12 +350,12 @@ int do_powerup(object* obj)
 		if (!(Players[Player_num].flags & PLAYER_FLAGS_QUAD_LASERS)) 
 		{
 			Players[Player_num].flags |= PLAYER_FLAGS_QUAD_LASERS;
-			powerup_basic(15, 15, 7, QUAD_FIRE_SCORE, "%s!", TXT_QUAD_LASERS);
+			powerup_basic(15, 15, 7, QUAD_FIRE_SCORE, transl_fmt_string_t("PickedUpPowerup", "TXT_QUAD_LASERS"));
 			update_laser_weapon_info();
 			used = 1;
 		}
 		else
-			HUD_init_message("%s %s!", TXT_ALREADY_HAVE, TXT_QUAD_LASERS);
+			HUD_init_message(transl_fmt_string_t("AlreadyHavePowerup", "TXT_QUAD_LASERS"));
 		if (!used && !(Game_mode & GM_MULTI))
 			used = pick_up_energy();
 		break;
@@ -380,7 +382,7 @@ int do_powerup(object* obj)
 			obj->ctype.powerup_info.count -= ammo_used;
 			if (!used && ammo_used) 
 			{
-				powerup_basic(7, 14, 21, VULCAN_AMMO_SCORE, "%s!", TXT_VULCAN_AMMO);
+				powerup_basic(7, 14, 21, VULCAN_AMMO_SCORE, transl_fmt_string_t("PickedUpVulcanAmmo", "TXT_VULCAN_AMMO"));
 				special_used = 1;
 				id = POW_VULCAN_AMMO;		//set new id for making sound at end of this function 
 				if (obj->ctype.powerup_info.count == 0)
@@ -472,7 +474,7 @@ int do_powerup(object* obj)
 	case	POW_CLOAK:
 		if (Players[Player_num].flags & PLAYER_FLAGS_CLOAKED)
 		{
-			HUD_init_message("%s %s!", TXT_ALREADY_ARE, TXT_CLOAKED);
+			HUD_init_message(transl_fmt_string_t("YouAlreadyAre", "TXT_CLOAKED"));
 			break;
 		}
 		else
@@ -484,21 +486,21 @@ int do_powerup(object* obj)
 			if (Game_mode & GM_MULTI)
 				multi_send_cloak();
 #endif
-			powerup_basic(-10, -10, -10, CLOAK_SCORE, "%s!", TXT_CLOAKING_DEVICE);
+			powerup_basic(-10, -10, -10, CLOAK_SCORE, transl_fmt_string_t("PickedUpPowerup", "TXT_CLOAKING_DEVICE"));
 			used = 1;
 			break;
 		}
 	case	POW_INVULNERABILITY:
 		if (Players[Player_num].flags & PLAYER_FLAGS_INVULNERABLE)
 		{
-			HUD_init_message("%s %s!", TXT_ALREADY_ARE, TXT_INVULNERABLE);
+			HUD_init_message(transl_fmt_string_t("YouAlreadyAre", "TXT_INVULNERABLE"));
 			break;
 		}
 		else
 		{
 			Players[Player_num].invulnerable_time = GameTime;
 			Players[Player_num].flags |= PLAYER_FLAGS_INVULNERABLE;
-			powerup_basic(7, 14, 21, INVULNERABILITY_SCORE, "%s!", TXT_INVULNERABILITY);
+			powerup_basic(7, 14, 21, INVULNERABILITY_SCORE, transl_fmt_string_t("PickedUpPowerup", "TXT_INVULNERABILITY"));
 			used = 1;
 			break;
 		}
@@ -512,14 +514,14 @@ int do_powerup(object* obj)
 	case POW_FULL_MAP:
 		if (Players[Player_num].flags & PLAYER_FLAGS_MAP_ALL)
 		{
-			HUD_init_message("%s %s!", TXT_ALREADY_HAVE, "the FULL MAP");
+			HUD_init_message(transl_fmt_string_t("AlreadyHavePowerup2", "PowerUpFullMap"));
 			if (!(Game_mode & GM_MULTI))
 				used = pick_up_energy();
 		}
 		else
 		{
 			Players[Player_num].flags |= PLAYER_FLAGS_MAP_ALL;
-			powerup_basic(15, 0, 15, 0, "FULL MAP!");
+			powerup_basic(15, 0, 15, 0, transl_fmt_string_t("PickedUpPowerup", "PowerUpFullMap"));
 			used = 1;
 		}
 		break;
@@ -527,7 +529,7 @@ int do_powerup(object* obj)
 	case POW_CONVERTER:
 		if (Players[Player_num].flags & PLAYER_FLAGS_CONVERTER)
 		{
-			HUD_init_message("%s %s!", TXT_ALREADY_HAVE, "the Converter");
+			HUD_init_message(transl_fmt_string_t("AlreadyHavePowerup2", "PowerUpConverter"));
 			if (!(Game_mode & GM_MULTI))
 				used = pick_up_energy();
 		}
@@ -536,11 +538,11 @@ int do_powerup(object* obj)
 			Players[Player_num].flags |= PLAYER_FLAGS_CONVERTER;
 			if ((GetKeyValue(54)) < 255)
 			{
-				sprintf(temp_string, "Energy->Shield converter! (Press %c to use)", key_to_ascii(GetKeyValue(54)));
+				sprintf(temp_string, transl_get_string("PickedUpConverterKey"), key_to_ascii(GetKeyValue(54)));
 				powerup_basic(15, 0, 15, 0, temp_string);
 			}
 			else
-				powerup_basic(15, 0, 15, 0, "Energy -> shield converter!");
+				powerup_basic(15, 0, 15, 0, transl_get_string("PickedUpConverter"));
 
 
 			used = 1;
@@ -551,7 +553,7 @@ int do_powerup(object* obj)
 		if (Players[Player_num].laser_level >= MAX_SUPER_LASER_LEVEL)
 		{
 			Players[Player_num].laser_level = MAX_SUPER_LASER_LEVEL;
-			HUD_init_message("SUPER LASER MAXED OUT!");
+			HUD_init_message(transl_get_string("SuperLaserMaxedOut"));
 		}
 		else
 		{
@@ -562,7 +564,7 @@ int do_powerup(object* obj)
 			Players[Player_num].laser_level++;
 			if (Newdemo_state == ND_STATE_RECORDING)
 				newdemo_record_laser_level(old_level, Players[Player_num].laser_level);
-			powerup_basic(10, 0, 10, LASER_SCORE, "Super Boost to Laser level %d", Players[Player_num].laser_level + 1);
+			powerup_basic(10, 0, 10, LASER_SCORE, transl_fmt_string_i("SuperLaserPickedUp", Players[Player_num].laser_level + 1));
 			update_laser_weapon_info();
 			if (Primary_weapon != LASER_INDEX)
 				check_to_use_primary(SUPER_LASER_INDEX);
@@ -575,7 +577,7 @@ int do_powerup(object* obj)
 	case POW_AMMO_RACK:
 		if (Players[Player_num].flags & PLAYER_FLAGS_AMMO_RACK)
 		{
-			HUD_init_message("%s %s!", TXT_ALREADY_HAVE, "the Ammo rack");
+			HUD_init_message(transl_fmt_string_t("AlreadyHavePowerup2", "PowerUpAmmoRack"));
 			if (!(Game_mode & GM_MULTI))
 				used = pick_up_energy();
 		}
@@ -586,7 +588,7 @@ int do_powerup(object* obj)
 			multi_send_play_sound(Powerup_info[obj->id].hit_sound, F1_0);
 #endif
 			digi_play_sample(Powerup_info[obj->id].hit_sound, F1_0);
-			powerup_basic(15, 0, 15, 0, "AMMO RACK!");
+			powerup_basic(15, 0, 15, 0, transl_fmt_string_t("PickedUpPowerup", "PowerUpAmmoRack"));
 			used = 1;
 		}
 		break;
@@ -594,7 +596,7 @@ int do_powerup(object* obj)
 	case POW_AFTERBURNER:
 		if (Players[Player_num].flags & PLAYER_FLAGS_AFTERBURNER)
 		{
-			HUD_init_message("%s %s!", TXT_ALREADY_HAVE, "the Afterburner");
+			HUD_init_message(transl_fmt_string_t("AlreadyHavePowerup2", "PowerUpAfterburner"));
 			if (!(Game_mode & GM_MULTI))
 				used = pick_up_energy();
 		}
@@ -605,7 +607,7 @@ int do_powerup(object* obj)
 			multi_send_play_sound(Powerup_info[obj->id].hit_sound, F1_0);
 #endif
 			digi_play_sample(Powerup_info[obj->id].hit_sound, F1_0);
-			powerup_basic(15, 15, 15, 0, "AFTERBURNER!");
+			powerup_basic(15, 15, 15, 0, transl_fmt_string_t("PickedUpPowerup", "PowerUpAfterburner"));
 			Afterburner_charge = f1_0;
 			used = 1;
 		}
@@ -614,7 +616,7 @@ int do_powerup(object* obj)
 	case POW_HEADLIGHT:
 		if (Players[Player_num].flags & PLAYER_FLAGS_HEADLIGHT)
 		{
-			HUD_init_message("%s %s!", TXT_ALREADY_HAVE, "the Headlight boost");
+			HUD_init_message(transl_fmt_string_t("AlreadyHavePowerup2", "PowerUpHeadlight"));
 			if (!(Game_mode & GM_MULTI))
 				used = pick_up_energy();
 		}
@@ -626,7 +628,7 @@ int do_powerup(object* obj)
 			multi_send_play_sound(Powerup_info[obj->id].hit_sound, F1_0);
 #endif
 			digi_play_sample(Powerup_info[obj->id].hit_sound, F1_0);
-			sprintf(msg, "HEADLIGHT BOOST! (Headlight is %s)", Headlight_active_default ? "ON" : "OFF");
+			sprintf(msg, transl_get_string(Headlight_active_default ? "PickedUpHeadlightOn" : "PickedUpHeadlightOff"));
 			powerup_basic(15, 0, 15, 0, msg);
 			if (Headlight_active_default)
 				Players[Player_num].flags |= PLAYER_FLAGS_HEADLIGHT_ON;
@@ -643,7 +645,7 @@ int do_powerup(object* obj)
 		if (Game_mode & GM_CAPTURE)
 			if (get_team(Player_num) == TEAM_RED)
 			{
-				powerup_basic(15, 0, 15, 0, "BLUE FLAG!");
+				powerup_basic(15, 0, 15, 0, transl_get_string("GotBlueFlag"));
 				Players[Player_num].flags |= PLAYER_FLAGS_FLAG;
 				used = 1;
 				multi_send_got_flag(Player_num);
@@ -655,7 +657,7 @@ int do_powerup(object* obj)
 #ifdef NETWORK
 		if (Game_mode & GM_HOARD)
 			if (Players[Player_num].secondary_ammo[PROXIMITY_INDEX] < 12) {
-				powerup_basic(15, 0, 15, 0, "Orb!!!");
+				powerup_basic(15, 0, 15, 0, transl_get_string("GotOrb"));
 				Players[Player_num].secondary_ammo[PROXIMITY_INDEX]++;
 				Players[Player_num].flags |= PLAYER_FLAGS_FLAG;
 				used = 1;
@@ -668,7 +670,7 @@ int do_powerup(object* obj)
 #ifdef NETWORK
 		if (Game_mode & GM_CAPTURE)
 			if (get_team(Player_num) == TEAM_BLUE) {
-				powerup_basic(15, 0, 15, 0, "RED FLAG!");
+				powerup_basic(15, 0, 15, 0, transl_get_string("GotRedFlag"));
 				Players[Player_num].flags |= PLAYER_FLAGS_FLAG;
 				used = 1;
 				multi_send_got_flag(Player_num);

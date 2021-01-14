@@ -468,7 +468,7 @@ int show_char_delay(char the_char, int delay, int robot_num, int cursor_flag)
 	{
 		WIN(DDGRLOCK(dd_grd_curcanv));
 		gr_set_fontcolor(Briefing_foreground_colors[Current_color], -1);
-		gr_printf(Briefing_text_x + 1, Briefing_text_y, "_");
+		gr_printf(Briefing_text_x + 1, Briefing_text_y, transl_get_string("BriefingCursor"));
 		WIN(DDGRUNLOCK(dd_grd_curcanv));
 	}
 
@@ -507,7 +507,7 @@ int show_char_delay(char the_char, int delay, int robot_num, int cursor_flag)
 	if (cursor_flag && delay)
 	{
 		gr_set_fontcolor(Erase_color, -1);
-		gr_printf(Briefing_text_x + 1, Briefing_text_y, "_");
+		gr_printf(Briefing_text_x + 1, Briefing_text_y, transl_get_string("BriefingCursor"));
 	}
 
 	//	Draw the character
@@ -635,7 +635,7 @@ void flash_cursor(int cursor_flag)
 	else
 		gr_set_fontcolor(Erase_color, -1);
 
-	gr_printf(Briefing_text_x + 1, Briefing_text_y, "_");
+	gr_printf(Briefing_text_x + 1, Briefing_text_y, transl_get_string("BriefingCursor"));
 	WIN(DDGRUNLOCK(dd_grd_curcanv));
 }
 

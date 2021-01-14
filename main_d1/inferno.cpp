@@ -400,7 +400,7 @@ int D_DescentMain(int argc, const char** argv)
 	load_text();
 	{
 		char langhog[16];
-		sprintf(langhog, "%s.HOG", get_language());
+		sprintf(langhog, "%s.LHG", get_language());
 		if (!transl_load_language(langhog)) return 1;
 	}
 

@@ -150,7 +150,7 @@ void kmatrix_draw_names(int *sorted)
    if (Kmatrix_nomovie_message)
     {
 		gr_set_fontcolor( BM_XRGB(63,0,0),-1 );
-		gr_printf( CENTERSCREEN-LHX(40), LHY(20), "(Movie not played)");
+		gr_printf( CENTERSCREEN-LHX(40), LHY(20), transl_get_string("KmatrixMovieNotPlayed"));
 	 }
 
 	for (j=0; j<N_players; j++) {
@@ -182,14 +182,14 @@ void kmatrix_draw_coop_names(int *sorted)
    if (Kmatrix_nomovie_message)
     {
 		gr_set_fontcolor( BM_XRGB(63,0,0),-1 );
-		gr_printf( CENTERSCREEN-LHX(40), LHY(20), "(Movie not played)");
+		gr_printf( CENTERSCREEN-LHX(40), LHY(20), transl_get_string("KmatrixMovieNotPlayed"));
 	 }
 
 	gr_set_fontcolor( BM_XRGB(63,31,31),-1 );
-	gr_printf( CENTERSCREEN, LHY(40), "SCORE");
+	gr_printf( CENTERSCREEN, LHY(40), transl_get_string("KmatrixScore"));
 
 	gr_set_fontcolor( BM_XRGB(63,31,31),-1 );
-	gr_printf( CENTERSCREEN+LHX(50), LHY(40), "DEATHS");
+	gr_printf( CENTERSCREEN+LHX(50), LHY(40), transl_get_string("KmatrixDeaths"));
 }
 
 
@@ -208,16 +208,16 @@ void kmatrix_draw_deaths(int *sorted)
 		int sw, sh, aw;
 	   				
       gr_set_fontcolor(gr_find_closest_color(63,20,0),-1);
-      gr_get_string_size("P-Playing E-Escaped D-Died", &sw, &sh, &aw); 
+      gr_get_string_size(transl_get_string("KmatrixLegend1"), &sw, &sh, &aw); 
 
  	   if (!((Game_mode & GM_MODEM) || (Game_mode & GM_SERIAL)))
-		   gr_printf( CENTERSCREEN-(sw/2), y,"P-Playing E-Escaped D-Died");
+		   gr_printf( CENTERSCREEN-(sw/2), y,transl_get_string("KmatrixLegend1"));
    
       y+=(sh+5);
-	   gr_get_string_size("V-Viewing scores W-Waiting", &sw, &sh, &aw); 
+	   gr_get_string_size(transl_get_string("KmatrixLegend2"), &sw, &sh, &aw); 
 
 	   if (!((Game_mode & GM_MODEM) || (Game_mode & GM_SERIAL)))
-		   gr_printf( CENTERSCREEN-(sw/2), y,"V-Viewing scores W-Waiting");
+		   gr_printf( CENTERSCREEN-(sw/2), y,transl_get_string("KmatrixLegend2"));
 
 	}
 
@@ -229,8 +229,8 @@ void kmatrix_draw_deaths(int *sorted)
 
       if (Players[Player_num].connected==7)
        {
-        gr_get_string_size("Waiting for other players...",&sw, &sh, &aw); 
-        gr_printf( CENTERSCREEN-(sw/2), y,"Waiting for other players...");
+        gr_get_string_size(transl_get_string("KmatrixWaiting"),&sw, &sh, &aw); 
+        gr_printf( CENTERSCREEN-(sw/2), y,transl_get_string("KmatrixWaiting"));
        }
       else
        {
@@ -243,7 +243,7 @@ void kmatrix_draw_deaths(int *sorted)
    kmatrix_reactor(TXT_REACTOR_EXPLODED);
   else
    {
-     sprintf(&reactor_message, "%s: %d %s  ", TXT_TIME_REMAINING, Countdown_seconds_left, TXT_SECONDS);
+     sprintf(&reactor_message, transl_fmt_string_i("TXT_TIME_REMAINING", Countdown_seconds_left));
      kmatrix_reactor (&reactor_message);
    }
   
@@ -277,17 +277,17 @@ void kmatrix_draw_coop_deaths(int *sorted)
 		int sw, sh, aw;
 
       gr_set_fontcolor(gr_find_closest_color(63,20,0),-1);
-      gr_get_string_size("P-Playing E-Escaped D-Died", &sw, &sh, &aw); 
+      gr_get_string_size(transl_get_string("KmatrixLegend1"), &sw, &sh, &aw); 
 
 	  if (!((Game_mode & GM_MODEM) || (Game_mode & GM_SERIAL)))
-	      gr_printf( CENTERSCREEN-(sw/2), y,"P-Playing E-Escaped D-Died");
+	      gr_printf( CENTERSCREEN-(sw/2), y,transl_get_string("KmatrixLegend1"));
   	   
    
       y+=(sh+5);
-	   gr_get_string_size("V-Viewing scores W-Waiting", &sw, &sh, &aw); 
+	   gr_get_string_size(transl_get_string("KmatrixLegend2"), &sw, &sh, &aw); 
 
 	   if (!((Game_mode & GM_MODEM) || (Game_mode & GM_SERIAL)))
-	       gr_printf( CENTERSCREEN-(sw/2), y,"V-Viewing scores W-Waiting");
+	       gr_printf( CENTERSCREEN-(sw/2), y,transl_get_string("KmatrixLegend2"));
 
 	}
 
@@ -299,8 +299,8 @@ void kmatrix_draw_coop_deaths(int *sorted)
 
       if (Players[Player_num].connected==7)
        {
-        gr_get_string_size("Waiting for other players...",&sw, &sh, &aw); 
-        gr_printf( CENTERSCREEN-(sw/2), y,"Waiting for other players...");
+        gr_get_string_size(transl_get_string("KmatrixWaiting"),&sw, &sh, &aw); 
+        gr_printf( CENTERSCREEN-(sw/2), y,transl_get_string("KmatrixWaiting"));
        }
       else
        {
@@ -313,7 +313,7 @@ void kmatrix_draw_coop_deaths(int *sorted)
    kmatrix_reactor(TXT_REACTOR_EXPLODED);
   else
    {
-     sprintf(&reactor_message, "%s: %d %s  ", TXT_TIME_REMAINING, Countdown_seconds_left, TXT_SECONDS);
+     sprintf(&reactor_message, transl_fmt_string_i("TXT_TIME_REMAINING", Countdown_seconds_left));
      kmatrix_reactor (&reactor_message);
    }
 
@@ -356,9 +356,9 @@ void kmatrix_phallic ()
 	return;
   
   if (PhallicMan==-1)
-	strcpy (message,"There was no record set for this level.");
+	strcpy (message,transl_get_string("KmatrixNoRecord"));
   else
-	sprintf (message,"%s had the best record at %d points.",Players[PhallicMan].callsign,PhallicLimit);
+	sprintf (message,transl_fmt_string_si("KmatrixBestRecord",Players[PhallicMan].callsign,PhallicLimit));
 
   grd_curcanv->cv_font = SMALL_FONT;
   gr_set_fontcolor(gr_find_closest_color(63,63,63),-1);
@@ -411,7 +411,7 @@ WIN(DDGRLOCK(dd_grd_curcanv));
 
 	gr_string( 0x8000, LHY(10), TXT_KILL_MATRIX_TITLE	);
 
-	grd_curcanv->cv_font = SMALL_FONT;
+	grd_curcanv->cv_font = HUD_FONT;
 
 	multi_get_kill_list(sorted);
 
@@ -496,7 +496,7 @@ WINDOS (
 
 WIN(DDGRLOCK(dd_grd_curcanv));
 	grd_curcanv->cv_font = MEDIUM3_FONT;
-	gr_string( 0x8000, LHY(10), "COOPERATIVE SUMMARY"	);
+	gr_string( 0x8000, LHY(10), transl_get_string("KmatrixCoopSummary")	);
 
 	grd_curcanv->cv_font = SMALL_FONT;
 

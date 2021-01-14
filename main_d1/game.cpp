@@ -558,7 +558,7 @@ void grow_window()
 		Game_window_w = VR_render_width;
 		toggle_cockpit();
 		grow_window();
-		HUD_init_message("Press F3 to return to Cockpit mode");
+		HUD_init_message(transl_get_string("CockpitReturnF3"));
 		return;
 	}
 
@@ -655,7 +655,7 @@ void shrink_window()
 		toggle_cockpit();
 		//		shrink_window();
 		//		shrink_window();
-		HUD_init_message("Press F3 to return to Cockpit mode");
+		HUD_init_message(transl_get_string("CockpitReturnF3"));
 		return;
 	}
 

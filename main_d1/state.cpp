@@ -186,9 +186,9 @@ int state_get_save_file(char* fname, char* dsc, int multi)
 
 	if (choice > -1) 
 	{
+		strcpy(desc[choice], m[choice].text);
 		strcpy(fname, filename[choice]);
-		//strcpy(dsc, desc[choice]);
-		strcpy(dsc, m[choice].text);
+		strcpy(dsc, desc[choice]);
 		state_default_item = choice;
 		return choice + 1;
 	}

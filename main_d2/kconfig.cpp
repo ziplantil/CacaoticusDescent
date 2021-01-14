@@ -81,12 +81,14 @@ uint8_t ExtYVibrateClear = 0;
 int8_t fades[64] = { 1,1,1,2,2,3,4,4,5,6,8,9,10,12,13,15,16,17,19,20,22,23,24,26,27,28,28,29,30,30,31,31,31,31,31,30,30,29,28,28,27,26,24,23,22,20,19,17,16,15,13,12,10,9,8,6,5,4,4,3,2,2,1,1 };
 
 //char * invert_text[2] = { "N", "Y" };
-//char * joybutton_text[28] = { "BTN 1", "BTN 2", "BTN 3", "BTN 4", "", "TRIG", "LEFT", "HAT ", "RIGHT", "", "", "HAT €", "MID", "", "", "HAT ", "", "", "", "HAT ‚", "TRIG", "LEFT", "RIGHT", "", "UP","DOWN","LEFT", "RIGHT" };
+//char * joybutton_text[28] = { "BTN 1", "BTN 2", "BTN 3", "BTN 4", "", "TRIG", "LEFT", "HAT \x11", "RIGHT", "", "", "HAT \x10", "MID", "", "", "HAT \x0f", "", "", "", "HAT \x12", "TRIG", "LEFT", "RIGHT", "", "UP","DOWN","LEFT", "RIGHT" };
 //char * joyaxis_text[4] = { "X1", "Y1", "X2", "Y2" };
 //char * mouseaxis_text[2] = { "L/R", "F/B" };
 //char * mousebutton_text[3] = { "Left", "Right", "Mid" };
 
-int invert_text[2] = { TNUM_N, TNUM_Y };
+int     use_alt_kconfig = 0;
+int low_yoffset = 0;
+const char* invert_text[2] = { TKEY_N, TKEY_Y };
 
 const char* choco_gamepad_text[28] = 
 { "0", "1", "2", "3", 
@@ -101,33 +103,30 @@ const char* choco_joybutton_text[28] =
 //Basic inputs
 { "BTN 1", "BTN 2", "BTN 3", "BTN 4", 
 //"Extended" Flightstick inputs, default ATM. 
-"BTN 1", "BTN 2", "BTN 3", "HAT ", 
-"BTN 4", "BTN 5", "BTN 6", "HAT €", 
-"BTN 7", "BTN 8", "BTN 9", "HAT ", 
-"BTN 10", "BTN 11", "BTN 12", "HAT ‚",
+"BTN 1", "BTN 2", "BTN 3", "HAT \x11",
+"BTN 4", "BTN 5", "BTN 6", "HAT \x10",
+"BTN 7", "BTN 8", "BTN 9", "HAT \x0f",
+"BTN 10", "BTN 11", "BTN 12", "HAT \x12",
 //[ISB] can't bind above 20...
 "-20-", "-21-", "-22-", "-23-",
 "-24-", "-25-", "-26-", "-27-" };
 
-int joybutton_text[28] =
-{ TNUM_BTN_1, TNUM_BTN_2, TNUM_BTN_3, TNUM_BTN_4,
-  -1, TNUM_TRIG, TNUM_LEFT, TNUM_HAT_L,
- TNUM_RIGHT, -1, TNUM_HAT2_D, TNUM_HAT_R,
- TNUM_MID, -1, TNUM_HAT2_R, TNUM_HAT_U,
- TNUM_HAT2_L, -1, TNUM_HAT2_U, TNUM_HAT_D,
- TNUM_TRIG, TNUM_LEFT, TNUM_RIGHT, -1,
- TNUM_UP, TNUM_DOWN, TNUM_LEFT, TNUM_RIGHT };
-
-int joyaxis_text[4] = { TNUM_X1, TNUM_Y1, TNUM_X2, TNUM_Y2 };
-
-int mouseaxis_text[2] = { TNUM_L_R, TNUM_F_B };
-
-int mousebutton_text[3] = { TNUM_LEFT, TNUM_RIGHT, TNUM_MID };
+const char* joybutton_text[28] =
+{ TKEY_BTN_1, TKEY_BTN_2, TKEY_BTN_3, TKEY_BTN_4,
+  NULL, TKEY_TRIG, TKEY_LEFT, TKEY_HAT_L,
+ TKEY_RIGHT, NULL, TKEY_HAT2_D, TKEY_HAT_R,
+ TKEY_MID, NULL, TKEY_HAT2_R, TKEY_HAT_U,
+ TKEY_HAT2_L, NULL, TKEY_HAT2_U, TKEY_HAT_D,
+ TKEY_TRIG, TKEY_LEFT, TKEY_RIGHT, NULL,
+  TKEY_UP, TKEY_DOWN, TKEY_LEFT, TKEY_RIGHT };
+const char* joyaxis_text[4] = { TKEY_X1, TKEY_Y1, TKEY_X2, TKEY_Y2 };
+const char* mouseaxis_text[2] = { TKEY_L_R, TKEY_F_B };
+const char* mousebutton_text[3] = { TKEY_LEFT, TKEY_RIGHT, TKEY_MID };
 
 const char* key_text[256] = { \
 "","ESC","1","2","3","4","5","6","7","8","9","0","-", 			\
 "=","BSPC","TAB","Q","W","E","R","T","Y","U","I","O",				\
-"P","[","]","ƒ","LCTRL","A","S","D","F",        \
+"P","[","]","\x13","LCTRL","A","S","D","F",        \
 "G","H","J","K","L",";","'","`",        \
 "LSHFT","\\","Z","X","C","V","B","N","M",",",      \
 ".","/","RSHFT","PAD*","LALT","SPC",      \
@@ -138,10 +137,10 @@ const char* key_text[256] = { \
 "","","","","","","","","","","","","","","","","","","","",     \
 "","","","","","","","","","","","","","","","","","","","",     \
 "","","","","","","","","","","","","","","","","","",           \
-"PADƒ","RCTRL","","","","","","","","","","","","","", \
+"PAD\x13","RCTRL","","","","","","","","","","","","","", \
 "","","","","","","","","","","PAD/","","","RALT","",      \
-"","","","","","","","","","","","","","HOME","‚","PGUP",     \
-"","","","","","END","€","PGDN","INS",       \
+"","","","","","","","","","","","","","HOME","\x12","PGUP",     \
+"","\x11","","\x0f","","END","\x10","PGDN","INS",       \
 "DEL","","","","","","","","","","","","","","","","","",     \
 "","","","","","","","","","","","","","","","","","","","",     \
 "","","","","","","" };
@@ -184,7 +183,7 @@ typedef struct kc_item
 	short w2;
 	short u, d, l, r;
 	//short text_num1;
-	const char* text;
+	const char* tkey;
 	uint8_t type;
 	uint8_t value;		// what key,button,etc
 } kc_item;
@@ -215,163 +214,163 @@ uint8_t default_kconfig_settings[CONTROL_MAX_TYPES][MAX_CONTROLS] =
 
 kc_item kc_keyboard[NUM_KEY_CONTROLS] =
 {
-	{  0, 15, 49, 71, 26, 55,  2, 55,  1,"Pitch forward", BT_KEY, 255 },
-	{  1, 15, 49,100, 26, 50,  3,  0, 24,"Pitch forward", BT_KEY, 255 },
-	{  2, 15, 57, 71, 26,  0,  4, 25,  3,"Pitch backward", BT_KEY, 255 },
-	{  3, 15, 57,100, 26,  1,  5,  2, 26,"Pitch backward", BT_KEY, 255 },
-	{  4, 15, 65, 71, 26,  2,  6, 27,  5,"Turn left", BT_KEY, 255 },
-	{  5, 15, 65,100, 26,  3,  7,  4, 28,"Turn left", BT_KEY, 255 },
-	{  6, 15, 73, 71, 26,  4,  8, 29,  7,"Turn right", BT_KEY, 255 },
-	{  7, 15, 73,100, 26,  5,  9,  6, 34,"Turn right", BT_KEY, 255 },
-	{  8, 15, 85, 71, 26,  6, 10, 35,  9,"Slide on", BT_KEY, 255 },
-	{  9, 15, 85,100, 26,  7, 11,  8, 36,"Slide on", BT_KEY, 255 },
-	{ 10, 15, 93, 71, 26,  8, 12, 37, 11,"Slide left", BT_KEY, 255 },
-	{ 11, 15, 93,100, 26,  9, 13, 10, 44,"Slide left", BT_KEY, 255 },
-	{ 12, 15,101, 71, 26, 10, 14, 45, 13,"Slide right", BT_KEY, 255 },
-	{ 13, 15,101,100, 26, 11, 15, 12, 30,"Slide right", BT_KEY, 255 },
-	{ 14, 15,109, 71, 26, 12, 16, 31, 15,"Slide up", BT_KEY, 255 },
-	{ 15, 15,109,100, 26, 13, 17, 14, 32,"Slide up", BT_KEY, 255 },
-	{ 16, 15,117, 71, 26, 14, 18, 33, 17,"Slide down", BT_KEY, 255 },
-	{ 17, 15,117,100, 26, 15, 19, 16, 46,"Slide down", BT_KEY, 255 },
-	{ 18, 15,129, 71, 26, 16, 20, 47, 19,"Bank on", BT_KEY, 255 },
-	{ 19, 15,129,100, 26, 17, 21, 18, 38,"Bank on", BT_KEY, 255 },
-	{ 20, 15,137, 71, 26, 18, 22, 39, 21,"Bank left", BT_KEY, 255 },
-	{ 21, 15,137,100, 26, 19, 23, 20, 40,"Bank left", BT_KEY, 255 },
-	{ 22, 15,145, 71, 26, 20, 48, 41, 23,"Bank right", BT_KEY, 255 },
-	{ 23, 15,145,100, 26, 21, 49, 22, 42,"Bank right", BT_KEY, 255 },
-	{ 24,158, 49, 83, 26, 51, 26,  1, 25,"Fire primary", BT_KEY, 255 },
-	{ 25,158, 49,112, 26, 54, 27, 24,  2,"Fire primary", BT_KEY, 255 },
-	{ 26,158, 57, 83, 26, 24, 28,  3, 27,"Fire secondary", BT_KEY, 255 },
-	{ 27,158, 57,112, 26, 25, 29, 26,  4,"Fire secondary", BT_KEY, 255 },
-	{ 28,158, 65, 83, 26, 26, 34,  5, 29,"Fire flare", BT_KEY, 255 },
-	{ 29,158, 65,112, 26, 27, 35, 28,  6,"Fire flare", BT_KEY, 255 },
-	{ 30,158,105, 83, 26, 44, 32, 13, 31,"Accelerate", BT_KEY, 255 },
-	{ 31,158,105,112, 26, 45, 33, 30, 14,"Accelerate", BT_KEY, 255 },
-	{ 32,158,113, 83, 26, 30, 46, 15, 33,"reverse", BT_KEY, 255 },
-	{ 33,158,113,112, 26, 31, 47, 32, 16,"reverse", BT_KEY, 255 },
-	{ 34,158, 73, 83, 26, 28, 36,  7, 35,"Drop Bomb", BT_KEY, 255 },
-	{ 35,158, 73,112, 26, 29, 37, 34,  8,"Drop Bomb", BT_KEY, 255 },
-	{ 36,158, 85, 83, 26, 34, 44,  9, 37,"REAR VIEW", BT_KEY, 255 },
-	{ 37,158, 85,112, 26, 35, 45, 36, 10,"REAR VIEW", BT_KEY, 255 },
-	{ 38,158,133, 83, 26, 46, 40, 19, 39,"Cruise Faster", BT_KEY, 255 },
-	{ 39,158,133,112, 26, 47, 41, 38, 20,"Cruise Faster", BT_KEY, 255 },
-	{ 40,158,141, 83, 26, 38, 42, 21, 41,"Cruise Slower", BT_KEY, 255 },
-	{ 41,158,141,112, 26, 39, 43, 40, 22,"Cruise Slower", BT_KEY, 255 },
-	{ 42,158,149, 83, 26, 40, 52, 23, 43,"Cruise Off", BT_KEY, 255 },
-	{ 43,158,149,112, 26, 41, 53, 42, 48,"Cruise Off", BT_KEY, 255 },
-	{ 44,158, 93, 83, 26, 36, 30, 11, 45,"Automap", BT_KEY, 255 },
-	{ 45,158, 93,112, 26, 37, 31, 44, 12,"Automap", BT_KEY, 255 },
-	{ 46,158,121, 83, 26, 32, 38, 17, 47,"Afterburner", BT_KEY, 255 },
-	{ 47,158,121,112, 26, 33, 39, 46, 18,"Afterburner", BT_KEY, 255 },
-	{ 48, 15,161, 71, 26, 22, 50, 43, 49,"Cycle Primary", BT_KEY, 255 },
-	{ 49, 15,161,100, 26, 23, 51, 48, 52,"Cycle Primary", BT_KEY, 255 },
-	{ 50, 15,169, 71, 26, 48,  1, 53, 51,"Cycle Second", BT_KEY, 255 },
-	{ 51, 15,169,100, 26, 49, 24, 50, 54,"Cycle Second", BT_KEY, 255 },
-	{ 52,158,163, 83, 26, 42, 54, 49, 53,"Headlight", BT_KEY, 255 },
-	{ 53,158,163,112, 26, 43, 55, 52, 50,"Headlight", BT_KEY, 255 },
-	{ 54,158,171, 83, 26, 52, 56, 51, 55,"Energy->Shield", BT_KEY, 255 },
-	{ 55,158,171,112, 26, 53,  0, 54,  0,"Energy->Shield", BT_KEY, 255 },
-   { 56,158,179,83,  26, 54,  0, 0,  0, "Toggle Bomb",  BT_KEY,255},
+	{  0, 15, 49, 71, 26, 55,  2, 55,  1,TKEY_PITCH_FORWARD, BT_KEY, 255 },
+	{  1, 15, 49,100, 26, 50,  3,  0, 24,TKEY_PITCH_FORWARD, BT_KEY, 255 },
+	{  2, 15, 57, 71, 26,  0,  4, 25,  3,TKEY_PITCH_BACKWARD, BT_KEY, 255 },
+	{  3, 15, 57,100, 26,  1,  5,  2, 26,TKEY_PITCH_BACKWARD, BT_KEY, 255 },
+	{  4, 15, 65, 71, 26,  2,  6, 27,  5,TKEY_TURN_LEFT, BT_KEY, 255 },
+	{  5, 15, 65,100, 26,  3,  7,  4, 28,TKEY_TURN_LEFT, BT_KEY, 255 },
+	{  6, 15, 73, 71, 26,  4,  8, 29,  7,TKEY_TURN_RIGHT, BT_KEY, 255 },
+	{  7, 15, 73,100, 26,  5,  9,  6, 34,TKEY_TURN_RIGHT, BT_KEY, 255 },
+	{  8, 15, 85, 71, 26,  6, 10, 35,  9,TKEY_SLIDE_ON, BT_KEY, 255 },
+	{  9, 15, 85,100, 26,  7, 11,  8, 36,TKEY_SLIDE_ON, BT_KEY, 255 },
+	{ 10, 15, 93, 71, 26,  8, 12, 37, 11,TKEY_SLIDE_LEFT, BT_KEY, 255 },
+	{ 11, 15, 93,100, 26,  9, 13, 10, 44,TKEY_SLIDE_LEFT, BT_KEY, 255 },
+	{ 12, 15,101, 71, 26, 10, 14, 45, 13,TKEY_SLIDE_RIGHT, BT_KEY, 255 },
+	{ 13, 15,101,100, 26, 11, 15, 12, 30,TKEY_SLIDE_RIGHT, BT_KEY, 255 },
+	{ 14, 15,109, 71, 26, 12, 16, 31, 15,TKEY_SLIDE_UP, BT_KEY, 255 },
+	{ 15, 15,109,100, 26, 13, 17, 14, 32,TKEY_SLIDE_UP, BT_KEY, 255 },
+	{ 16, 15,117, 71, 26, 14, 18, 33, 17,TKEY_SLIDE_DOWN, BT_KEY, 255 },
+	{ 17, 15,117,100, 26, 15, 19, 16, 38,TKEY_SLIDE_DOWN, BT_KEY, 255 },
+	{ 18, 15,129, 71, 26, 16, 20, 47, 19,TKEY_BANK_ON, BT_KEY, 255 },
+	{ 19, 15,129,100, 26, 17, 21, 18, 38,TKEY_BANK_ON, BT_KEY, 255 },
+	{ 20, 15,137, 71, 26, 18, 22, 39, 21,TKEY_BANK_LEFT, BT_KEY, 255 },
+	{ 21, 15,137,100, 26, 19, 23, 20, 40,TKEY_BANK_LEFT, BT_KEY, 255 },
+	{ 22, 15,145, 71, 26, 20, 48, 41, 23,TKEY_BANK_RIGHT, BT_KEY, 255 },
+	{ 23, 15,145,100, 26, 21, 49, 22, 42,TKEY_BANK_RIGHT, BT_KEY, 255 },
+	{ 24,158, 49, 83, 26, 51, 26,  1, 25,TKEY_FIRE_PRIMARY, BT_KEY, 255 },
+	{ 25,158, 49,112, 26, 54, 27, 24,  2,TKEY_FIRE_PRIMARY, BT_KEY, 255 },
+	{ 26,158, 57, 83, 26, 24, 28,  3, 27,TKEY_FIRE_SECONDARY, BT_KEY, 255 },
+	{ 27,158, 57,112, 26, 25, 29, 26,  4,TKEY_FIRE_SECONDARY, BT_KEY, 255 },
+	{ 28,158, 65, 83, 26, 26, 34,  5, 29,TKEY_FIRE_FLARE, BT_KEY, 255 },
+	{ 29,158, 65,112, 26, 27, 35, 28,  6,TKEY_FIRE_FLARE, BT_KEY, 255 },
+	{ 30,158,105, 83, 26, 44, 32, 13, 31,TKEY_ACCELERATE, BT_KEY, 255 },
+	{ 31,158,105,112, 26, 45, 33, 30, 14,TKEY_ACCELERATE, BT_KEY, 255 },
+	{ 32,158,113, 83, 26, 30, 46, 15, 33,TKEY_REVERSE, BT_KEY, 255 },
+	{ 33,158,113,112, 26, 31, 47, 32, 16,TKEY_REVERSE, BT_KEY, 255 },
+	{ 34,158, 73, 83, 26, 28, 36,  7, 35,TKEY_DROP_BOMB, BT_KEY, 255 },
+	{ 35,158, 73,112, 26, 29, 37, 34,  8,TKEY_DROP_BOMB, BT_KEY, 255 },
+	{ 36,158, 85, 83, 26, 34, 44,  9, 37,TKEY_REAR_VIEW, BT_KEY, 255 },
+	{ 37,158, 85,112, 26, 35, 45, 36, 10,TKEY_REAR_VIEW, BT_KEY, 255 },
+	{ 38,158,133, 83, 26, 46, 40, 19, 39,TKEY_CRUISE_FASTER, BT_KEY, 255 },
+	{ 39,158,133,112, 26, 47, 41, 38, 20,TKEY_CRUISE_FASTER, BT_KEY, 255 },
+	{ 40,158,141, 83, 26, 38, 42, 21, 41,TKEY_CRUISE_SLOWER, BT_KEY, 255 },
+	{ 41,158,141,112, 26, 39, 43, 40, 22,TKEY_CRUISE_SLOWER, BT_KEY, 255 },
+	{ 42,158,149, 83, 26, 40, 52, 23, 43,TKEY_CRUISE_OFF, BT_KEY, 255 },
+	{ 43,158,149,112, 26, 41, 53, 42, 48,TKEY_CRUISE_OFF, BT_KEY, 255 },
+	{ 44,158, 93, 83, 26, 36, 30, 11, 45,TKEY_AUTOMAP, BT_KEY, 255 },
+	{ 45,158, 93,112, 26, 37, 31, 44, 12,TKEY_AUTOMAP, BT_KEY, 255 },
+	{ 46,158,121, 83, 26, 32, 38, 17, 47,"TXT_C_AFTERBURNER", BT_KEY, 255 },
+	{ 47,158,121,112, 26, 33, 39, 46, 18,"TXT_C_AFTERBURNER", BT_KEY, 255 },
+	{ 48, 15,161, 71, 26, 22, 50, 43, 49,"TXT_CYCLE_PRIMARY", BT_KEY, 255 },
+	{ 49, 15,161,100, 26, 23, 51, 48, 52,"TXT_CYCLE_PRIMARY", BT_KEY, 255 },
+	{ 50, 15,169, 71, 26, 48,  1, 53, 51,"TXT_CYCLE_SECOND", BT_KEY, 255 },
+	{ 51, 15,169,100, 26, 49, 24, 50, 54,"TXT_CYCLE_SECOND", BT_KEY, 255 },
+	{ 52,158,163, 83, 26, 42, 54, 49, 53,"TXT_C_HEADLIGHT", BT_KEY, 255 },
+	{ 53,158,163,112, 26, 43, 55, 52, 50,"TXT_C_HEADLIGHT", BT_KEY, 255 },
+	{ 54,158,171, 83, 26, 52, 56, 51, 55,"TXT_C_CONVERTER", BT_KEY, 255 },
+	{ 55,158,171,112, 26, 53,  0, 54,  0,"TXT_C_CONVERTER", BT_KEY, 255 },
+   { 56,158,179,83,  26, 54,  0, 0,  0, "TXT_TOGGLE_BOMB",  BT_KEY,255},
 };
 kc_item kc_joystick[NUM_OTHER_CONTROLS] =
 {
-	{  0, 25, 46, 85, 26, 15,  1, 24,  5,"Fire primary", BT_JOY_BUTTON, 255 },
-	{  1, 25, 54, 85, 26,  0,  4,  5,  6,"Fire secondary", BT_JOY_BUTTON, 255 },
-	{  2, 25, 85, 85, 26, 26,  3,  9, 10,"Accelerate", BT_JOY_BUTTON, 255 },
-	{  3, 25, 93, 85, 26,  2, 25, 10, 11,"reverse", BT_JOY_BUTTON, 255 },
-	{  4, 25, 62, 85, 26,  1, 26,  6,  7,"Fire flare", BT_JOY_BUTTON, 255 },
-	{  5,180, 46, 79, 26, 23,  6,  0,  1,"Slide on", BT_JOY_BUTTON, 255 },
-	{  6,180, 54, 79, 26,  5,  7,  1,  4,"Slide left", BT_JOY_BUTTON, 255 },
-	{  7,180, 62, 79, 26,  6,  8,  4, 26,"Slide right", BT_JOY_BUTTON, 255 },
-	{  8,180, 70, 79, 26,  7,  9, 26,  9,"Slide up", BT_JOY_BUTTON, 255 },
-	{  9,180, 78, 79, 26,  8, 10,  8,  2,"Slide down", BT_JOY_BUTTON, 255 },
-	{ 10,180, 90, 79, 26,  9, 11,  2,  3,"Bank on", BT_JOY_BUTTON, 255 },
-	{ 11,180, 98, 79, 26, 10, 12,  3, 12,"Bank left", BT_JOY_BUTTON, 255 },
-	{ 12,180,106, 79, 26, 11, 28, 11, 25,"Bank right", BT_JOY_BUTTON, 255 },
-	{ 13, 22,154, 51, 26, 24, 15, 30, 14,"Pitch U/D", BT_JOY_AXIS, 255 },
-	{ 14, 22,154, 99,  8, 30, 16, 13, 17,"Pitch U/D", BT_INVERT, 255 },
-	{ 15, 22,162, 51, 26, 13,  0, 18, 16,"Turn L/R", BT_JOY_AXIS, 255 },
-	{ 16, 22,162, 99,  8, 14, 17, 15, 19,"Turn L/R", BT_INVERT, 255 },
-	{ 17,164,154, 58, 26, 16, 19, 14, 18,"Slide L/R", BT_JOY_AXIS, 255 },
-	{ 18,164,154,106,  8, 29, 20, 17, 15,"Slide L/R", BT_INVERT, 255 },
-	{ 19,164,162, 58, 26, 17, 21, 16, 20,"Slide U/D", BT_JOY_AXIS, 255 },
-	{ 20,164,162,106,  8, 18, 22, 19, 21,"Slide U/D", BT_INVERT, 255 },
-	{ 21,164,172, 58, 26, 19, 23, 20, 22,"Bank L/R", BT_JOY_AXIS, 255 },
-	{ 22,164,172,106,  8, 20, 24, 21, 23,"Bank L/R", BT_INVERT, 255 },
-	{ 23,164,180, 58, 26, 21,  5, 22, 24,"throttle", BT_JOY_AXIS, 255 },
-	{ 24,164,180,106,  8, 22, 13, 23,  0,"throttle", BT_INVERT, 255 },
-	{ 25, 25,109, 85, 26,  3, 27, 12, 28,"REAR VIEW", BT_JOY_BUTTON, 255 },
-	{ 26, 25, 70, 85, 26,  4,  2,  7,  8,"Drop Bomb", BT_JOY_BUTTON, 255 },
-	{ 27, 25,117, 85, 26, 25, 30, 28, 29,"Afterburner", BT_JOY_BUTTON, 255 },
-	{ 28,180,114, 79, 26, 12, 29, 25, 27,"Cycle Primary", BT_JOY_BUTTON, 255 },
-	{ 29,180,122, 79, 26, 28, 18, 27, 30,"Cycle Secondary", BT_JOY_BUTTON, 255 },
-	{ 30, 25,125, 85, 26, 27, 14, 29, 13,"Headlight", BT_JOY_BUTTON, 255 },
+	{  0, 25, 46, 85, 26, 15,  1, 24,  5,TKEY_FIRE_PRIMARY, BT_JOY_BUTTON, 255 },
+	{  1, 25, 54, 85, 26,  0,  4,  5,  6,TKEY_FIRE_SECONDARY, BT_JOY_BUTTON, 255 },
+	{  2, 25, 85, 85, 26, 26,  3,  9, 10,TKEY_ACCELERATE, BT_JOY_BUTTON, 255 },
+	{  3, 25, 93, 85, 26,  2, 25, 10, 11,TKEY_REVERSE, BT_JOY_BUTTON, 255 },
+	{  4, 25, 62, 85, 26,  1, 26,  6,  7,TKEY_FIRE_FLARE, BT_JOY_BUTTON, 255 },
+	{  5,180, 46, 59, 26, 23,  6,  0,  1,TKEY_SLIDE_ON, BT_JOY_BUTTON, 255 },
+	{  6,180, 54, 59, 26,  5,  7,  1,  4,TKEY_SLIDE_LEFT, BT_JOY_BUTTON, 255 },
+	{  7,180, 62, 59, 26,  6,  8,  4, 26,TKEY_SLIDE_RIGHT, BT_JOY_BUTTON, 255 },
+	{  8,180, 70, 59, 26,  7,  9, 26,  9,TKEY_SLIDE_UP, BT_JOY_BUTTON, 255 },
+	{  9,180, 78, 59, 26,  8, 10,  8,  2,TKEY_SLIDE_DOWN, BT_JOY_BUTTON, 255 },
+	{ 10,180, 90, 59, 26,  9, 11,  2,  3,TKEY_BANK_ON, BT_JOY_BUTTON, 255 },
+	{ 11,180, 98, 59, 26, 10, 12,  3, 12,TKEY_BANK_LEFT, BT_JOY_BUTTON, 255 },
+	{ 12,180,106, 59, 26, 11, 28, 11, 25,TKEY_BANK_RIGHT, BT_JOY_BUTTON, 255 },
+	{ 13, 22,154, 51, 26, 24, 15, 30, 14,TKEY_PITCH_UD, BT_JOY_AXIS, 255 },
+	{ 14, 22,154, 99,  8, 30, 16, 13, 17,TKEY_PITCH_UD, BT_INVERT, 255 },
+	{ 15, 22,162, 51, 26, 13,  0, 18, 16,TKEY_TURN_LR, BT_JOY_AXIS, 255 },
+	{ 16, 22,162, 99,  8, 14, 17, 15, 19,TKEY_TURN_LR, BT_INVERT, 255 },
+	{ 17,164,154, 58, 26, 16, 19, 14, 18,TKEY_SLIDE_LR, BT_JOY_AXIS, 255 },
+	{ 18,164,154,106,  8, 29, 20, 17, 15,TKEY_SLIDE_LR, BT_INVERT, 255 },
+	{ 19,164,162, 58, 26, 17, 21, 16, 20,TKEY_SLIDE_UD, BT_JOY_AXIS, 255 },
+	{ 20,164,162,106,  8, 18, 22, 19, 21,TKEY_SLIDE_UD, BT_INVERT, 255 },
+	{ 21,164,172, 58, 26, 19, 23, 20, 22,TKEY_BANK_LR, BT_JOY_AXIS, 255 },
+	{ 22,164,172,106,  8, 20, 24, 21, 23,TKEY_BANK_LR, BT_INVERT, 255 },
+	{ 23,164,180, 58, 26, 21,  5, 22, 24,TKEY_THROTTLE, BT_JOY_AXIS, 255 },
+	{ 24,164,180,106,  8, 22, 13, 23,  0,TKEY_THROTTLE, BT_INVERT, 255 },
+	{ 25, 25,109, 85, 26,  3, 27, 12, 28,TKEY_REAR_VIEW, BT_JOY_BUTTON, 255 },
+	{ 26, 25, 70, 85, 26,  4,  2,  7,  8,TKEY_DROP_BOMB, BT_JOY_BUTTON, 255 },
+	{ 27, 25,117, 85, 26, 25, 30, 28, 29,"TXT_C_AFTERBURNER", BT_JOY_BUTTON, 255 },
+	{ 28,180,114, 79, 26, 12, 29, 25, 27,"TXT_CYCLE_PRIMARY", BT_JOY_BUTTON, 255 },
+	{ 29,180,122, 79, 26, 28, 18, 27, 30,"TXT_CYCLE_SECONDARY", BT_JOY_BUTTON, 255 },
+	{ 30, 25,125, 85, 26, 27, 14, 29, 13,"TXT_C_HEADLIGHT", BT_JOY_BUTTON, 255 },
 };
 kc_item kc_superjoy[NUM_OTHER_CONTROLS] =
 {
-	{  0, 25, 46, 85, 26, 15,  1, 24,  5,"Fire primary", BT_JOY_BUTTON, 255 },
-	{  1, 25, 54, 85, 26,  0,  4,  5,  6,"Fire secondary", BT_JOY_BUTTON, 255 },
-	{  2, 25, 85, 85, 26, 26,  3,  9, 10,"Accelerate", BT_JOY_BUTTON, 255 },
-	{  3, 25, 93, 85, 26,  2, 25, 10, 11,"reverse", BT_JOY_BUTTON, 255 },
-	{  4, 25, 62, 85, 26,  1, 26,  6,  7,"Fire flare", BT_JOY_BUTTON, 255 },
-	{  5,180, 46, 79, 26, 23,  6,  0,  1,"Slide on", BT_JOY_BUTTON, 255 },
-	{  6,180, 54, 79, 26,  5,  7,  1,  4,"Slide left", BT_JOY_BUTTON, 255 },
-	{  7,180, 62, 79, 26,  6,  8,  4, 26,"Slide right", BT_JOY_BUTTON, 255 },
-	{  8,180, 70, 79, 26,  7,  9, 26,  9,"Slide up", BT_JOY_BUTTON, 255 },
-	{  9,180, 78, 79, 26,  8, 10,  8,  2,"Slide down", BT_JOY_BUTTON, 255 },
-	{ 10,180, 90, 79, 26,  9, 11,  2,  3,"Bank on", BT_JOY_BUTTON, 255 },
-	{ 11,180, 98, 79, 26, 10, 12,  3, 12,"Bank left", BT_JOY_BUTTON, 255 },
-	{ 12,180,106, 79, 26, 11, 28, 11, 25,"Bank right", BT_JOY_BUTTON, 255 },
-	{ 13, 22,154, 51, 26, 24, 15, 30, 14,"Pitch U/D", BT_JOY_AXIS, 255 },
-	{ 14, 22,154, 99,  8, 30, 16, 13, 17,"Pitch U/D", BT_INVERT, 255 },
-	{ 15, 22,162, 51, 26, 13,  0, 18, 16,"Turn L/R", BT_JOY_AXIS, 255 },
-	{ 16, 22,162, 99,  8, 14, 17, 15, 19,"Turn L/R", BT_INVERT, 255 },
-	{ 17,164,154, 58, 26, 16, 19, 14, 18,"Slide L/R", BT_JOY_AXIS, 255 },
-	{ 18,164,154,106,  8, 29, 20, 17, 15,"Slide L/R", BT_INVERT, 255 },
-	{ 19,164,162, 58, 26, 17, 21, 16, 20,"Slide U/D", BT_JOY_AXIS, 255 },
-	{ 20,164,162,106,  8, 18, 22, 19, 21,"Slide U/D", BT_INVERT, 255 },
-	{ 21,164,172, 58, 26, 19, 23, 20, 22,"Bank L/R", BT_JOY_AXIS, 255 },
-	{ 22,164,172,106,  8, 20, 24, 21, 23,"Bank L/R", BT_INVERT, 255 },
-	{ 23,164,180, 58, 26, 21,  5, 22, 24,"throttle", BT_JOY_AXIS, 255 },
-	{ 24,164,180,106,  8, 22, 13, 23,  0,"throttle", BT_INVERT, 255 },
-	{ 25, 25,109, 85, 26,  3, 27, 12, 28,"REAR VIEW", BT_JOY_BUTTON, 255 },
-	{ 26, 25, 70, 85, 26,  4,  2,  7,  8,"Drop Bomb", BT_JOY_BUTTON, 255 },
-	{ 27, 25,117, 85, 26, 25, 30, 28, 29,"Afterburner", BT_JOY_BUTTON, 255 },
-	{ 28,180,114, 79, 26, 12, 29, 25, 27,"Cycle Primary", BT_JOY_BUTTON, 255 },
-	{ 29,180,122, 79, 26, 28, 18, 27, 30,"Cycle Secondary", BT_JOY_BUTTON, 255 },
-	{ 30, 25,125, 85, 26, 27, 14, 29, 13,"Headlight", BT_JOY_BUTTON, 255 },
+	{  0, 25, 46, 85, 26, 15,  1, 24,  5,TKEY_FIRE_PRIMARY, BT_JOY_BUTTON, 255 },
+	{  1, 25, 54, 85, 26,  0,  4,  5,  6,TKEY_FIRE_SECONDARY, BT_JOY_BUTTON, 255 },
+	{  2, 25, 85, 85, 26, 26,  3,  9, 10,TKEY_ACCELERATE, BT_JOY_BUTTON, 255 },
+	{  3, 25, 93, 85, 26,  2, 25, 10, 11,TKEY_REVERSE, BT_JOY_BUTTON, 255 },
+	{  4, 25, 62, 85, 26,  1, 26,  6,  7,TKEY_FIRE_FLARE, BT_JOY_BUTTON, 255 },
+	{  5,180, 46, 59, 26, 23,  6,  0,  1,TKEY_SLIDE_ON, BT_JOY_BUTTON, 255 },
+	{  6,180, 54, 59, 26,  5,  7,  1,  4,TKEY_SLIDE_LEFT, BT_JOY_BUTTON, 255 },
+	{  7,180, 62, 59, 26,  6,  8,  4, 26,TKEY_SLIDE_RIGHT, BT_JOY_BUTTON, 255 },
+	{  8,180, 70, 59, 26,  7,  9, 26,  9,TKEY_SLIDE_UP, BT_JOY_BUTTON, 255 },
+	{  9,180, 78, 59, 26,  8, 10,  8,  2,TKEY_SLIDE_DOWN, BT_JOY_BUTTON, 255 },
+	{ 10,180, 90, 59, 26,  9, 11,  2,  3,TKEY_BANK_ON, BT_JOY_BUTTON, 255 },
+	{ 11,180, 98, 59, 26, 10, 12,  3, 12,TKEY_BANK_LEFT, BT_JOY_BUTTON, 255 },
+	{ 12,180,106, 59, 26, 11, 28, 11, 25,TKEY_BANK_RIGHT, BT_JOY_BUTTON, 255 },
+	{ 13, 22,154, 51, 26, 24, 15, 30, 14,TKEY_PITCH_UD, BT_JOY_AXIS, 255 },
+	{ 14, 22,154, 99,  8, 30, 16, 13, 17,TKEY_PITCH_UD, BT_INVERT, 255 },
+	{ 15, 22,162, 51, 26, 13,  0, 18, 16,TKEY_TURN_LR, BT_JOY_AXIS, 255 },
+	{ 16, 22,162, 99,  8, 14, 17, 15, 19,TKEY_TURN_LR, BT_INVERT, 255 },
+	{ 17,164,154, 58, 26, 16, 19, 14, 18,TKEY_SLIDE_LR, BT_JOY_AXIS, 255 },
+	{ 18,164,154,106,  8, 12, 20, 17, 15,TKEY_SLIDE_LR, BT_INVERT, 255 },
+	{ 19,164,162, 58, 26, 17, 21, 16, 20,TKEY_SLIDE_UD, BT_JOY_AXIS, 255 },
+	{ 20,164,162,106,  8, 18, 22, 19, 21,TKEY_SLIDE_UD, BT_INVERT, 255 },
+	{ 21,164,172, 58, 26, 19, 23, 20, 22,TKEY_BANK_LR, BT_JOY_AXIS, 255 },
+	{ 22,164,172,106,  8, 20, 24, 21, 23,TKEY_BANK_LR, BT_INVERT, 255 },
+	{ 23,164,180, 58, 26, 21,  5, 22, 24,TKEY_THROTTLE, BT_JOY_AXIS, 255 },
+	{ 24,164,180,106,  8, 22, 13, 23,  0,TKEY_THROTTLE, BT_INVERT, 255 },
+	{ 25, 25,109, 85, 26,  3, 27, 12, 28,TKEY_REAR_VIEW, BT_JOY_BUTTON, 255 },
+	{ 26, 25, 70, 85, 26,  4,  2,  7,  8,TKEY_DROP_BOMB, BT_JOY_BUTTON, 255 },
+	{ 27, 25,117, 85, 26, 25, 30, 28, 29,"TXT_C_AFTERBURNER", BT_JOY_BUTTON, 255 },
+	{ 28,180,114, 79, 26, 12, 29, 25, 27,"TXT_CYCLE_PRIMARY", BT_JOY_BUTTON, 255 },
+	{ 29,180,122, 79, 26, 28, 18, 27, 30,"TXT_CYCLE_SECONDARY", BT_JOY_BUTTON, 255 },
+	{ 30, 25,125, 85, 26, 27, 14, 29, 13,"TXT_C_HEADLIGHT", BT_JOY_BUTTON, 255 },
 };
 
 kc_item kc_mouse[NUM_OTHER_CONTROLS] =
 {
-	{  0, 25, 46, 85, 26, 12,  1, 24,  5,"Fire primary", BT_MOUSE_BUTTON, 255 },
-	{  1, 25, 54, 85, 26,  0,  4,  5,  6,"Fire secondary", BT_MOUSE_BUTTON, 255 },
-	{  2, 25, 85, 85, 26, 26,  3,  9, 10,"Accelerate", BT_MOUSE_BUTTON, 255 },
-	{  3, 25, 93, 85, 26,  2, 25, 10, 11,"reverse", BT_MOUSE_BUTTON, 255 },
-	{  4, 25, 62, 85, 26,  1, 26,  6,  7,"Fire flare", BT_MOUSE_BUTTON, 255 },
-	{  5,180, 46, 59, 26, 24,  6,  0,  1,"Slide on", BT_MOUSE_BUTTON, 255 },
-	{  6,180, 54, 59, 26,  5,  7,  1,  4,"Slide left", BT_MOUSE_BUTTON, 255 },
-	{  7,180, 62, 59, 26,  6,  8,  4, 26,"Slide right", BT_MOUSE_BUTTON, 255 },
-	{  8,180, 70, 59, 26,  7,  9, 26,  9,"Slide up", BT_MOUSE_BUTTON, 255 },
-	{  9,180, 78, 59, 26,  8, 10,  8,  2,"Slide down", BT_MOUSE_BUTTON, 255 },
-	{ 10,180, 90, 59, 26,  9, 11,  2,  3,"Bank on", BT_MOUSE_BUTTON, 255 },
-	{ 11,180, 98, 59, 26, 10, 12,  3, 12,"Bank left", BT_MOUSE_BUTTON, 255 },
-	{ 12,180,106, 59, 26, 11,  0, 11, 25,"Bank right", BT_MOUSE_BUTTON, 255 },
-	{ 13,103,138, 58, 26, 27, 15, 25, 14,"Pitch U/D", BT_MOUSE_AXIS, 255 },
-	{ 14,103,138,106,  8, 23, 16, 13, 15,"Pitch U/D", BT_INVERT, 255 },
-	{ 15,103,146, 58, 26, 13, 17, 14, 16,"Turn L/R", BT_MOUSE_AXIS, 255 },
-	{ 16,103,146,106,  8, 14, 18, 15, 17,"Turn L/R", BT_INVERT, 255 },
-	{ 17,103,154, 58, 26, 15, 19, 16, 18,"Slide L/R", BT_MOUSE_AXIS, 255 },
-	{ 18,103,154,106,  8, 16, 20, 17, 19,"Slide L/R", BT_INVERT, 255 },
-	{ 19,103,162, 58, 26, 17, 21, 18, 20,"Slide U/D", BT_MOUSE_AXIS, 255 },
-	{ 20,103,162,106,  8, 18, 22, 19, 21,"Slide U/D", BT_INVERT, 255 },
-	{ 21,103,170, 58, 26, 19, 23, 20, 22,"Bank L/R", BT_MOUSE_AXIS, 255 },
-	{ 22,103,170,106,  8, 20, 24, 21, 23,"Bank L/R", BT_INVERT, 255 },
-	{ 23,103,182, 58, 26, 21, 14, 22, 24,"throttle", BT_MOUSE_AXIS, 255 },
-	{ 24,103,182,106,  8, 22,  5, 23,  0,"throttle", BT_INVERT, 255 },
-	{ 25, 25,109, 85, 26,  3, 27, 12, 13,"REAR VIEW", BT_MOUSE_BUTTON, 255 },
-	{ 26, 25, 70, 85, 26,  4,  2,  7,  8,"Drop Bomb", BT_MOUSE_BUTTON, 255 },
-	{ 27, 25,117, 85, 26, 25, 13, 25, 13,"Afterburner", BT_MOUSE_BUTTON, 255 },
+	{  0, 25, 46, 85, 26, 12,  1, 24,  5,TKEY_FIRE_PRIMARY, BT_MOUSE_BUTTON, 255 },
+	{  1, 25, 54, 85, 26,  0,  4,  5,  6,TKEY_FIRE_SECONDARY, BT_MOUSE_BUTTON, 255 },
+	{  2, 25, 85, 85, 26, 26,  3,  9, 10,TKEY_ACCELERATE, BT_MOUSE_BUTTON, 255 },
+	{  3, 25, 93, 85, 26,  2, 25, 10, 11,TKEY_REVERSE, BT_MOUSE_BUTTON, 255 },
+	{  4, 25, 62, 85, 26,  1, 26,  6,  7,TKEY_FIRE_FLARE, BT_MOUSE_BUTTON, 255 },
+	{  5,180, 46, 59, 26, 24,  6,  0,  1,TKEY_SLIDE_ON, BT_MOUSE_BUTTON, 255 },
+	{  6,180, 54, 59, 26,  5,  7,  1,  4,TKEY_SLIDE_LEFT, BT_MOUSE_BUTTON, 255 },
+	{  7,180, 62, 59, 26,  6,  8,  4, 26,TKEY_SLIDE_RIGHT, BT_MOUSE_BUTTON, 255 },
+	{  8,180, 70, 59, 26,  7,  9, 26,  9,TKEY_SLIDE_UP, BT_MOUSE_BUTTON, 255 },
+	{  9,180, 78, 59, 26,  8, 10,  8,  2,TKEY_SLIDE_DOWN, BT_MOUSE_BUTTON, 255 },
+	{ 10,180, 90, 59, 26,  9, 11,  2,  3,TKEY_BANK_ON, BT_MOUSE_BUTTON, 255 },
+	{ 11,180, 98, 59, 26, 10, 12,  3, 12,TKEY_BANK_LEFT, BT_MOUSE_BUTTON, 255 },
+	{ 12,180,106, 59, 26, 11,  0, 11, 25,TKEY_BANK_RIGHT, BT_MOUSE_BUTTON, 255 },
+	{ 13,180,138, 58, 26, 25, 15, 25, 14,TKEY_PITCH_UD, BT_MOUSE_AXIS, 255 },
+	{ 14,180,138,106,  8, 23, 16, 13, 15,TKEY_PITCH_UD, BT_INVERT, 255 },
+	{ 15,180,146, 58, 26, 13, 17, 14, 16,TKEY_TURN_LR, BT_MOUSE_AXIS, 255 },
+	{ 16,180,146,106,  8, 14, 18, 15, 17,TKEY_TURN_LR, BT_INVERT, 255 },
+	{ 17,180,154, 58, 26, 15, 19, 16, 18,TKEY_SLIDE_LR, BT_MOUSE_AXIS, 255 },
+	{ 18,180,154,106,  8, 16, 20, 17, 19,TKEY_SLIDE_LR, BT_INVERT, 255 },
+	{ 19,180,162, 58, 26, 17, 21, 18, 20,TKEY_SLIDE_UD, BT_MOUSE_AXIS, 255 },
+	{ 20,180,162,106,  8, 18, 22, 19, 21,TKEY_SLIDE_UD, BT_INVERT, 255 },
+	{ 21,180,170, 58, 26, 19, 23, 20, 22,TKEY_BANK_LR, BT_MOUSE_AXIS, 255 },
+	{ 22,180,170,106,  8, 20, 24, 21, 23,TKEY_BANK_LR, BT_INVERT, 255 },
+	{ 23,180,182, 58, 26, 21, 14, 22, 24,TKEY_THROTTLE, BT_MOUSE_AXIS, 255 },
+	{ 24,180,182,106,  8, 22,  5, 23,  0,TKEY_THROTTLE, BT_INVERT, 255 },
+	{ 25, 25,109, 85, 26,  3, 27, 12, 13,TKEY_REAR_VIEW, BT_MOUSE_BUTTON, 255 },
+	{ 26, 25, 70, 85, 26,  4,  2,  7,  8,TKEY_DROP_BOMB, BT_MOUSE_BUTTON, 255 },
+	{ 27, 25,117, 85, 26, 25, 13, 25, 13,"TXT_C_AFTERBURNER", BT_MOUSE_BUTTON, 255 },
 };
 
 int kconfig_is_axes_used(int axis)
@@ -532,10 +531,10 @@ void kc_change_joybutton(kc_item* item);
 void kc_change_joyaxis(kc_item* item);
 void kc_change_invert(kc_item* item);
 
-void kconfig_sub(kc_item* items, int nitems, char* title)
+void kconfig_sub(kc_item* items, int nitems, const char* title)
 {
 	grs_canvas* save_canvas;
-	grs_font* save_font;
+	grs_fontstyle* save_font;
 	int old_keyd_repeat;
 #ifdef MENU_MOUSE_ENABLED
 	int mouse_state, omouse_state, mx, my, x1, x2, y1, y2;
@@ -545,6 +544,7 @@ void kconfig_sub(kc_item* items, int nitems, char* title)
 	int i, k, ocitem, citem;
 	int time_stopped = 0;
 	char* titlebuf;
+	char kbuf[64];
 
 	All_items = items;
 	Num_items = nitems;
@@ -597,59 +597,140 @@ KConfigPaint:
 	gr_string(0x8000, LHY(20), TXT_KCONFIG_STRING_1);
 
 	gr_set_fontcolor(BM_XRGB(28, 28, 28), -1);
-	if (items == kc_keyboard) 
+	if (use_alt_kconfig)
 	{
-		gr_set_fontcolor(BM_XRGB(31, 27, 6), -1);
-		gr_setcolor(BM_XRGB(31, 27, 6));
+		if (items == kc_keyboard)
+		{
+			int w, h, aw;
+			// grd_curcanv->cv_font->deffont->ft_yoffset
 
-		gr_scanline(LHX(98), LHX(106), LHY(42));
-		gr_scanline(LHX(120), LHX(128), LHY(42));
-		gr_pixel(LHX(98), LHY(43));
-		gr_pixel(LHX(98), LHY(44));
-		gr_pixel(LHX(128), LHY(43));
-		gr_pixel(LHX(128), LHY(44));
+			gr_get_string_size(transl_get_string("ControlOr"), &w, &h, &aw);
 
-		gr_string(LHX(109), LHY(40), "OR");
+			gr_set_fontcolor(BM_XRGB(31, 27, 6), -1);
+			gr_setcolor(BM_XRGB(31, 27, 6));
 
-		gr_scanline(LHX(253), LHX(261), LHY(42));
-		gr_scanline(LHX(274), LHX(283), LHY(42));
-		gr_pixel(LHX(253), LHY(43));
-		gr_pixel(LHX(253), LHY(44));
-		gr_pixel(LHX(283), LHY(43));
-		gr_pixel(LHX(283), LHY(44));
+			gr_scanline(LHX(98), LHX(128), LHY(42));
+			gr_pixel(LHX(98), LHY(43));
+			gr_pixel(LHX(98), LHY(44));
+			gr_pixel(LHX(128), LHY(43));
+			gr_pixel(LHX(128), LHY(44));
 
-		gr_string(LHX(264), LHY(40), "OR");
+			nm_restore_background(LHX(109 - ((w - 10) / 2) - 1), LHY(42), LHX(w + 1), 1);
+			gr_string(LHX(109 - ((w - (FontHires ? 20 : 10)) / 2)), LHY(40 - ((h - SMALL_FONT_HEIGHT) / 2)), transl_get_string("ControlOr"));
 
-	} 
-	if (items == kc_joystick)
-	{
-		gr_set_fontcolor(BM_XRGB(31, 27, 6), -1);
-		gr_setcolor(BM_XRGB(31, 27, 6));
-		gr_scanline(LHX(18), LHX(135), LHY(37));
-		gr_scanline(LHX(181), LHX(294), LHY(37));
-		gr_scanline(LHX(18), LHX(144), LHY(119 + 18));
-		gr_scanline(LHX(174), LHX(294), LHY(119 + 18));
-		gr_string(0x8000, LHY(35), TXT_BUTTONS);
-		gr_string(0x8000, LHY(117 + 18), TXT_AXES);
-		gr_set_fontcolor(BM_XRGB(28, 28, 28), -1);
-		gr_string(LHX(81), LHY(137 + 8), TXT_AXIS);
-		gr_string(LHX(111), LHY(137 + 8), TXT_INVERT);
-		gr_string(LHX(222), LHY(137 + 8), TXT_AXIS);
-		gr_string(LHX(252), LHY(137 + 8), TXT_INVERT);
+			gr_scanline(LHX(253), LHX(283), LHY(42));
+			gr_pixel(LHX(253), LHY(43));
+			gr_pixel(LHX(253), LHY(44));
+			gr_pixel(LHX(283), LHY(43));
+			gr_pixel(LHX(283), LHY(44));
+
+			nm_restore_background(LHX(264 - ((w - 10) / 2) - 1), LHY(42), LHX(w + 1), 1);
+			gr_string(LHX(264 - ((w - (FontHires ? 20 : 10)) / 2)), LHY(40 - ((h - SMALL_FONT_HEIGHT) / 2)), transl_get_string("ControlOr"));
+			printf("size=%d, %d\n", w, h);
+
+		}
+		if (items == kc_joystick)
+		{
+			int w, h, aw;
+			gr_set_fontcolor(BM_XRGB(31, 27, 6), -1);
+			gr_setcolor(BM_XRGB(31, 27, 6));
+			gr_scanline(LHX(18), LHX(294), LHY(37));
+			gr_scanline(LHX(18), LHX(294), LHY(119 + 14));
+
+			gr_get_string_size(transl_get_string("TXT_BUTTONS"), &w, &h, &aw);
+			nm_restore_background(((grd_curcanv->cv_bitmap.bm_w / 2) - (w / 2) - 2), LHY(37), LHX(w + 3), LHY(1));
+			gr_string(0x8000, LHY(35 - ((h - SMALL_FONT_HEIGHT) / 2)), TXT_BUTTONS);
+
+			gr_get_string_size(transl_get_string("TXT_AXES"), &w, &h, &aw);
+			nm_restore_background(((grd_curcanv->cv_bitmap.bm_w / 2) - (w / 2) - 2), LHY(119 + 14), LHX(w + 3), LHY(1));
+			gr_string(0x8000, LHY(117 + 14 - ((h - SMALL_FONT_HEIGHT) / 2)), TXT_AXES);
+
+			low_yoffset += (h - SMALL_FONT_HEIGHT) / 2;
+			gr_set_fontcolor(BM_XRGB(28, 28, 28), -1);
+			gr_string(LHX(81), LHY(137), TXT_AXIS);
+			gr_string(LHX(111), LHY(137), TXT_INVERT);
+			gr_string(LHX(222), LHY(137), TXT_AXIS);
+			gr_string(LHX(252), LHY(137), TXT_INVERT);
+
+		}
+		else if (items == kc_mouse)
+		{
+			int w, h, aw;
+			gr_set_fontcolor(BM_XRGB(31, 27, 6), -1);
+			gr_setcolor(BM_XRGB(31, 27, 6));
+			gr_scanline(LHX(18), LHX(294), LHY(37));
+			gr_scanline(LHX(18), LHX(294), LHY(119 + 7));
+
+			gr_get_string_size(transl_get_string("TXT_BUTTONS"), &w, &h, &aw);
+			nm_restore_background(((grd_curcanv->cv_bitmap.bm_w / 2) - (w / 2) - 2), LHY(37), LHX(w + 3), LHY(1));
+			gr_string(0x8000, LHY(35 - ((h - SMALL_FONT_HEIGHT) / 2)), TXT_BUTTONS);
+
+			gr_get_string_size(transl_get_string("TXT_AXES"), &w, &h, &aw);
+			nm_restore_background(((grd_curcanv->cv_bitmap.bm_w / 2) - (w / 2) - 2), LHY(119 + 7), LHX(w + 3), LHY(1));
+			gr_string(0x8000, LHY(117 + 7 - ((h - SMALL_FONT_HEIGHT) / 2)), TXT_AXES);
+
+			low_yoffset += (h - SMALL_FONT_HEIGHT) / 2;
+			gr_set_fontcolor(BM_XRGB(28, 28, 28), -1);
+			gr_string(LHX(239), LHY(129), TXT_AXIS);
+			gr_string(LHX(269), LHY(129), TXT_INVERT);
+		}
 	}
-	else if (items == kc_mouse)
+	else
 	{
-		gr_set_fontcolor(BM_XRGB(31, 27, 6), -1);
-		gr_setcolor(BM_XRGB(31, 27, 6));
-		gr_scanline(LHX(18), LHX(135), LHY(37));
-		gr_scanline(LHX(181), LHX(294), LHY(37));
-		gr_scanline(LHX(18), LHX(144), LHY(119 + 5));
-		gr_scanline(LHX(174), LHX(294), LHY(119 + 5));
-		gr_string(0x8000, LHY(35), TXT_BUTTONS);
-		gr_string(0x8000, LHY(117 + 5), TXT_AXES);
-		gr_set_fontcolor(BM_XRGB(28, 28, 28), -1);
-		gr_string(LHX(169), LHY(129), TXT_AXIS);
-		gr_string(LHX(199), LHY(129), TXT_INVERT);
+		if (items == kc_keyboard)
+		{
+			gr_set_fontcolor(BM_XRGB(31, 27, 6), -1);
+			gr_setcolor(BM_XRGB(31, 27, 6));
+
+			gr_scanline(LHX(98), LHX(106), LHY(42));
+			gr_scanline(LHX(120), LHX(128), LHY(42));
+			gr_pixel(LHX(98), LHY(43));
+			gr_pixel(LHX(98), LHY(44));
+			gr_pixel(LHX(128), LHY(43));
+			gr_pixel(LHX(128), LHY(44));
+
+			gr_string(LHX(109), LHY(40), "OR");
+
+			gr_scanline(LHX(253), LHX(261), LHY(42));
+			gr_scanline(LHX(274), LHX(283), LHY(42));
+			gr_pixel(LHX(253), LHY(43));
+			gr_pixel(LHX(253), LHY(44));
+			gr_pixel(LHX(283), LHY(43));
+			gr_pixel(LHX(283), LHY(44));
+
+			gr_string(LHX(264), LHY(40), "OR");
+
+		}
+		if (items == kc_joystick)
+		{
+			gr_set_fontcolor(BM_XRGB(31, 27, 6), -1);
+			gr_setcolor(BM_XRGB(31, 27, 6));
+			gr_scanline(LHX(18), LHX(135), LHY(37));
+			gr_scanline(LHX(181), LHX(294), LHY(37));
+			gr_scanline(LHX(18), LHX(144), LHY(119 + 18));
+			gr_scanline(LHX(174), LHX(294), LHY(119 + 18));
+			gr_string(0x8000, LHY(35), TXT_BUTTONS);
+			gr_string(0x8000, LHY(117 + 18), TXT_AXES);
+			gr_set_fontcolor(BM_XRGB(28, 28, 28), -1);
+			gr_string(LHX(81), LHY(137 + 8), TXT_AXIS);
+			gr_string(LHX(111), LHY(137 + 8), TXT_INVERT);
+			gr_string(LHX(222), LHY(137 + 8), TXT_AXIS);
+			gr_string(LHX(252), LHY(137 + 8), TXT_INVERT);
+		}
+		else if (items == kc_mouse)
+		{
+			gr_set_fontcolor(BM_XRGB(31, 27, 6), -1);
+			gr_setcolor(BM_XRGB(31, 27, 6));
+			gr_scanline(LHX(18), LHX(135), LHY(37));
+			gr_scanline(LHX(181), LHX(294), LHY(37));
+			gr_scanline(LHX(18), LHX(144), LHY(119 + 5));
+			gr_scanline(LHX(174), LHX(294), LHY(119 + 5));
+			gr_string(0x8000, LHY(35), TXT_BUTTONS);
+			gr_string(0x8000, LHY(117 + 5), TXT_AXES);
+			gr_set_fontcolor(BM_XRGB(28, 28, 28), -1);
+			gr_string(LHX(169), LHY(129), TXT_AXIS);
+			gr_string(LHX(199), LHY(129), TXT_INVERT);
+		}
 	}
 
 	for (i = 0; i < nitems; i++)
@@ -670,6 +751,23 @@ KConfigPaint:
 	{
 		I_MarkStart();
 		I_DoEvents();
+
+		if (use_alt_kconfig)
+		{
+			grd_curcanv->cv_font = GAME_FONT;
+			int x = 15, y = (FontHires ? 196 : 188) - GAME_FONT->ft_h, w = 80, h = GAME_FONT->ft_h;
+			strcpy(kbuf, items[citem].tkey);
+			strcat(kbuf, "_ALT");
+			const char* kname = transl_get_string(kbuf);
+
+			/*gr_setcolor(BM_XRGB(1, 1, 1));
+			gr_urect(x - 1, y - 1, x + w, x + h);
+			*/
+			nm_restore_background(LHX(x - 1), LHY(y - 1), LHX(w + 1), LHY(h + 1));
+			gr_set_fontcolor(BM_XRGB(28, 28, 28), -1);
+
+			gr_string(LHX(x), LHY(y), kname);
+		}
 
 		//see if redbook song needs to be restarted
 		songs_check_redbook_repeat();
@@ -817,7 +915,7 @@ KConfigPaint:
 				fprintf(fp, "\t{ %2d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%c%s%c, %s, 255 },\n",
 					kc_keyboard[i].id, kc_keyboard[i].x, kc_keyboard[i].y, kc_keyboard[i].w1, kc_keyboard[i].w2,
 					kc_keyboard[i].u, kc_keyboard[i].d, kc_keyboard[i].l, kc_keyboard[i].r,
-					34, kc_keyboard[i].text, 34, btype_text[kc_keyboard[i].type]);
+					34, kc_keyboard[i].tkey, 34, btype_text[kc_keyboard[i].type]);
 			}
 			fprintf(fp, "};");
 
@@ -827,12 +925,12 @@ KConfigPaint:
 					fprintf(fp, "\t{ %2d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%c%s%c, %s, 255 },\n",
 						kc_joystick[i].id, kc_joystick[i].x, kc_joystick[i].y, kc_joystick[i].w1, kc_joystick[i].w2,
 						kc_joystick[i].u, kc_joystick[i].d, kc_joystick[i].l, kc_joystick[i].r,
-						34, kc_joystick[i].text, 34, btype_text[kc_joystick[i].type]);
+						34, kc_joystick[i].tkey, 34, btype_text[kc_joystick[i].type]);
 				else
 					fprintf(fp, "\t{ %2d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%c%s%c, %s, 255 },\n",
 						kc_joystick[i].id, kc_joystick[i].x, kc_joystick[i].y, kc_joystick[i].w1, kc_joystick[i].w2,
 						kc_joystick[i].u, kc_joystick[i].d, kc_joystick[i].l, kc_joystick[i].r,
-						34, kc_joystick[i].text, 34, btype_text[kc_joystick[i].type]);
+						34, kc_joystick[i].tkey, 34, btype_text[kc_joystick[i].type]);
 			}
 			fprintf(fp, "};");
 
@@ -841,7 +939,7 @@ KConfigPaint:
 				fprintf(fp, "\t{ %2d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%3d,%c%s%c, %s, 255 },\n",
 					kc_mouse[i].id, kc_mouse[i].x, kc_mouse[i].y, kc_mouse[i].w1, kc_mouse[i].w2,
 					kc_mouse[i].u, kc_mouse[i].d, kc_mouse[i].l, kc_mouse[i].r,
-					34, kc_mouse[i].text, 34, btype_text[kc_mouse[i].type]);
+					34, kc_mouse[i].tkey, 34, btype_text[kc_mouse[i].type]);
 			}
 			fprintf(fp, "};");
 
@@ -867,15 +965,19 @@ KConfigPaint:
 
 void kc_drawitem(kc_item* item, int is_current)
 {
-	int x, w, h, aw;
+	int x, y, w, h, aw;
+	int kyo = grd_curcanv->cv_font->deffont->ft_yoffset;
 	char btext[16];
+	y = item->y;
 	//	PA_DFX (pa_set_frontbuffer_current());
+	if (use_alt_kconfig && low_yoffset && y >= LHY(130))
+		y += low_yoffset;
 
 	if (is_current)
 		gr_set_fontcolor(BM_XRGB(20, 20, 29), -1);
 	else
 		gr_set_fontcolor(BM_XRGB(15, 15, 24), -1);
-	gr_string(LHX(item->x), LHY(item->y), item->text);
+	gr_string(LHX(item->x), LHY(y) - kyo, transl_get_string(item->tkey));
 
 	if (item->value == 255)
 	{
@@ -888,9 +990,9 @@ void kc_drawitem(kc_item* item, int is_current)
 		case BT_KEY:
 			strncpy(btext, key_text[item->value], 10); break;
 		case BT_MOUSE_BUTTON:
-			strncpy(btext, Text_string[mousebutton_text[item->value]], 10); break;
+			strncpy(btext, transl_get_string(mousebutton_text[item->value]), 10); break;
 		case BT_MOUSE_AXIS:
-			strncpy(btext, Text_string[mouseaxis_text[item->value]], 10); break;
+			strncpy(btext, transl_get_string(mouseaxis_text[item->value]), 10); break;
 		case BT_JOY_BUTTON:
 			if (Config_control_type == CONTROL_FLIGHTSTICK_PRO)
 			{
@@ -906,9 +1008,9 @@ void kc_drawitem(kc_item* item, int is_current)
 			}
 			break;
 		case BT_JOY_AXIS:
-			strncpy(btext, Text_string[joyaxis_text[item->value]], 10); break;
+			strncpy(btext, transl_get_string(joyaxis_text[item->value]), 10); break;
 		case BT_INVERT:
-			strncpy(btext, Text_string[invert_text[item->value]], 10); break;
+			strncpy(btext, transl_get_string(invert_text[item->value]), 10); break;
 		}
 	}
 	if (item->w1)
@@ -919,13 +1021,13 @@ void kc_drawitem(kc_item* item, int is_current)
 			gr_setcolor(BM_XRGB(21, 0, 24));
 		else
 			gr_setcolor(BM_XRGB(16, 0, 19));
-		gr_urect(LHX(item->w1 + item->x), LHY(item->y - 1), LHX(item->w1 + item->x + item->w2), LHY(item->y) + h);
+		gr_urect(LHX(item->w1 + item->x), LHY(item->y - 1), LHX(item->w1 + item->x + item->w2), LHY(item->y) + (use_alt_kconfig ? SMALL_FONT_HEIGHT : h));
 
 		gr_set_fontcolor(BM_XRGB(28, 28, 28), -1);
 
 		x = LHX(item->w1 + item->x) + ((LHX(item->w2) - w) / 2);
 
-		gr_string(x, LHY(item->y), btext);
+		gr_string(x, LHY(y) - kyo, btext);
 		//		PA_DFX (pa_set_backbuffer_current());
 	}
 }
@@ -935,7 +1037,11 @@ static int looper = 0;
 
 void kc_drawquestion(kc_item* item)
 {
-	int c, x, w, h, aw;
+	int c, x, y, w, h, aw;
+	int kyo = grd_curcanv->cv_font->deffont->ft_yoffset;
+	y = item->y;
+	if (use_alt_kconfig && low_yoffset && y >= LHY(130))
+		y += low_yoffset;
 
 	//PA_DFX (pa_set_frontbuffer_current());
 
@@ -948,13 +1054,13 @@ void kc_drawquestion(kc_item* item)
 	looper++;
 	if (looper > 63) looper = 0;
 
-	gr_urect(LHX(item->w1 + item->x), LHY(item->y - 1), LHX(item->w1 + item->x + item->w2), LHY(item->y) + h);
+	gr_urect(LHX(item->w1 + item->x), LHY(y - 1), LHX(item->w1 + item->x + item->w2), LHY(y) + (use_alt_kconfig ? SMALL_FONT_HEIGHT : h));
 
 	gr_set_fontcolor(BM_XRGB(28, 28, 28), -1);
 
 	x = LHX(item->w1 + item->x) + ((LHX(item->w2) - w) / 2);
 
-	gr_string(x, LHY(item->y), "?");
+	gr_string(x, LHY(y) - kyo, "?");
 	//	PA_DFX (pa_set_backbuffer_current());
 }
 
@@ -1306,13 +1412,14 @@ void kc_change_invert(kc_item * item)
 
 extern void gr_bm_bitblt(int w, int h, int dx, int dy, int sx, int sy, grs_bitmap * src, grs_bitmap * dest);
 
-void kconfig(int n, char* title)
+void kconfig(int n, const char* title)
 {
 	int i;
 	grs_bitmap* save_bm;
 
 	set_screen_mode(SCREEN_MENU);
 
+	use_alt_kconfig = GAME_FONT->ft_h != SMALL_FONT_HEIGHT || atoi(transl_get_string("UseAltKconfig"));
 	kc_set_controls();
 
 #if defined(POLY_ACC)
@@ -2052,14 +2159,14 @@ void controls_read_all()
 			!Players[Player_num].secondary_ammo[SMART_MINE_INDEX])
 		{
 			digi_play_sample_once(SOUND_BAD_SELECTION, F1_0);
-			HUD_init_message("No bombs available!");
+			HUD_init_message(transl_get_string("ControlNoBombsAvailable"));
 		}
 		else
 		{
 			if (Players[Player_num].secondary_ammo[bomb] == 0)
 			{
 				digi_play_sample_once(SOUND_BAD_SELECTION, F1_0);
-				HUD_init_message("No %s available!", (bomb == SMART_MINE_INDEX) ? "Smart mines" : "Proximity bombs");
+				HUD_init_message(transl_fmt_string_t("ControlBombsNotAvailable", (bomb == SMART_MINE_INDEX) ? "ControlSmartMines" : "ControlProxBombs"));
 			}
 			else
 			{

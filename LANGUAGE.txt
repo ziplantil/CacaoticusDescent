@@ -1,0 +1,158 @@
+==========================
+Language HOG format & Info
+==========================
+
+Languages are distributed as .LHG files. These are standard
+Descent .HOG files with a different extension. They may
+contain the following files:
+
+* STRINGS.LNG (required)
+* D1LEVELS.LNG (for Descent I)
+* D2LEVELS.LNG (for Descent II)
+* FONTS.LST
+* OFFSETS.LST
+* KERNS.LST
+* replacement .TXB files (for briefings)
+* any number of font files
+
+All .LNG and .LST files support comments by starting a line
+with #.
+
+STRINGS.LNG is a simple key-value list of strings based on
+a translation key and translation value. The file should
+be encoded with the UTF-8 text encoding. There is also
+support for placeholders which can be passed a special
+"form" parameter and a fallback in case it is not found.
+For example:
+
+BlueKey            =Blue Key
+BlueKey<test       =Blue Key!
+RedKey             =Red Key
+DoorLocked         =No {0<test|{0}?} No Admittance!
+
+With this, a DoorLocked formatted with BlueKey becomes
+"No Blue Key! No Admittance!"
+but with RedKey it becomes
+"No Red Key? No Admittance!"
+as there is no RedKey<test, it uses the fallback.
+
+In addition, the variables themselves can hand forms
+"up" in the chain. For example:
+
+VulcanCannon       =Vulcan Cannon
+Laser>pew          =Lasers
+GotWeapon          =Got {0}!
+GotWeapon<pew      =Got {0}! Pew pew!
+
+GotWeapon with VulcanCannon will show up as
+"Got Vulcan Cannon!"
+but with Laser it will show up as
+"Got Lasers! Pew pew!"
+
+For numbers (integers only), this form can be a % for
+formatting numbers according to the printf format.
+It can also be prefixed with 1 to use wide 1s.
+
+You should always test the game to make sure your
+translations fit the allotted space. If not, they
+will often have to be shortened.
+
+D1LEVELS.LNG and D2LEVELS.LNG contains translations
+for the level names for the builtin D1 and D2 missions,
+respectively. One level name per line, and secret
+levels follow the standard levels. For both games,
+the file should have exactly 30 lines (27+3 levels
+in D1 and 24+6 levels in D2). If not present,
+the level names will not be translated.
+
+FONTS.LST lists extra fonts. Since the fonts that
+come with the game can only render standard ASCII
+characters, supplying extra fonts for adding more
+letters etc. will be required. The format of this
+file is as follows: every line should contain four
+items, separated by spaces, in this order:
+
+* Font style ID (see below for values for D1 and D2).
+  This determines the font style the font will be loaded
+  for.
+* The offset. Since the Descent font format only supports
+  minimum and maximum character indexes between 0-255,
+  an offset is required for handling any characters
+  with Unicode codepoints larger than U+00FF. For example,
+  with 1024. the "first character" in the font will actually
+  correspond to Unicode codepoint 1024 (U+0400).
+* The vertical offset. Should be 0 normally, but if specified,
+  will cause the characters in this particular font to be
+  drawn lower down than usual. Useful if the fonts have
+  varying heights so that everything can be vertically centered.
+* The font file name. The .LHG should then contain a fon
+  by that file name.
+
+For example:
+
+2 128 0 EUFNT11.FNT
+
+means "for font style 2, load font EUFNT11.FNT with Unicode
+character offset 128 and vertical offset 0".
+
+Font styles:
+* Huge font ("GAME OVER", game title in credits, etc.):
+    Descent 1:  0
+    Descent 2:  0,  1 (lo-res, hi-res)
+* Menu font (gray color):
+    Descent 1:  1
+    Descent 2:  2,  3 (lo-res, hi-res)
+* Menu font (gold color):
+    Descent 1:  2
+    Descent 2:  4,  5 (lo-res, hi-res)
+* Menu font (blue color):
+    Descent 1:  3
+    Descent 2:  6,  7 (lo-res, hi-res)
+* In-game font, not colored, used for briefings etc.:
+    Descent 1:  4
+    Descent 2:  8,  9 (lo-res, hi-res)
+* HUD font, by default the same as in-game font
+    Descent 1:  5
+    Descent 2: 10, 11 (lo-res, hi-res)
+* Gauge font (used for numerical gauges, ideally no custom
+  fonts required here, or at least with differing heights),
+  by default the same as in-game font
+    Descent 1:  6
+    Descent 2: 12, 13 (lo-res, hi-res)
+
+OFFSETS.LST should contain various font information and is
+only really useful if the new fonts have different heights
+or their height is different from the standard fonts. It is much
+like FONTS.LST in format, except the listed values are:
+
+* Font style ID (see below for values for D1 and D2).
+* General vertical offset for this font style in general.
+* The vertical offset for the *default built-in* font.
+* The nominal height of the font style. Used for most measurements.
+
+For example:
+
+1 0 6 50
+
+means "for font style 1, the general Y offset is 0, the Y offset
+for the built-in font is 6 and the nominal height is 50 pixels."
+
+KERNS.LST should contain additional kerns, which are values
+that allow characters to be drawn closer to (or further from)
+each other than normal. The font format supports a kern table,
+but there is no way to use these kerns *across* different fonts
+without using KERNS.LST. The format is much like FONTS.LST
+and OFFSETS.LST, and contains on every line:
+
+* Font style ID (see below for values for D1 and D2).
+* The codepoint of the first character in the pair.
+* The codepoint of the second character in the pair.
+* The kern width.
+
+For example:
+
+0 34 228 4
+
+means "for font style 0, a character with codepoint 34 is only
+4 pixels wide if followed by a character with codepoint 228".
+

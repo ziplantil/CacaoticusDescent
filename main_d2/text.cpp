@@ -26,7 +26,7 @@ COPYRIGHT 1993-1999 PARALLAX SOFTWARE CORPORATION.  ALL RIGHTS RESERVED.
 
 char *text;
 
-char *Text_string[N_TEXT_STRINGS];
+char *Text_string_orig[N_TEXT_STRINGS];
 
 void free_text()
 {
@@ -108,7 +108,7 @@ void load_text()
 	for (i=0,tptr=text;i<N_TEXT_STRINGS;i++) {
 		char *p;
 
-		Text_string[i] = tptr;
+		Text_string_orig[i] = tptr;
 
 		tptr = strchr(tptr,'\n');
 
@@ -123,10 +123,10 @@ void load_text()
 		if ( tptr ) *tptr++ = 0;
 
 		if (have_binary)
-			decode_text_line(Text_string[i]);
+			decode_text_line(Text_string_orig[i]);
 
 		//scan for special chars (like \n)
-		for (p=Text_string[i];p=strchr(p,'\\');) {
+		for (p=Text_string_orig[i];p=strchr(p,'\\');) {
 			char newchar;
 
 			if (p[1] == 'n') newchar = '\n';
@@ -145,5 +145,144 @@ void load_text()
 //	Assert(tptr==text+len || tptr==text+len-2);
 	
 }
+
+void strcpyn(char* dst, const char* src, size_t n)
+{
+	if (!n) return;
+	while (--n && (*dst++ = *src++));
+	*dst++ = '\0';
+}
+
+const char* _PRIMARY_WEAPON_NAMES[10] = {
+	"TXT_W_LASER",
+	"TXT_W_VULCAN",
+	"TXT_W_SPREADFIRE",
+	"TXT_W_PLASMA",
+	"TXT_W_FUSION",
+	"TXT_W_SLASER",
+	"TXT_W_SVULCAN",
+	"TXT_W_SSPREADFIRE",
+	"TXT_W_SPLASMA",
+	"TXT_W_SFUSION",
+};
+const char* _SECONDARY_WEAPON_NAMES[10] = {
+	"TXT_W_C_MISSILE",
+	"TXT_W_H_MISSILE",
+	"TXT_W_P_BOMB",
+	"TXT_W_S_MISSILE",
+	"TXT_W_M_MISSILE",
+	"TXT_W_SMISSILE1",
+	"TXT_W_SMISSILE2",
+	"TXT_W_SMISSILE3",
+	"TXT_W_SMISSILE4",
+	"TXT_W_SMISSILE5",
+};
+const char* _PRIMARY_WEAPON_NAMES_SHORT[10] = {
+	"TXT_W_LASER_S",
+	"TXT_W_VULCAN_S",
+	"TXT_W_SPREADFIRE_S",
+	"TXT_W_PLASMA_S",
+	"TXT_W_FUSION_S",
+	"TXT_W_SLASER_S",
+	"TXT_W_SVULCAN_S",
+	"TXT_W_SSPREADFIRE_S",
+	"TXT_W_SPLASMA_S",
+	"TXT_W_SFUSION_S",
+};
+const char* _SECONDARY_WEAPON_NAMES_SHORT[10] = {
+	"TXT_W_C_MISSILE_S",
+	"TXT_W_H_MISSILE_S",
+	"TXT_W_P_BOMB_S",
+	"TXT_W_S_MISSILE_S",
+	"TXT_W_M_MISSILE_S",
+	"TXT_W_SMISSILE1_S",
+	"TXT_W_SMISSILE2_S",
+	"TXT_W_SMISSILE3_S",
+	"TXT_W_SMISSILE4_S",
+	"TXT_W_SMISSILE5_S",
+};
+const char* _CONTROL_TEXT[7] = {
+	"TXT_CONTROL_KEYBOARD",
+	"TXT_CONTROL_JOYSTICK",
+	"TXT_CONTROL_FSTICKPRO",
+	"TXT_CONTROL_THRUSTFCS",
+	"TXT_CONTROL_GGAMEPAD",
+	"TXT_CONTROL_MOUSE",
+	"TXT_CONTROL_CYBERMAN",
+};
+const char* _CONNECT_STRINGS[7] = {
+	"TXT_NET_DISCONNECTED",
+	"TXT_NET_PLAYING",
+	"TXT_NET_ESCAPED",
+	"TXT_NET_DIED",
+	"TXT_NET_FOUND_SECRET",
+	"TXT_NET_ESCAPE_TUNNEL",
+	"TXT_NET_RESERVED",
+};
+const char* _NET_DUMP_STRINGS[7] = {
+	"TXT_NET_GAME_CLOSED",
+	"TXT_NET_GAME_FULL",
+	"TXT_NET_GAME_BETWEEN",
+	"TXT_NET_GAME_NSELECT",
+	"TXT_NET_GAME_NSTART",
+	"TXT_NET_GAME_CONNECT",
+	"TXT_NET_GAME_WRONGLEV",
+};
+const char* _MODE_NAMES[4] = {
+	"TXT_ANARCHY",
+	"TXT_TEAM_ANARCHY",
+	"TXT_ANARCHY_W_ROBOTS",
+	"TXT_COOPERATIVE",
+};
+const char* _MODEM_ERROR_MESS[6] = {
+	"TXT_NO_DIAL_TONE",
+	"TXT_BUSY",
+	"TXT_NO_ANSWER",
+	"TXT_NO_CARRIER",
+	"TXT_VOICE",
+	"TXT_ERR_MODEM_RETURN",
+};
+const char* _MENU_DIFFICULTY_TEXT[5] = {
+	"TXT_DIFFICULTY_1",
+	"TXT_DIFFICULTY_2",
+	"TXT_DIFFICULTY_3",
+	"TXT_DIFFICULTY_4",
+	"TXT_DIFFICULTY_5",
+};
+const char* _MENU_DETAIL_TEXT[6] = {
+	"TXT_DETAIL_1",
+	"TXT_DETAIL_2",
+	"TXT_DETAIL_3",
+	"TXT_DETAIL_4",
+	"TXT_DETAIL_5",
+	"TXT_DETAIL_CUSTOM_",
+};
+const char* _ORDINAL_TEXT[10] = {
+	"TXT_1ST",
+	"TXT_2ND",
+	"TXT_3RD",
+	"TXT_4TH",
+	"TXT_5TH",
+	"TXT_6TH",
+	"TXT_7TH",
+	"TXT_8TH",
+	"TXT_9TH",
+	"TXT_10TH",
+};
+
+const char* _SECONDARY_WEAPON_NAMES_VERY_SHORT[10] = {
+	"TXT_CONCUSSION",
+	"TXT_HOMING",
+	"TXT_PROXBOMB",
+	"TXT_SMART",
+	"TXT_MEGA",
+	"TXT_SMISSILE1_VS",
+	"TXT_SMISSILE2_VS",
+	"TXT_SMISSILE3_VS",
+	"TXT_SMISSILE4_VS",
+	"TXT_SMISSILE5_VS",
+};
+
+const char* _TRANSLATED_LEVEL_NAMES[40] = { };
 
 

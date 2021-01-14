@@ -254,11 +254,11 @@ int state_get_save_file(char* fname, char* dsc, int multi)
 			strcpy(desc[i], TXT_EMPTY);
 			//rpad_string( desc[i], DESC_LENGTH-1 );
 		}
-		m[i].type = NM_TYPE_INPUT_MENU; m[i].text = desc[i]; m[i].text_len = DESC_LENGTH - 1;
+		m[i].type = NM_TYPE_INPUT_MENU; nm_copy_text(&m[i], desc[i]); m[i].text_len = DESC_LENGTH - 1;
 	}
 
 	sc_last_item = -1;
-	choice = newmenu_do1(NULL, "Save Game", NUM_SAVES, m, NULL, state_default_item);
+	choice = newmenu_do1(NULL, transl_get_string("SaveGame"), NUM_SAVES, m, NULL, state_default_item);
 
 	for (i = 0; i < NUM_SAVES; i++)
 	{
@@ -268,6 +268,7 @@ int state_get_save_file(char* fname, char* dsc, int multi)
 
 	if (choice > -1)
 	{
+		strcpy(desc[choice], m[choice].text);
 		strcpy(fname, filename[choice]);
 		strcpy(dsc, desc[choice]);
 		state_default_item = choice;
@@ -290,7 +291,7 @@ int state_get_restore_file(char* fname, int multi)
 	int valid;
 
 	nsaves = 0;
-	m[0].type = NM_TYPE_TEXT; m[0].text = const_cast<char*>("\n\n\n\n");
+	m[0].type = NM_TYPE_TEXT; nm_copy_text(&m[0], "\n\n\n\n");
 	for (i = 0; i < NUM_SAVES + 1; i++)
 	{
 		sc_bmp[i] = NULL;
@@ -320,7 +321,7 @@ int state_get_restore_file(char* fname, int multi)
 					// Read description
 					fread(desc[i], sizeof(char) * DESC_LENGTH, 1, fp);
 					//rpad_string( desc[i], DESC_LENGTH-1 );
-					m[i + 1].type = NM_TYPE_MENU; m[i + 1].text = desc[i];
+					m[i + 1].type = NM_TYPE_MENU; nm_copy_text(&m[i + 1], desc[i]);
 					// Read thumbnail
 					sc_bmp[i] = gr_create_bitmap(THUMBNAIL_W, THUMBNAIL_H);
 					fread(sc_bmp[i]->bm_data, THUMBNAIL_W * THUMBNAIL_H, 1, fp);
@@ -340,13 +341,13 @@ int state_get_restore_file(char* fname, int multi)
 		{
 			strcpy(desc[i], TXT_EMPTY);
 			//rpad_string( desc[i], DESC_LENGTH-1 );
-			m[i + 1].type = NM_TYPE_TEXT; m[i + 1].text = desc[i];
+			m[i + 1].type = NM_TYPE_TEXT; nm_copy_text(&m[i + 1], desc[i]);
 		}
 	}
 
 	if (nsaves < 1)
 	{
-		nm_messagebox(NULL, 1, "Ok", "No saved games were found!");
+		nm_messagebox(NULL, 1, transl_get_string("TXT_OK"), transl_get_string("NoSavedGames"));
 		return 0;
 	}
 
@@ -360,7 +361,7 @@ int state_get_restore_file(char* fname, int multi)
 #endif
 
 	RestoringMenu = 1;
-	choice = newmenu_do3(NULL, "Select Game to Restore", NUM_SAVES + 2, m, state_callback, state_default_item + 1, NULL, 190, -1);
+	choice = newmenu_do3(NULL, transl_get_string("SelectGameToRestore"), NUM_SAVES + 2, m, state_callback, state_default_item + 1, NULL, 190, -1);
 	RestoringMenu = 0;
 
 #if defined(WINDOWS) || defined(MACINTOSH)
@@ -476,7 +477,7 @@ int state_save_all(int between_levels, int secret_save, char* filename_override)
 
 	if ((Current_level_num < 0) && (secret_save == 0))
 	{
-		HUD_init_message("Can't save in secret level!");
+		HUD_init_message(transl_get_string("CannotSaveInSecretLevel"));
 		return 0;
 	}
 
@@ -511,7 +512,7 @@ int state_save_all(int between_levels, int secret_save, char* filename_override)
 		if (filename_override)
 		{
 			strcpy(filename, filename_override);
-			sprintf(desc, "[autosave backup]");
+			sprintf(desc, transl_get_string("AutosaveBackup"));
 		}
 		else if (!(filenum = state_get_save_file(filename, desc, 0)))
 		{
@@ -577,7 +578,7 @@ int state_save_all(int between_levels, int secret_save, char* filename_override)
 #endif
 
 			fseek(tfp, DESC_OFFSET, SEEK_SET);
-			fwrite("[autosave backup]", sizeof(char) * DESC_LENGTH, 1, tfp);
+			fwrite(transl_get_string("AutosaveBackup"), sizeof(char) * DESC_LENGTH, 1, tfp);
 			fclose(tfp);
 			_unlink(newname);
 			rename(filename, newname);
@@ -619,7 +620,7 @@ int state_save_all_sub(char* filename, char* desc, int between_levels)
 	if (!fp)
 	{
 		if (!(Game_mode & GM_MULTI))
-			nm_messagebox(NULL, 1, TXT_OK, "Error writing savegame.\nPossibly out of disk\nspace.");
+			nm_messagebox(NULL, 1, TXT_OK, transl_get_string("CannotWriteSavegame"));
 		start_time();
 		return 0;
 	}
@@ -984,7 +985,7 @@ int state_save_all_sub(char* filename, char* desc, int between_levels)
 	{
 		if (!(Game_mode & GM_MULTI))
 		{
-			nm_messagebox(NULL, 1, TXT_OK, "Error writing savegame.\nPossibly out of disk\nspace.");
+			nm_messagebox(NULL, 1, TXT_OK, transl_get_string("CannotWriteSavegame"));
 			fclose(fp);
 			_unlink(filename);
 		}
@@ -1030,7 +1031,7 @@ int state_restore_all(int in_game, int secret_restore, char* filename_override)
 
 	if (in_game && (Current_level_num < 0) && (secret_restore == 0))
 	{
-		HUD_init_message("Can't restore in secret level!");
+		HUD_init_message(transl_get_string("CannotRestoreInSecretLevel"));
 		return 0;
 	}
 
@@ -1099,7 +1100,7 @@ int state_restore_all(int in_game, int secret_restore, char* filename_override)
 	if (!secret_restore && in_game)
 	{
 		int choice;
-		choice = nm_messagebox(NULL, 2, "Yes", "No", "Restore Game?");
+		choice = nm_messagebox(NULL, 2, transl_get_string("TXT_YES"), transl_get_string("TXT_NO"), transl_get_string("ConfirmRestoreGame"));
 		if (choice != 0)
 		{
 			start_time();
@@ -1184,7 +1185,7 @@ int state_restore_all_sub(char* filename, int multi, int secret_restore)
 
 	if (!load_mission_by_name(mission))
 	{
-		nm_messagebox(NULL, 1, "Ok", "Error!\nUnable to load mission\n'%s'\n", mission);
+		nm_messagebox(NULL, 1, transl_get_string("TXT_OK"), transl_fmt_string_s("CannotLoadMission", mission));
 		fclose(fp);
 		return 0;
 	}
