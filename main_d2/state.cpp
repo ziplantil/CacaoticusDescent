@@ -512,7 +512,7 @@ int state_save_all(int between_levels, int secret_save, char* filename_override)
 		if (filename_override)
 		{
 			strcpy(filename, filename_override);
-			sprintf(desc, transl_get_string("AutosaveBackup"));
+			sprintf(desc, "[autosave backup]");
 		}
 		else if (!(filenum = state_get_save_file(filename, desc, 0)))
 		{
@@ -578,7 +578,7 @@ int state_save_all(int between_levels, int secret_save, char* filename_override)
 #endif
 
 			fseek(tfp, DESC_OFFSET, SEEK_SET);
-			fwrite(transl_get_string("AutosaveBackup"), sizeof(char) * DESC_LENGTH, 1, tfp);
+			fwrite("[autosave backup]", sizeof(char) * DESC_LENGTH, 1, tfp);
 			fclose(tfp);
 			_unlink(newname);
 			rename(filename, newname);
